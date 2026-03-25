@@ -1,0 +1,92 @@
+/* 🎨 GTS Design Tokens - FSD Migration Copy
+   Centralized design system tokens */
+
+:root {
+  /* 🎨 Brand Colors */
+  --gts-brand-red: #91040C;
+  --gts-brand-black: #000000;
+  --gts-brand-white: #FFFFFF;
+  
+  /* 🌚 Portal Theme (Dark) */
+  --gts-portal-bg: #0B0B0C;
+  --gts-portal-surface: #121214;
+  --gts-portal-card: #17181A;
+  --gts-portal-border: #232428;
+  --gts-portal-text: #FFFFFF;
+  --gts-portal-text-muted: #A1A1AA;
+  --gts-portal-accent: #91040C;
+  --gts-portal-error: #E5484D;
+  
+  /* 🔤 Typography */
+  --font-heading: 'Nokia Kokia', 'Inter', system-ui, sans-serif;
+  --font-body: 'Gilroy', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* 📏 Font Weights */
+  --gts-font-normal: 400;
+  --gts-font-medium: 500;
+  --gts-font-semibold: 600;
+  --gts-font-bold: 700;
+  
+  /* 📐 Font Sizes */
+  --gts-text-xs: 0.75rem;    /* 12px */
+  --gts-text-sm: 0.875rem;   /* 14px */
+  --gts-text-base: 1rem;     /* 16px */
+  --gts-text-lg: 1.125rem;   /* 18px */
+  --gts-text-xl: 1.25rem;    /* 20px */
+  --gts-text-2xl: 1.5rem;    /* 24px */
+  --gts-text-3xl: 1.875rem;  /* 30px */
+  --gts-text-4xl: 2.25rem;   /* 36px */
+  
+  /* 📏 Line Heights */
+  --gts-leading-tight: 1.25;
+  --gts-leading-normal: 1.5;
+  --gts-leading-relaxed: 1.75;
+  
+  /* 📦 Spacing (Design Tokens) */
+  --gts-space-xs: 0.25rem;   /* 4px */
+  --gts-space-sm: 0.5rem;    /* 8px */
+  --gts-space-md: 1rem;      /* 16px */
+  --gts-space-lg: 1.5rem;    /* 24px */
+  --gts-space-xl: 2rem;      /* 32px */
+  --gts-space-2xl: 3rem;     /* 48px */
+  
+  /* 📋 Component Paddings (rules.json standards) */
+  --gts-padding-cards: 1.5rem;      /* 24px - стандарт для карточек */
+  --gts-padding-cards-lg: 1.75rem;  /* 28px - большие карточки */
+  --gts-padding-tables: 1rem;       /* 16px - таблицы и toolbar */
+  --gts-padding-containers: 1.25rem; /* 20px - контейнеры */
+  
+  /* 🔄 Border Radius */
+  --gts-radius-sm: 0.25rem;   /* 4px */
+  --gts-radius-md: 0.375rem;  /* 6px */
+  --gts-radius-lg: 0.5rem;    /* 8px */
+  --gts-radius-xl: 0.75rem;   /* 12px */
+  
+  /* 🎭 Shadows */
+  --gts-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --gts-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --gts-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* ⚡ Transitions */
+  --gts-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --gts-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --gts-transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* 📱 Responsive Breakpoints (для CSS) */
+  --gts-breakpoint-sm: 640px;
+  --gts-breakpoint-md: 768px;
+  --gts-breakpoint-lg: 1024px;
+  --gts-breakpoint-xl: 1280px;
+  --gts-breakpoint-2xl: 1536px;
+  
+  /* 🎯 Z-Index Scale */
+  --gts-z-dropdown: 1000;
+  --gts-z-sticky: 1020;
+  --gts-z-fixed: 1030;
+  --gts-z-modal-backdrop: 1040;
+  --gts-z-modal: 1050;
+  --gts-z-popover: 1060;
+  --gts-z-tooltip: 1070;
+  --gts-z-toast: 1080;
+}

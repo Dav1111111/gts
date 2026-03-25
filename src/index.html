@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTS - Grand Tour Sochi</title>
+  <meta name="description" content="Премиальный клуб активного отдыха Grand Tour Sochi - элитные туры по Сочи">
+  
+  <!-- Preload critical fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Critical CSS - inline small styles if needed -->
+  <style>
+    /* Prevent flash of unstyled content */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background-color: #0B0B0C;
+      color: #ffffff;
+    }
+    
+    /* Loading spinner */
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0B0B0C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #232428;
+      border-top: 3px solid #91040C;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      margin-top: 20px;
+      color: #A6A7AA;
+      font-size: 14px;
+    }
+    
+    /* Hide loading when React takes over */
+    .loaded .loading-container {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading screen -->
+  <div class="loading-container" id="loading">
+    <div>
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Загружается GTS Platform...</div>
+    </div>
+  </div>
+  
+  <!-- React root -->
+  <div id="root"></div>
+  
+  <!-- Fallback for no JavaScript -->
+  <noscript>
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0B0B0C; color: #fff; display: flex; align-items: center; justify-content: center; font-family: Arial, sans-serif;">
+      <div style="text-align: center;">
+        <h1 style="color: #91040C; margin-bottom: 20px;">GTS Platform</h1>
+        <p style="color: #A6A7AA; margin-bottom: 20px;">Для работы с платформой необходимо включить JavaScript</p>
+        <p style="color: #A6A7AA; font-size: 14px;">
+          Пожалуйста, включите JavaScript в настройках браузера и обновите страницу
+        </p>
+      </div>
+    </div>
+  </noscript>
+  
+  <!-- Hide loading when DOM is ready -->
+  <script>
+    // Hide loading spinner when React component mounts
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set a timeout to hide loading after a short delay
+      setTimeout(function() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.display = 'none';
+        }
+        document.body.classList.add('loaded');
+      }, 100);
+    });
+    
+    // Error handling
+    window.addEventListener('error', function(e) {
+      console.error('JavaScript Error:', e.error);
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.innerHTML = `
+          <div style="text-align: center; color: #ff6b6b;">
+            <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
+            <div>Ошибка загрузки приложения</div>
+            <div style="font-size: 12px; margin-top: 10px; color: #A6A7AA;">
+              Попробуйте обновить страницу
+            </div>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

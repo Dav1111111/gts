@@ -1,0 +1,276 @@
+@startuml GTS_Technical_Architecture
+!define AWSPUML https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v18.0/dist
+!include AWSPUML/AWSCommon.puml
+
+' Title and theme
+title GTS Platform - Technical Architecture & Data Connectivity
+skinparam backgroundColor #0B0B0C
+skinparam defaultFontColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+' Color definitions
+skinparam package {
+  BackgroundColor #121214
+  BorderColor #91040C
+  FontColor #FFFFFF
+}
+
+skinparam component {
+  BackgroundColor #17181A
+  BorderColor #232428
+  FontColor #FFFFFF
+}
+
+skinparam arrow {
+  Color #91040C
+  FontColor #A6A7AA
+}
+
+' === MAIN ARCHITECTURE LAYERS ===
+
+package "🚀 Application Entry" as EntryLayer {
+  component [App.tsx\nMain Entry Point] as App
+  component [GTSPageRouter\nNavigation Hub] as Router
+  component [AuthContext\nAuthentication] as Auth
+}
+
+package "👥 User Portals Layer" as PortalsLayer {
+  component [Executive Portal\nGTSExecutivePanel_v2025] as ExecutivePortal
+  component [Partner Portal\nGTSPartnerPortalUnified] as PartnerPortal
+  component [Client Club Portal\nGTSClientClubPortal] as ClientPortal
+  component [B2B Client Portal\nGTSB2BClientPortal] as B2BPortal
+  component [Crew Mobile App\nGTSCrewApp] as CrewApp
+  component [Contractor Portal\nGTSContractorPortal] as ContractorPortal
+  component [Brand Partner Portal\nGTSBrandPartnerPortal] as BrandPortal
+}
+
+package "💼 Core Business Logic" as BusinessLayer {
+  component [CRM System\nCustomer Management] as CRM
+  component [Finance System\nPayments & Revenue] as Finance
+  component [Booking Calendar\nReservations] as Booking
+  component [Dispatch Module\nOperations Control] as Dispatch
+  component [Fleet Maintenance\nVehicle Management] as Fleet
+  component [Inventory & Parts\nSupply Management] as Inventory
+  component [Pricing & Offers\nDynamic Pricing] as Pricing
+  component [Routes & Schedules\nLogistics Planning] as Routes
+}
+
+package "🤖 AI & Intelligence Layer" as AILayer {
+  component [Global AI Assistant\nConversational AI] as AIAssistant
+  component [AI Content Generator\nContent Automation] as AIContent
+  component [AI Customer Insights\nBehavior Analysis] as AIInsights
+  component [AI Market Analysis\nMarket Intelligence] as AIMarket
+  component [Omni Inbox\nUnified Communications] as OmniInbox
+}
+
+package "🛠️ Support & Management" as SupportLayer {
+  component [IAM Roles & Permissions\nAccess Control] as IAM
+  component [Sphere Management\nResource Management] as Sphere
+  component [CMS Content Hub\nContent Management] as CMS
+  component [Analytics Enhanced\nBusiness Intelligence] as Analytics
+  component [Audit Logging\nCompliance & Tracking] as Audit
+  component [API Integrations\nExternal Systems] as API
+  component [Notifications Panel\nAlert Management] as Notifications
+}
+
+package "📱 Mobile & Specialized" as MobileLayer {
+  component [Mobile Booking\nResponsive Interface] as MobileBooking
+  component [Crew Mobile\nField Operations] as CrewMobile
+  component [Mobile Navigation\nCrew Interface] as MobileNav
+  component [Resource Planning\nCapacity Management] as ResourcePlanning
+}
+
+package "🤝 Partner Ecosystem" as PartnerLayer {
+  component [Partners Database\nPartner Data] as PartnersDB
+  component [Partners Management\nRelationship Management] as PartnersModule
+  component [Partner Agent\nAgent Portal] as PartnerAgent
+  component [Brand Partner Tools\nMarketing Tools] as BrandTools
+  component [Contractor Fleet\nExternal Fleet] as ContractorFleet
+}
+
+package "💎 Client Services" as ClientLayer {
+  component [Client Club\nMembership Management] as ClientClub
+  component [Loyalty Program\nRewards System] as Loyalty
+  component [Concierge Service\nPersonal Service] as Concierge
+  component [VIP Bookings\nPremium Service] as VIPBookings
+  component [Corporate Clients\nB2B Management] as Corporate
+}
+
+package "🔗 Shared Infrastructure" as SharedLayer {
+  component [Shared Modules\nCommon Components] as SharedModules
+  component [Shared States\nGlobal State] as SharedStates
+  component [Shared Documents\nDocument Management] as SharedDocs
+  component [Shared Audit\nAudit Trail] as SharedAudit
+  component [UI Kit\nDesign System] as UIKit
+  component [App Shell\nLayout System] as AppShell
+}
+
+package "💾 Data & Persistence" as DataLayer {
+  component [Mock Data\nDevelopment Data] as MockData
+  component [Local Storage\nBrowser Storage] as LocalStorage
+  component [Database Adapter\nData Access Layer] as DatabaseAdapter
+  component [Booking System\nReservation Engine] as BookingSystem
+}
+
+package "🔄 Utilities & Helpers" as UtilsLayer {
+  component [Navigation Utils\nRouting Logic] as Navigation
+  component [AI Navigation\nIntelligent Navigation] as AINavigation
+  component [GTS Styles\nStyling System] as GTSStyles
+  component [Cleanup Manager\nMaintenance Tools] as CleanupManager
+}
+
+package "🎨 Styling System" as StylingLayer {
+  component [Design Tokens\nDesign Variables] as DesignTokens
+  component [Global CSS\nBase Styles] as GlobalCSS
+  component [GTS Theme\nTheme Provider] as GTSTheme
+}
+
+' === CONNECTIONS ===
+
+' Entry Layer Connections
+App --> Auth
+App --> Router
+Auth --> Router
+
+' Router to Portals
+Router --> ExecutivePortal
+Router --> PartnerPortal
+Router --> ClientPortal
+Router --> B2BPortal
+Router --> CrewApp
+Router --> ContractorPortal
+Router --> BrandPortal
+
+' Executive Portal to Business Modules
+ExecutivePortal --> CRM
+ExecutivePortal --> Finance
+ExecutivePortal --> Booking
+ExecutivePortal --> Dispatch
+ExecutivePortal --> Fleet
+ExecutivePortal --> Inventory
+ExecutivePortal --> Pricing
+ExecutivePortal --> Routes
+
+' Business to AI Layer
+CRM --> AIAssistant
+CRM --> AIContent
+CRM --> AIInsights
+Finance --> AIMarket
+ExecutivePortal --> OmniInbox
+
+' Executive to Support
+ExecutivePortal --> IAM
+ExecutivePortal --> Sphere
+ExecutivePortal --> CMS
+ExecutivePortal --> Analytics
+ExecutivePortal --> Audit
+ExecutivePortal --> API
+ExecutivePortal --> Notifications
+
+' Mobile Connections
+Booking --> MobileBooking
+CrewApp --> CrewMobile
+CrewApp --> MobileNav
+ExecutivePortal --> ResourcePlanning
+
+' Partner Ecosystem
+PartnerPortal --> PartnersDB
+PartnerPortal --> PartnersModule
+PartnerPortal --> PartnerAgent
+BrandPortal --> BrandTools
+ContractorPortal --> ContractorFleet
+
+' Client Services
+ClientPortal --> ClientClub
+ClientPortal --> Loyalty
+ClientPortal --> Concierge
+ClientPortal --> VIPBookings
+B2BPortal --> Corporate
+
+' Shared Infrastructure
+ExecutivePortal --> SharedModules
+PartnerPortal --> SharedModules
+ClientPortal --> SharedModules
+B2BPortal --> SharedModules
+CrewApp --> SharedModules
+
+SharedModules --> SharedStates
+SharedModules --> SharedDocs
+SharedModules --> SharedAudit
+SharedModules --> UIKit
+SharedModules --> AppShell
+
+' Data Layer
+CRM --> MockData
+Finance --> MockData
+Booking --> BookingSystem
+Auth --> LocalStorage
+SharedStates --> DatabaseAdapter
+
+' Utilities
+Router --> Navigation
+Router --> AINavigation
+UIKit --> GTSStyles
+SharedModules --> CleanupManager
+
+' Styling
+UIKit --> DesignTokens
+UIKit --> GlobalCSS
+UIKit --> GTSTheme
+
+' === DATA FLOW ARROWS (dashed) ===
+
+' CRM Data Flow
+CRM -.-> Booking : Lead Data
+CRM -.-> Finance : Customer Data
+CRM -.-> AIInsights : Analytics
+
+' Finance Data Flow
+Finance -.-> Booking : Payment Data
+Finance -.-> Analytics : Revenue Data
+Finance -.-> Pricing : Pricing Data
+
+' Fleet & Operations Flow
+Fleet -.-> Dispatch : Vehicle Data
+Fleet -.-> Inventory : Maintenance Data
+Dispatch -.-> Routes : Route Data
+Routes -.-> Booking : Schedule Data
+
+' Partner Data Flow
+PartnersDB -.-> CRM : Partner Data
+PartnersDB -.-> Finance : Commission Data
+
+' Client Data Flow
+ClientClub -.-> CRM : Member Data
+Loyalty -.-> Finance : Points Data
+Corporate -.-> CRM : B2B Data
+
+' === NOTES ===
+
+note top of EntryLayer : Entry point with authentication\nand role-based routing
+
+note top of BusinessLayer : Core business logic modules\nwith complete data management
+
+note top of AILayer : AI-powered automation\nand intelligence features
+
+note top of SharedLayer : Shared infrastructure\nfor code reusability
+
+note top of DataLayer : Data persistence layer\nwith mock data for prototype
+
+note bottom of StylingLayer : Centralized design system\nwith GTS brand guidelines
+
+' === LEGEND ===
+
+legend bottom
+|= Component Type |= Color |= Description |
+| Entry & Auth | Default | Core application infrastructure |
+| User Portals | Default | Role-based user interfaces |
+| Business Logic | Default | Core business functionality |
+| AI & Intelligence | Default | Automation and AI features |
+| Shared Infrastructure | Default | Common components and services |
+| Data & Persistence | Default | Data storage and management |
+| Styling & Theme | Default | Design system and styling |
+endlegend
+
+@enduml

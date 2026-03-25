@@ -1,0 +1,351 @@
+{
+  "meta": {
+    "version": "2025-09-17",
+    "audience": ["frontend-dev", "design-to-code agent", "tech-leads"],
+    "goals": [
+      "Единый источник правды для генерации и ревью кода",
+      "Стабильная, масштабируемая, безопасная архитектура",
+      "Предсказуемая адаптивность и доступность"
+    ]
+  },
+  "stack": {
+    "language": "TypeScript >=5.x (strict: true, exactOptionalPropertyTypes: true)",
+    "framework": "React 18+ / Next.js 15+ (App Router, RSC по умолчанию)",
+    "ui": {
+      "design_system": "Design Tokens (W3C JSON) -> Tailwind + Radix UI/shadcn",
+      "icons": "lucide-react",
+      "charts": "recharts (точечно)"
+    },
+    "data": {
+      "client": "TanStack Query + fetch/ky",
+      "schema_validation": "zod",
+      "contracts": "OpenAPI/GraphQL с автогенерацией типов"
+    },
+    "state_management": {
+      "local_ui": "React state/useReducer",
+      "app_state": "Zustand/Jotai (минимум глобала)",
+      "server_state": "TanStack Query"
+    },
+    "testing": {
+      "unit_component": "Vitest + @testing-library/react",
+      "e2e": "Playwright",
+      "contract": "OpenAPI tests / pact по необходимости"
+    },
+    "ci_cd": {
+      "lint": "ESLint (flat) + Typescript ESLint",
+      "format": "Prettier",
+      "commits": "Conventional Commits",
+      "ci": "GitHub Actions: typecheck, lint, test, build",
+      "cd": "Canary -> Progressive rollout"
+    }
+  },
+  "architecture": {
+    "principles": [
+      "SRP/SoC: один модуль — одна ответственность",
+      "Feature-Sliced Design (слои: app -> pages -> widgets -> features -> entities -> shared)",
+      "Public API на уровне каждого слоя через index.ts",
+      "Чистые границы: side-effects только на уровнях app/features",
+      "Env доступен только через shared/config"
+    ],
+    "structure": {
+      "app": "инициализация, провайдеры, маршрутизация",
+      "pages": "маршруты Next.js (layout/loading/error)",
+      "widgets": "композиции из features/entities",
+      "features": "самодостаточные юзкейсы",
+      "entities": "бизнес-сущности (User, Listing, Order)",
+      "shared": "ui/lib/api/config/constants/hooks/tokens"
+    },
+    "imports_policy": {
+      "no_cross_imports": "без относительных выходов через ../../..",
+      "only_public_api": "импорты только из публичных index.ts целевых слоёв"
+    }
+  },
+  "responsive_adaptive": {
+    "strategy": "mobile-first с масштабированием до desktop",
+    "enhancement": "progressive enhancement (по capabilities, не по user-agent)",
+    "breakpoints": {
+      "tokens": ["xs", "sm", "md", "lg", "xl", "2xl"],
+      "reference_widths_px": { "xs": 360, "sm": 640, "md": 768, "lg": 1024, "xl": 1280, "2xl": 1536 }
+    },
+    "layout": {
+      "grids": {
+        "mobile": { "columns": 4, "gutter": "spacing-2", "margin": "spacing-4" },
+        "tablet": { "columns": 8, "gutter": "spacing-3", "margin": "spacing-6" },
+        "desktop": { "columns": 12, "gutter": "spacing-4", "margin": "spacing-8" }
+      },
+      "patterns": [
+        "CSS Grid для макро-лайаута, Flex — для микро-выравниваний",
+        "Container Queries для карточек/виджетов, где возможно",
+        "max-inline-size для текста; избегать сверхширины",
+        "Sticky-зоны (header/action bar) + safe-area insets"
+      ],
+      "safe_areas": { "ios_android": true, "env": ["env(safe-area-inset-*)"] }
+    },
+    "typography_spacing": {
+      "fluid_scale": "clamp(min, vw-основа, max) для заголовков",
+      "line_length": "45–75 знаков (моб.: 45–60)",
+      "hit_targets": "минимум 44x44px",
+      "spacing_tokens_only": true
+    },
+    "navigation": {
+      "mobile": ["bottom tabbar", "hamburger/Sheet", "top tabs при переключаемых видах"],
+      "desktop": ["sidebar rail + topbar", "megamenu для каталогов"],
+      "rules": ["primary CTA всегда видим", "поиск ≤ 1 интеракции на любом брейкпоинте"]
+    },
+    "components_behavior": {
+      "tables": {
+        "mobile": ["stacked rows", "column priority/hide", "details disclosure"],
+        "desktop": ["resizable/sticky header", "virtualization при больших объёмах"]
+      },
+      "forms": {
+        "mobile": ["wizard/stepper", "native inputs", "inputmode/enterkeyhint"],
+        "desktop": ["inline validation", "большее число полей в ряд"]
+      },
+      "modals_drawers": { "mobile": "bottom sheet/drawer", "desktop": "modal/dialog" }
+    },
+    "performance": {
+      "budgets": { "mobile_initial_gzip_kb": 200, "desktop_initial_gzip_kb": 300, "route_lcp_target_ms": 2500 },
+      "techniques": [
+        "RSC/SSR/ISR по типу страницы",
+        "code-splitting по маршрутам/виджетам",
+        "priority hints, defer/async для некритичного",
+        "virtualization для списков",
+        "prefetch на Wi-Fi/desktop; на моб. сети — ограниченно"
+      ]
+    },
+    "generation_limits": {
+      "reflow_rules": [
+        "xs/sm: 1 колонка, сайдбар -> Drawer/нижний блок",
+        "md: 2 колонки при наличии места",
+        "lg/xl: 12-колоночная сетка, max-width через токены"
+      ],
+      "max_nested_layouts": 3,
+      "avoid": ["fixed-ширины контейнеров", "absolute для общего layout"]
+    }
+  },
+  "design_tokens": {
+    "format": "W3C Design Tokens JSON",
+    "namespaces": ["color", "space", "radius", "shadow", "typography", "motion", "z", "breakpoints"],
+    "export": {
+      "css_vars_scope": ":root[data-theme='*']",
+      "tailwind_bridge": "tailwind.config.* генерируется из tokens.json"
+    },
+    "theming": { "modes": ["light", "dark", "high-contrast"], "switch_attr": "data-theme" }
+  },
+  "coding_standards": {
+    "typescript": [
+      "strict, noImplicitAny: true",
+      "предпочитать type над interface для локальных типов; interface — для публичных API",
+      "валидация входа/выхода через zod в одном месте"
+    ],
+    "react": [
+      "Server Components по умолчанию; Client — только где state/effect/event",
+      "Hooks с явной сигнатурой и deps",
+      "ErrorBoundary на уровне pages/widgets",
+      "мемоизация по результатам профилирования"
+    ],
+    "styling": {
+      "tailwind": "utility-first; @apply — точечно",
+      "variants": "cva/clsx для состояний/размеров",
+      "themes": "data-theme + CSS variables (из токенов)"
+    },
+    "routing_data": {
+      "next_app_router": "layout/loading/error сегменты",
+      "data_fetching": "RSC fetch cache/revalidate; клиент — TanStack Query"
+    },
+    "i18n": {
+      "default_locale": "ru-RU",
+      "locales": ["ru-RU", "en-US"],
+      "format": "ICU JSON",
+      "rules": ["без конкатенации строк", "Intl для чисел/дат/валют"]
+    }
+  },
+  "data_fetching_policy": {
+    "rsc_fetch_defaults": { "cache": "force-cache", "revalidate": 60 },
+    "client_fetch_defaults": { "staleTime_ms": 30000, "gcTime_ms": 300000 },
+    "mutations": {
+      "optimistic_updates": true,
+      "invalidate_queries": "точечные ключи",
+      "error_revert": true,
+      "timeouts_ms": 15000
+    },
+    "pagination": ["cursor предпочтительно", "infinite scroll с sentry items"],
+    "caching_tiers": ["RQ memory", "Next cache/edge", "CDN для ассетов"]
+  },
+  "forms_policy": {
+    "lib": "react-hook-form + @hookform/resolvers/zod",
+    "patterns": [
+      "debounced validation (300ms)",
+      "submit disabled при invalid",
+      "field-level errors + form-level summary",
+      "aria-invalid/aria-describedby"
+    ]
+  },
+  "tables_policy": {
+    "mobile": ["stacked rows", "detail expander", "column priority/hide"],
+    "desktop": ["resizable/sticky header", "column virtualization > 20", "row virtualization > 100"],
+    "a11y": ["th scope", "caption при необходимости", "aria-sort"]
+  },
+  "a11y": {
+    "principles": [
+      "keyboard-first (полная навигация)",
+      "семантическая разметка и корректная heading-иерархия",
+      "видимый focus, trap-focus в диалогах",
+      "контраст: текст ≥ 4.5:1, крупные элементы ≥ 3:1",
+      "уважение prefers-reduced-motion"
+    ],
+    "checklist": ["alt у img или role=presentation", "labels связаны с inputs", "aria-live для async", "skip-link"],
+    "tooling": ["axe", "storybook a11y", "playwright-axe"]
+  },
+  "performance": {
+    "targets": { "LCP": "<2.5s", "INP": "<200ms", "CLS": "<0.1" },
+    "anti_patterns": ["hydration waterfalls", "лишние Client Components", "большие неразбитые бандлы"]
+  },
+  "security_model": {
+    "authz": "RBAC (roles -> permissions)",
+    "secrets": "никогда в клиент; только server actions/API",
+    "storage": { "cookies": { "httpOnly": true, "sameSite": "Lax|Strict", "secure": true } },
+    "headers": {
+      "csp": "script-src 'self' 'strict-dynamic' https:; object-src 'none'; base-uri 'none'",
+      "referrer": "strict-origin-when-cross-origin",
+      "x_frame_options": "DENY",
+      "permissions_policy": ["geolocation=()", "camera=()", "microphone=()"]
+    },
+    "input_sanitization": "DOMPurify для доверенного HTML",
+    "deps_policy": { "audit_in_ci": true, "pin_versions": true }
+  },
+  "error_taxonomy": {
+    "shape": { "code": "string", "message": "string", "details": "object?", "cause": "Error?" },
+    "domains": ["UI", "Network", "Auth", "Validation", "Server", "Unknown"],
+    "levels": ["info", "warn", "error", "fatal"],
+    "ux_rules": {
+      "toast_for": ["Network", "Validation"],
+      "error_boundary_for": ["UI", "Unknown"],
+      "retry": { "strategy": "exponential_backoff", "max_attempts": 3, "idempotent_only": true }
+    }
+  },
+  "observability": {
+    "logging": { "dev": "console", "prod": "Sentry/OpenTelemetry", "pii_redaction": true },
+    "metrics": { "web_vitals": ["LCP", "CLS", "INP", "TTFB"], "ux_events": ["view", "click", "submit", "error", "retry"] },
+    "tracing": { "otel": true, "propagation": "traceparent в запросах" }
+  },
+  "images_policy": {
+    "component": "next/image",
+    "formats": ["AVIF", "WebP", "fallback JPEG/PNG"],
+    "loading": { "lazy_default": true, "priority_hero": true },
+    "art_direction": "picture + media",
+    "sizes_attr_required": true,
+    "cdn_cache": "immutable + long max-age с хешем"
+  },
+  "animations_motion": {
+    "principles": ["meaningful over decorative", "duration 120–240ms", "стандартные easing"],
+    "reduced_motion": "выключать параллакс/крупные переходы",
+    "focus_visible": "без резких анимаций на фокусе"
+  },
+  "feature_flags": {
+    "provider": "абстрактный адаптер (Unleash/Flagsmith/Env)",
+    "rules": [
+      "временные флаги удаляются после релиза",
+      "критическую логику не ветвить надолго",
+      "логировать exposure"
+    ]
+  },
+  "deprecation_migration": {
+    "adr_required": true,
+    "process": [
+      "пометить @deprecated (JSDoc)",
+      "CHANGELOG + срок грации >= 2 релиза",
+      "удаление с миграционной картой импортов/скриптом"
+    ]
+  },
+  "testing_pyramid": {
+    "unit_component": { "coverage_target": ">=80% критических путей" },
+    "contract": "OpenAPI/GraphQL tests (pact при необходимости)",
+    "e2e": "Playwright smoke + ключевые флоу",
+    "visual_regression": "per breakpoint (chromatic/playwright)",
+    "perf": "Lighthouse CI budgets"
+  },
+  "code_review_checklist": {
+    "api": ["нет нарушения границ слоёв", "стабильные типы/контракты"],
+    "a11y": ["keyboard, contrast, labels"],
+    "perf": ["bundle delta ok", "нет hydration waterfalls", "мемоизация по профилю"],
+    "security": ["нет секретов", "CSP-совместимость"],
+    "ux": ["пустые/ошибочные состояния", "микрокопирайт"]
+  },
+  "docs_governance": {
+    "adr_dir": "docs/adr/ADR-YYYYMMDD-*.md",
+    "runbooks": ["onboarding.md", "release.md", "incident.md"],
+    "changelog": "Keep a Changelog + semver",
+    "storybook": { "coverage_components_pct": 90, "a11y_enabled": true }
+  },
+  "repository_structure": {
+    "type": "monorepo (pnpm + turbo)",
+    "packages": ["app", "ui", "config", "eslint-config", "tsconfig", "tokens"],
+    "aliases": ["@/app/*", "@shared/*", "@entities/*", "@features/*", "@widgets/*"],
+    "public_api": "index.ts на каждом слое"
+  },
+  "release_budgets": {
+    "mobile_initial_gzip_kb": 200,
+    "desktop_initial_gzip_kb": 300,
+    "route_lcp_ms": 2500,
+    "long_task_ms": 50
+  },
+  "figma_code_agent_contract": {
+    "do": [
+      "использовать только дизайн-токены и библиотеку UI",
+      "layout: Grid/Flex по Figma AutoLayout",
+      "строго типизированные props; TODO-комментарии при отсутствии данных"
+    ],
+    "dont": [
+      "не хардкодить цвета/размеры вне токенов",
+      "не добавлять зависимости без allow3p=true",
+      "не использовать absolute для общего layout"
+    ],
+    "file_output": {
+      "paths": {
+        "components": "src/shared/ui | src/entities | src/features",
+        "styles": "src/shared/styles",
+        "tokens": "src/shared/tokens/tokens.json"
+      },
+      "naming": { "component": "PascalCase", "file": "kebab-case.tsx", "test": "ComponentName.test.tsx", "story": "ComponentName.stories.tsx" }
+    },
+    "generation_limits": {
+      "max_component_depth": 4,
+      "max_props_per_component": 12,
+      "responsive_breakpoints": ["xs", "sm", "md", "lg", "xl"],
+      "a11y_required": ["role/aria", "focus-visible", "color-contrast>=4.5:1"]
+    }
+  },
+  "agent_prompts_policy": {
+    "guardrails": [
+      "не добавлять новые зависимости без явного флага",
+      "импорты — только из публичных API слоёв",
+      "без magic numbers и inline-стилей (кроме обоснованных исключений)"
+    ],
+    "output_style": { "typescript": "strict", "naming": "PascalCase компоненты, kebab-case файлы" },
+    "self_checklist_before_emit": [
+      "брейкпоинты/контейнер-квери соблюдены",
+      "a11y-атрибуты на интерактивах",
+      "нет абсолютного позиционирования для общего layout",
+      "учтены skeleton/empty/error состояния"
+    ]
+  },
+  "quality_gates": {
+    "pull_request": [
+      "typecheck=pass",
+      "eslint=pass",
+      "unit_component_coverage>=80%",
+      "e2e_smoke=pass",
+      "bundle_budget_per_route<=200KB_gzip_initial"
+    ],
+    "a11y": ["axe clean", "keyboard nav ok", "prefers-reduced-motion respected"]
+  },
+  "defaults_opinions": {
+    "prefer_server_components": true,
+    "ssg_isr_for_content": true,
+    "edge_runtime_for_light_rsc": true,
+    "forms_first_class": "react-hook-form + zod",
+    "css_strategy": "Tailwind + cva + tokens",
+    "data_mutations": "optimistic updates + targeted invalidation"
+  }
+}

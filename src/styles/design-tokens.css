@@ -1,0 +1,704 @@
+/**
+ * GTS Design Tokens
+ * Централизованная система дизайн-токенов для всего проекта
+ * 
+ * Использование: @import './design-tokens.css'; в globals.css
+ * 
+ * ВАЖНО: Все компоненты должны использовать только эти токены,
+ * никаких хардкодированных цветов и размеров!
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     🎨 GTS COLOR TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Brand Colors */
+  --gts-brand-black: #000000;
+  --gts-brand-white: #ffffff;
+  --gts-brand-red: #91040C;
+  
+  /* Portal Dark Theme (Primary) */
+  --gts-portal-bg: #0B0B0C;
+  --gts-portal-surface: #121214;
+  --gts-portal-card: #17181A;
+  --gts-portal-text: #FFFFFF;
+  --gts-portal-text-muted: #A6A7AA;
+  --gts-portal-border: #232428;
+  --gts-portal-accent: #91040C;
+  --gts-portal-success: #2BB673;  
+  --gts-portal-warning: #F5A623;
+  --gts-portal-error: #E5484D;
+  --gts-portal-info: #3B82F6;
+  
+  /* State Colors */
+  --gts-state-hover: rgba(255, 255, 255, 0.1);
+  --gts-state-active: rgba(255, 255, 255, 0.2);
+  --gts-state-focus: rgba(145, 4, 12, 0.3);
+  --gts-state-disabled: rgba(166, 167, 170, 0.5);
+  
+  /* Status Badge Colors */
+  --gts-status-active: #2BB673;
+  --gts-status-inactive: #6B7280;
+  --gts-status-pending: #F59E0B;
+  --gts-status-error: #EF4444;
+  --gts-status-warning: #F59E0B;
+  --gts-status-draft: #6B7280;
+  --gts-status-published: #10B981;
+  --gts-status-archived: #9CA3AF;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     📝 GTS TYPOGRAPHY TOKENS  
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Font Families */
+  --gts-font-heading: 'Nokia.Kokia', 'Inter', system-ui, sans-serif;
+  --gts-font-body: 'Gilroy', 'Inter', system-ui, sans-serif;
+  --gts-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  
+  /* Font Sizes */
+  --gts-text-xs: 0.75rem;    /* 12px */
+  --gts-text-sm: 0.875rem;   /* 14px */
+  --gts-text-base: 1rem;     /* 16px */
+  --gts-text-lg: 1.125rem;   /* 18px */
+  --gts-text-xl: 1.25rem;    /* 20px */
+  --gts-text-2xl: 1.5rem;    /* 24px */
+  --gts-text-3xl: 1.875rem;  /* 30px */
+  --gts-text-4xl: 2.25rem;   /* 36px */
+  
+  /* Font Weights */
+  --gts-font-light: 300;
+  --gts-font-normal: 400;
+  --gts-font-medium: 500;
+  --gts-font-semibold: 600;
+  --gts-font-bold: 700;
+  
+  /* Line Heights */
+  --gts-leading-tight: 1.25;
+  --gts-leading-normal: 1.5;
+  --gts-leading-relaxed: 1.75;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     📐 GTS SPACING TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Spacing Scale */
+  --gts-space-0: 0;
+  --gts-space-1: 0.25rem;   /* 4px */
+  --gts-space-2: 0.5rem;    /* 8px */
+  --gts-space-3: 0.75rem;   /* 12px */
+  --gts-space-4: 1rem;      /* 16px */
+  --gts-space-5: 1.25rem;   /* 20px */
+  --gts-space-6: 1.5rem;    /* 24px */
+  --gts-space-8: 2rem;      /* 32px */
+  --gts-space-10: 2.5rem;   /* 40px */
+  --gts-space-12: 3rem;     /* 48px */
+  --gts-space-16: 4rem;     /* 64px */
+  --gts-space-20: 5rem;     /* 80px */
+  
+  /* Component Spacing */
+  --gts-spacing-card-padding: var(--gts-space-6);      /* 24px */
+  --gts-spacing-form-padding: var(--gts-space-3);      /* 12px */
+  --gts-spacing-button-x: var(--gts-space-3);          /* 12px */
+  --gts-spacing-button-y: var(--gts-space-2);          /* 8px */
+  --gts-spacing-section: var(--gts-space-8);           /* 32px */
+  --gts-spacing-page-margin-desktop: var(--gts-space-20); /* 80px */
+  --gts-spacing-page-margin-mobile: var(--gts-space-5);   /* 20px */
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     🔘 GTS BORDER RADIUS TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --gts-radius-none: 0;
+  --gts-radius-sm: 0.25rem;    /* 4px */
+  --gts-radius-md: 0.5rem;     /* 8px */
+  --gts-radius-lg: 0.75rem;    /* 12px */
+  --gts-radius-xl: 1rem;       /* 16px */
+  --gts-radius-2xl: 1.25rem;   /* 20px */
+  --gts-radius-full: 9999px;
+  
+  /* Component Radii */
+  --gts-radius-card: var(--gts-radius-xl);      /* 16px */
+  --gts-radius-input: var(--gts-radius-lg);     /* 12px */
+  --gts-radius-button: var(--gts-radius-md);    /* 8px */
+  --gts-radius-badge: var(--gts-radius-sm);     /* 4px */
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     📏 GTS SIZE TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Icon Sizes */
+  --gts-icon-xs: 1rem;     /* 16px */
+  --gts-icon-sm: 1.25rem;  /* 20px */
+  --gts-icon-md: 1.5rem;   /* 24px */
+  --gts-icon-lg: 2rem;     /* 32px */
+  --gts-icon-xl: 2.5rem;   /* 40px */
+  
+  /* Avatar Sizes */
+  --gts-avatar-xs: 1.5rem;   /* 24px */
+  --gts-avatar-sm: 2rem;     /* 32px */
+  --gts-avatar-md: 2.5rem;   /* 40px */
+  --gts-avatar-lg: 3rem;     /* 48px */
+  --gts-avatar-xl: 4rem;     /* 64px */
+  
+  /* Button Heights */
+  --gts-button-sm: 2rem;     /* 32px */
+  --gts-button-md: 2.5rem;   /* 40px */
+  --gts-button-lg: 3rem;     /* 48px */
+  
+  /* Input Heights */
+  --gts-input-sm: 2rem;      /* 32px */
+  --gts-input-md: 2.5rem;    /* 40px */
+  --gts-input-lg: 3rem;      /* 48px */
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     🌊 GTS SHADOW TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --gts-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --gts-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --gts-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --gts-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Modal/Overlay Shadows */
+  --gts-shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --gts-shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     📱 GTS BREAKPOINT TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --gts-breakpoint-mobile: 390px;
+  --gts-breakpoint-tablet: 768px;
+  --gts-breakpoint-desktop: 1440px;
+  --gts-breakpoint-wide: 1920px;
+  
+  /* Grid Columns */
+  --gts-grid-mobile: 4;
+  --gts-grid-tablet: 8;
+  --gts-grid-desktop: 12;
+  --gts-grid-wide: 16;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     ⚡ GTS ANIMATION TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Durations */
+  --gts-duration-instant: 100ms;
+  --gts-duration-fast: 200ms;
+  --gts-duration-normal: 300ms;
+  --gts-duration-slow: 500ms;
+  --gts-duration-slower: 700ms;
+  --gts-duration-slowest: 1000ms;
+  
+  /* Easing Functions */
+  --gts-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --gts-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --gts-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --gts-ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  --gts-ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --gts-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --gts-ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  /* Common Transitions */
+  --gts-transition-colors: color var(--gts-duration-fast) var(--gts-ease-in-out),
+                          background-color var(--gts-duration-fast) var(--gts-ease-in-out),
+                          border-color var(--gts-duration-fast) var(--gts-ease-in-out);
+  
+  --gts-transition-opacity: opacity var(--gts-duration-fast) var(--gts-ease-in-out);
+  
+  --gts-transition-transform: transform var(--gts-duration-normal) var(--gts-ease-out);
+  
+  --gts-transition-all: all var(--gts-duration-fast) var(--gts-ease-in-out);
+  
+  --gts-transition-smooth: all var(--gts-duration-normal) var(--gts-ease-smooth);
+  
+  --gts-transition-bounce: transform var(--gts-duration-normal) var(--gts-ease-bounce),
+                           opacity var(--gts-duration-fast) var(--gts-ease-out);
+  
+  /* Scale & Shadow Transitions */
+  --gts-transition-scale: transform var(--gts-duration-fast) var(--gts-ease-out),
+                         box-shadow var(--gts-duration-fast) var(--gts-ease-out);
+  
+  /* Complex Interactions */
+  --gts-transition-interaction: transform var(--gts-duration-fast) var(--gts-ease-out),
+                               box-shadow var(--gts-duration-fast) var(--gts-ease-out),
+                               background-color var(--gts-duration-fast) var(--gts-ease-in-out),
+                               border-color var(--gts-duration-fast) var(--gts-ease-in-out);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     🎯 GTS Z-INDEX TOKENS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --gts-z-base: 0;
+  --gts-z-dropdown: 10;
+  --gts-z-sticky: 20;
+  --gts-z-fixed: 30;
+  --gts-z-modal: 40;
+  --gts-z-popover: 50;
+  --gts-z-tooltip: 60;
+  --gts-z-toast: 70;
+  --gts-z-overlay: 80;
+  --gts-z-max: 9999;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎨 GTS UTILITY CLASSES
+   Предустановленные классы для быстрого использования
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.gts-bg-main { background-color: var(--gts-portal-bg); }
+.gts-bg-surface { background-color: var(--gts-portal-surface); }
+.gts-bg-card { background-color: var(--gts-portal-card); }
+.gts-bg-accent { background-color: var(--gts-portal-accent); }
+
+.gts-text-primary { color: var(--gts-portal-text); }
+.gts-text-muted { color: var(--gts-portal-text-muted); }
+.gts-text-accent { color: var(--gts-portal-accent); }
+
+.gts-border-default { border-color: var(--gts-portal-border); }
+.gts-border-accent { border-color: var(--gts-portal-accent); }
+
+.gts-font-heading { font-family: var(--gts-font-heading); }
+.gts-font-body { font-family: var(--gts-font-body); }
+.gts-font-mono { font-family: var(--gts-font-mono); }
+
+.gts-shadow-card { box-shadow: var(--gts-shadow-md); }
+.gts-shadow-modal { box-shadow: var(--gts-shadow-modal); }
+
+.gts-radius-card { border-radius: var(--gts-radius-card); }
+.gts-radius-input { border-radius: var(--gts-radius-input); }
+.gts-radius-button { border-radius: var(--gts-radius-button); }
+
+.gts-transition-default { transition: var(--gts-transition-colors); }
+.gts-transition-all { transition: var(--gts-transition-all); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎭 GTS COMPONENT PRESETS
+   Готовые стили для распространенных паттернов
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.gts-button-primary {
+  background-color: var(--gts-portal-accent);
+  color: white;
+  border-radius: var(--gts-radius-button);
+  padding: var(--gts-spacing-button-y) var(--gts-spacing-button-x);
+  font-weight: var(--gts-font-medium);
+  transition: var(--gts-transition-colors);
+}
+
+.gts-button-primary:hover {
+  background-color: var(--gts-portal-accent);
+  opacity: 0.9;
+}
+
+.gts-button-secondary {
+  background-color: transparent;
+  color: var(--gts-portal-text);
+  border: 1px solid var(--gts-portal-border);
+  border-radius: var(--gts-radius-button);
+  padding: var(--gts-spacing-button-y) var(--gts-spacing-button-x);
+  font-weight: var(--gts-font-medium);
+  transition: var(--gts-transition-colors);
+}
+
+.gts-button-secondary:hover {
+  background-color: var(--gts-portal-card);
+}
+
+.gts-card-default {
+  background-color: var(--gts-portal-surface);
+  border: 1px solid var(--gts-portal-border);
+  border-radius: var(--gts-radius-card);
+  padding: var(--gts-spacing-card-padding);
+}
+
+.gts-card-content {
+  background-color: var(--gts-portal-card);
+  border: 1px solid var(--gts-portal-border);
+  border-radius: var(--gts-radius-card);
+  padding: var(--gts-spacing-card-padding);
+}
+
+.gts-input-default {
+  background-color: var(--gts-portal-card);
+  border: 1px solid var(--gts-portal-border);
+  border-radius: var(--gts-radius-input);
+  padding: var(--gts-spacing-form-padding);
+  color: var(--gts-portal-text);
+  height: var(--gts-input-md);
+}
+
+.gts-input-default::placeholder {
+  color: var(--gts-portal-text-muted);
+}
+
+.gts-badge-default {
+  background-color: var(--gts-portal-accent);
+  color: white;
+  border-radius: var(--gts-radius-badge);
+  padding: var(--gts-space-1) var(--gts-space-2);
+  font-size: var(--gts-text-xs);
+  font-weight: var(--gts-font-medium);
+}
+
+.gts-heading-1 {
+  font-family: var(--gts-font-heading);
+  font-size: var(--gts-text-3xl);
+  font-weight: var(--gts-font-medium);
+  color: var(--gts-portal-text);
+  line-height: var(--gts-leading-tight);
+}
+
+.gts-heading-2 {
+  font-family: var(--gts-font-heading);
+  font-size: var(--gts-text-xl);
+  font-weight: var(--gts-font-medium);
+  color: var(--gts-portal-text);
+  line-height: var(--gts-leading-normal);
+}
+
+.gts-body-text {
+  font-family: var(--gts-font-body);
+  font-size: var(--gts-text-base);
+  font-weight: var(--gts-font-normal);
+  color: var(--gts-portal-text);
+  line-height: var(--gts-leading-normal);
+}
+
+.gts-caption-text {
+  font-family: var(--gts-font-body);
+  font-size: var(--gts-text-sm);
+  font-weight: var(--gts-font-normal);
+  color: var(--gts-portal-text-muted);
+  line-height: var(--gts-leading-normal);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎬 GTS ANIMATION KEYFRAMES
+   Предустановленные анимации для использования в компонентах
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes gts-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes gts-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes gts-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes gts-slide-down {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes gts-slide-left {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes gts-slide-right {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes gts-scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes gts-scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes gts-bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes gts-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes gts-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes gts-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gts-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--gts-portal-accent),
+                0 0 10px var(--gts-portal-accent);
+  }
+  50% {
+    box-shadow: 0 0 10px var(--gts-portal-accent),
+                0 0 20px var(--gts-portal-accent),
+                0 0 30px var(--gts-portal-accent);
+  }
+}
+
+@keyframes gts-shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes gts-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎨 GTS ANIMATION UTILITY CLASSES
+   Готовые классы для применения анимаций
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Fade Animations */
+.gts-animate-fade-in {
+  animation: gts-fade-in var(--gts-duration-normal) var(--gts-ease-out);
+}
+
+.gts-animate-fade-out {
+  animation: gts-fade-out var(--gts-duration-normal) var(--gts-ease-in);
+}
+
+/* Slide Animations */
+.gts-animate-slide-up {
+  animation: gts-slide-up var(--gts-duration-normal) var(--gts-ease-out);
+}
+
+.gts-animate-slide-down {
+  animation: gts-slide-down var(--gts-duration-normal) var(--gts-ease-out);
+}
+
+.gts-animate-slide-left {
+  animation: gts-slide-left var(--gts-duration-normal) var(--gts-ease-out);
+}
+
+.gts-animate-slide-right {
+  animation: gts-slide-right var(--gts-duration-normal) var(--gts-ease-out);
+}
+
+/* Scale Animations */
+.gts-animate-scale-in {
+  animation: gts-scale-in var(--gts-duration-normal) var(--gts-ease-out);
+}
+
+.gts-animate-scale-out {
+  animation: gts-scale-out var(--gts-duration-normal) var(--gts-ease-in);
+}
+
+/* Bounce Animation */
+.gts-animate-bounce-in {
+  animation: gts-bounce-in var(--gts-duration-slow) var(--gts-ease-out);
+}
+
+/* Shake Animation */
+.gts-animate-shake {
+  animation: gts-shake var(--gts-duration-slow) var(--gts-ease-in-out);
+}
+
+/* Pulse Animation */
+.gts-animate-pulse {
+  animation: gts-pulse var(--gts-duration-slower) var(--gts-ease-in-out) infinite;
+}
+
+/* Spin Animation */
+.gts-animate-spin {
+  animation: gts-spin var(--gts-duration-slowest) linear infinite;
+}
+
+/* Glow Animation */
+.gts-animate-glow {
+  animation: gts-glow var(--gts-duration-slower) var(--gts-ease-in-out) infinite;
+}
+
+/* Shimmer Animation */
+.gts-animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--gts-portal-card) 0%,
+    var(--gts-portal-surface) 50%,
+    var(--gts-portal-card) 100%
+  );
+  background-size: 1000px 100%;
+  animation: gts-shimmer var(--gts-duration-slower) linear infinite;
+}
+
+/* Float Animation */
+.gts-animate-float {
+  animation: gts-float 3s var(--gts-ease-smooth) infinite;
+}
+
+/* Hover Effects with Transitions */
+.gts-hover-lift {
+  transition: var(--gts-transition-scale);
+}
+
+.gts-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--gts-shadow-lg);
+}
+
+.gts-hover-scale {
+  transition: var(--gts-transition-scale);
+}
+
+.gts-hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.gts-hover-glow {
+  transition: var(--gts-transition-interaction);
+}
+
+.gts-hover-glow:hover {
+  box-shadow: 0 0 20px rgba(145, 4, 12, 0.3);
+  border-color: var(--gts-portal-accent);
+}
+
+.gts-hover-brightness {
+  transition: filter var(--gts-duration-fast) var(--gts-ease-out);
+}
+
+.gts-hover-brightness:hover {
+  filter: brightness(1.1);
+}
+
+/* Стаггер-эффект для списков */
+.gts-stagger-item {
+  opacity: 0;
+  animation: gts-slide-up var(--gts-duration-normal) var(--gts-ease-out) forwards;
+}
+
+.gts-stagger-item:nth-child(1) { animation-delay: 0ms; }
+.gts-stagger-item:nth-child(2) { animation-delay: 50ms; }
+.gts-stagger-item:nth-child(3) { animation-delay: 100ms; }
+.gts-stagger-item:nth-child(4) { animation-delay: 150ms; }
+.gts-stagger-item:nth-child(5) { animation-delay: 200ms; }
+.gts-stagger-item:nth-child(6) { animation-delay: 250ms; }
+.gts-stagger-item:nth-child(7) { animation-delay: 300ms; }
+.gts-stagger-item:nth-child(8) { animation-delay: 350ms; }
+.gts-stagger-item:nth-child(9) { animation-delay: 400ms; }
+.gts-stagger-item:nth-child(10) { animation-delay: 450ms; }
+
+/* Loading States */
+.gts-loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gts-portal-card) 25%,
+    var(--gts-portal-surface) 50%,
+    var(--gts-portal-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: gts-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--gts-radius-md);
+}
+
+/* Interactive Focus States */
+.gts-focus-ring {
+  transition: var(--gts-transition-all);
+}
+
+.gts-focus-ring:focus-visible {
+  outline: 2px solid var(--gts-portal-accent);
+  outline-offset: 2px;
+  border-radius: var(--gts-radius-md);
+}
+
+/* Smooth Appearance */
+.gts-appear-smooth {
+  animation: gts-fade-in var(--gts-duration-slow) var(--gts-ease-smooth);
+}

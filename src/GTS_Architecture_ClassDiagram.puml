@@ -1,0 +1,350 @@
+@startuml
+
+package "Core Application" {
+  class App {
+    -currentPage: string
+    -currentArticleId: string
+    +setCurrentPage()
+    +setCurrentArticleId()
+    +render()
+  }
+}
+
+package "Landing Components" {
+  class GTSHeader {
+    +onNavigateToCatalog()
+    +onNavigateToMembership()
+    +onNavigateToDashboard()
+    +onNavigateToAdmin()
+  }
+  
+  class GTSHeroSection {
+    +render()
+  }
+  
+  class GTSAboutSection {
+    +render()
+  }
+  
+  class GTSCatalogWithScenariosSection {
+    +onViewFullCatalog()
+  }
+  
+  class GTSNewsSection {
+    +onViewAllNews()
+    +onViewArticle()
+  }
+  
+  class GTSMembershipSection {
+    +onViewMembership()
+  }
+  
+  class GTSFooter {
+    +onNavigateToAdmin()
+    +onNavigateToExtendedAdmin()
+  }
+}
+
+package "Pages" {
+  class GTSCatalogPage {
+    +onBackToHome()
+  }
+  
+  class GTSMembershipPage {
+    +onBackToHome()
+  }
+  
+  class GTSNewsFeedPage {
+    +onBack()
+    +onViewArticle()
+  }
+  
+  class GTSArticlePage {
+    -articleId: string
+    +onBack()
+  }
+  
+  class GTSMemberDashboard {
+    +onBackToHome()
+  }
+}
+
+package "Admin System" {
+  abstract class AdminPortal {
+    +onBackToHome()
+    +render()
+  }
+  
+  class AdminDashboard extends AdminPortal {
+    +onNavigateToPartnerAgent()
+    +onNavigateToContractor()
+    +onNavigateToBrandPartner()
+  }
+  
+  class GTSExtendedAdminPortal extends AdminPortal {
+    -modules: AdminModule[]
+    +navigateToModule()
+  }
+  
+  abstract class AdminModule {
+    +onBack()
+    +render()
+  }
+  
+  class GTSCRMModule extends AdminModule {
+    +onNavigateToCalendar()
+    +manageCRM()
+  }
+  
+  class GTSCalendarModule extends AdminModule {
+    +onNavigateToCRM()
+    +manageBookings()
+  }
+  
+  class GTSStaffManagementModule extends AdminModule {
+    +onNavigateToCalendar()
+    +manageStaff()
+  }
+  
+  class GTSPartnersModule extends AdminModule {
+    +onNavigateToFinance()
+    +managePartners()
+  }
+  
+  class GTSFinanceCenterModule extends AdminModule {
+    +manageFinances()
+  }
+  
+  class GTSDocumentsInboxModule extends AdminModule {
+    +manageDocuments()
+  }
+  
+  class GTSCMSModule extends AdminModule {
+    +manageContent()
+  }
+  
+  class GTSCorporateClientsModule extends AdminModule {
+    +manageCorporateClients()
+  }
+  
+  class GTSConciergeModule extends AdminModule {
+    +manageConciergeServices()
+  }
+  
+  class GTSPartnerCreation {
+    +onBack()
+    +onSuccess()
+    +createPartner()
+  }
+}
+
+package "Partner Portals" {
+  abstract class PartnerPortal {
+    +onBackToAdmin()
+    +render()
+  }
+  
+  class GTSPartnerAgentPortal extends PartnerPortal {
+    -sidebar: GTSPartnerAgentSidebar
+    -dashboard: GTSPartnerAgentDashboard
+    -bookings: GTSPartnerAgentBookings
+    -clients: GTSPartnerAgentClients
+    -commissions: GTSPartnerAgentCommissions
+    -promoTools: GTSPartnerAgentPromoTools
+    -support: GTSPartnerAgentSupport
+  }
+  
+  class GTSContractorPortal extends PartnerPortal {
+    -sidebar: GTSContractorSidebar
+    -dashboard: GTSContractorDashboard
+    -bookings: GTSContractorBookings
+    -fleet: GTSContractorFleet
+    -finance: GTSContractorFinance
+    -documents: GTSContractorDocuments
+    -logs: GTSContractorLogs
+    -support: GTSContractorSupport
+    -terms: GTSContractorTerms
+  }
+  
+  class GTSBrandPartnerPortal extends PartnerPortal {
+    -sidebar: GTSBrandPartnerSidebar
+    -dashboard: GTSBrandPartnerDashboard
+    -api: GTSBrandPartnerAPI
+    -promotions: GTSBrandPartnerPromotions
+    -loyalty: GTSBrandPartnerLoyalty
+    -tools: GTSBrandPartnerTools
+    -documents: GTSBrandPartnerDocuments
+    -support: GTSBrandPartnerSupport
+  }
+}
+
+package "Portal Authentication" {
+  class GTSPortalEntry {
+    +handleAuthentication()
+  }
+  
+  class GTSPortalLogin {
+    +onLogin()
+  }
+  
+  class GTSPortal2FA {
+    +onVerify()
+  }
+  
+  class GTSPortalRoleConsent {
+    +onConsent()
+  }
+  
+  class GTSPortalRoleSwitcher {
+    +onRoleChange()
+  }
+}
+
+package "Shared Modules" {
+  class GTSSharedModules {
+    -currentUser: User
+    -availableRoles: Role[]
+    +onRoleChange()
+    +onBackToPortal()
+    +onLogout()
+  }
+  
+  class GTSSharedProfile {
+    +manageProfile()
+  }
+  
+  class GTSSharedNotifications {
+    +manageNotifications()
+  }
+  
+  class GTSSharedDocuments {
+    +manageDocuments()
+  }
+  
+  class GTSSharedAudit {
+    +viewAuditLogs()
+  }
+  
+  class GTSSharedStates {
+    +manageStates()
+  }
+  
+  class GTSSharedSidebar {
+    +render()
+  }
+  
+  class GTSSharedTopbar {
+    +render()
+  }
+}
+
+package "UI Library" {
+  class GTSUILibrary {
+    +showcaseComponents()
+  }
+  
+  package "UI Components" {
+    class Button
+    class Card
+    class Dialog
+    class Input
+    class Avatar
+    class Badge
+    class Tabs
+    class Table
+  }
+}
+
+package "Test Components" {
+  class PortalsNavigationTest {
+    +onBackToMain()
+    +testNavigation()
+  }
+  
+  class PortalsDiagnostic {
+    +onBackToMain()
+    +runDiagnostics()
+  }
+}
+
+package "Data Models" {
+  class User {
+    -id: string
+    -name: string
+    -email: string
+    -role: string
+  }
+  
+  class Role {
+    -id: string
+    -name: string
+    -icon: ReactNode
+    -color: string
+  }
+  
+  class Partner {
+    -id: string
+    -name: string
+    -type: string
+    -status: string
+  }
+  
+  class Booking {
+    -id: string
+    -clientId: string
+    -resourceId: string
+    -startTime: Date
+    -endTime: Date
+    -status: string
+  }
+}
+
+' Main Application Relationships
+App ||--|| GTSHeader : contains
+App ||--|| GTSFooter : contains
+App ||--o{ Landing Components : contains
+App ||--o{ Pages : navigates
+App ||--|| AdminDashboard : navigates
+App ||--|| GTSExtendedAdminPortal : navigates
+
+' Admin System Relationships
+GTSExtendedAdminPortal ||--o{ AdminModule : contains
+AdminDashboard ||--o{ PartnerPortal : navigates
+GTSCRMModule <--> GTSCalendarModule : navigates
+GTSPartnersModule --> GTSFinanceCenterModule : navigates
+GTSStaffManagementModule --> GTSCalendarModule : navigates
+
+' Partner Portal Relationships
+PartnerPortal ||--|| GTSPortalEntry : authenticated_by
+GTSPortalEntry --> GTSPortalLogin : flows_to
+GTSPortalLogin --> GTSPortal2FA : flows_to
+GTSPortal2FA --> GTSPortalRoleConsent : flows_to
+GTSPortalRoleConsent --> GTSPortalRoleSwitcher : flows_to
+
+' Shared Modules Relationships
+GTSSharedModules ||--|| GTSSharedProfile : contains
+GTSSharedModules ||--|| GTSSharedNotifications : contains
+GTSSharedModules ||--|| GTSSharedDocuments : contains
+GTSSharedModules ||--|| GTSSharedAudit : contains
+GTSSharedModules ||--|| GTSSharedStates : contains
+GTSSharedModules ||--|| GTSSharedSidebar : contains
+GTSSharedModules ||--|| GTSSharedTopbar : contains
+
+' Data Relationships
+GTSSharedModules --> User : manages
+GTSSharedModules --> Role : manages
+AdminModule --> Partner : manages
+AdminModule --> Booking : manages
+PartnerPortal --> User : authenticated_as
+
+' UI Library Relationships
+GTSUILibrary ||--o{ UI Components : showcases
+App --> UI Components : uses
+AdminModule --> UI Components : uses
+PartnerPortal --> UI Components : uses
+
+' Test Components
+App --> PortalsNavigationTest : navigates
+App --> PortalsDiagnostic : navigates
+
+@enduml
