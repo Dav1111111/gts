@@ -21,15 +21,123 @@ const DIFF_COLORS: Record<string, { text: string; bg: string; border: string }> 
   "Сложный": { text: "#91040C", bg: "rgba(145,4,12,0.12)", border: "rgba(145,4,12,0.3)" },
 };
 
+const MONTH_LABELS = [
+  "ЯНВАРЬ",
+  "ФЕВРАЛЬ",
+  "МАРТ",
+  "АПРЕЛЬ",
+  "МАЙ",
+  "ИЮНЬ",
+  "ИЮЛЬ",
+  "АВГУСТ",
+  "СЕНТЯБРЬ",
+  "ОКТЯБРЬ",
+  "НОЯБРЬ",
+  "ДЕКАБРЬ",
+] as const;
+
+const MONTH_GENITIVE = [
+  "января",
+  "февраля",
+  "марта",
+  "апреля",
+  "мая",
+  "июня",
+  "июля",
+  "августа",
+  "сентября",
+  "октября",
+  "ноября",
+  "декабря",
+] as const;
+
+const MONTH_SHORT = [
+  "янв",
+  "фев",
+  "мар",
+  "апр",
+  "мая",
+  "июн",
+  "июл",
+  "авг",
+  "сен",
+  "окт",
+  "ноя",
+  "дек",
+] as const;
+
+function parseDateInput(value?: string): Date | null {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateRange(startDate?: string, endDate?: string): string {
+  const start = parseDateInput(startDate);
+  const end = parseDateInput(endDate);
+
+  if (!start || !end) return "";
+
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const sameMonth = sameYear && start.getMonth() === end.getMonth();
+
+  if (sameMonth) {
+    return `${String(start.getDate()).padStart(2, "0")} — ${String(end.getDate()).padStart(2, "0")} ${MONTH_GENITIVE[end.getMonth()]}`;
+  }
+
+  return `${String(start.getDate()).padStart(2, "0")} ${MONTH_SHORT[start.getMonth()]} — ${String(end.getDate()).padStart(2, "0")} ${MONTH_SHORT[end.getMonth()]}${sameYear ? "" : ` ${end.getFullYear()}`}`;
+}
+
+function getInclusiveDayCount(startDate?: string, endDate?: string, fallback = 1): number {
+  const start = parseDateInput(startDate);
+  const end = parseDateInput(endDate);
+
+  if (!start || !end) return fallback;
+
+  const diff = end.getTime() - start.getTime();
+  return diff >= 0 ? Math.floor(diff / 86400000) + 1 : fallback;
+}
+
+function normalizeExpeditionDates(expedition: ExpeditionData): ExpeditionData {
+  const start = parseDateInput(expedition.startDate);
+  const end = parseDateInput(expedition.endDate) ?? start;
+
+  if (!start || !end) {
+    return expedition;
+  }
+
+  const totalDays = getInclusiveDayCount(expedition.startDate, expedition.endDate, expedition.totalDays);
+
+  return {
+    ...expedition,
+    endDate: expedition.endDate || expedition.startDate,
+    dateRange: formatDateRange(expedition.startDate, expedition.endDate),
+    month: MONTH_LABELS[start.getMonth()],
+    year: start.getFullYear(),
+    totalDays,
+    trekDays: Math.min(expedition.trekDays, totalDays),
+    restDays: Math.max(0, totalDays - Math.min(expedition.trekDays, totalDays)),
+  };
+}
+
+function addDaysToIsoDate(value: string | undefined, days: number): string | undefined {
+  const date = parseDateInput(value);
+  if (!date) return value;
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 /* ═══ Empty expedition template ═══ */
 function createEmptyExpedition(id: string): ExpeditionData {
-  return {
+  return normalizeExpeditionDates({
     id,
     title: "",
     tagline: "",
     heroImage: "",
     galleryImages: [],
     dateRange: "",
+    startDate: "2026-04-01",
+    endDate: "2026-04-03",
     month: "АПРЕЛЬ",
     year: 2026,
     totalDays: 1,
@@ -57,7 +165,7 @@ function createEmptyExpedition(id: string): ExpeditionData {
     labelAbove: true,
     isFeatured: false,
     highlights: [""],
-  };
+  });
 }
 
 /* ═══ Reusable Input ═══ */
@@ -106,6 +214,24 @@ function AdminTextarea({ label, value, onChange, placeholder, rows = 3 }: {
         onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(145,4,12,0.5)"; }}
         onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
       />
+    </div>
+  );
+}
+
+function AdminReadonly({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex-1 min-w-0">
+      <label className="block mb-1.5 uppercase tracking-[0.1em] text-white/40" style={{ fontSize: 10 }}>{label}</label>
+      <div
+        className="w-full px-3 py-2.5 text-white/70"
+        style={{
+          fontSize: 13,
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        {value || "—"}
+      </div>
     </div>
   );
 }
@@ -328,11 +454,15 @@ function ExpeditionEditor({
   onCancel: () => void;
   isNew: boolean;
 }) {
-  const [draft, setDraft] = useState<ExpeditionData>({ ...expedition });
+  const [draft, setDraft] = useState<ExpeditionData>(() => normalizeExpeditionDates({ ...expedition }));
   const [activeTab, setActiveTab] = useState<"general" | "program" | "details" | "map">("general");
 
   const update = <K extends keyof ExpeditionData>(key: K, value: ExpeditionData[K]) => {
     setDraft((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updateDate = (key: "startDate" | "endDate", value: string) => {
+    setDraft((prev) => normalizeExpeditionDates({ ...prev, [key]: value }));
   };
 
   const tabs = [
@@ -439,28 +569,17 @@ function ExpeditionEditor({
 
               <AdminTextarea label="Описание" value={draft.description} onChange={(v) => update("description", v)} placeholder="Подробное описание экспедиции..." rows={4} />
 
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <AdminInput label="Дата старта" value={draft.startDate || ""} onChange={(v) => updateDate("startDate", v)} type="date" />
+                <AdminInput label="Дата окончания" value={draft.endDate || ""} onChange={(v) => updateDate("endDate", v)} type="date" />
+                <AdminReadonly label="Диапазон дат" value={draft.dateRange} />
+                <AdminReadonly label="Месяц старта" value={draft.month} />
+              </div>
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <AdminInput label="Даты" value={draft.dateRange} onChange={(v) => update("dateRange", v)} placeholder="13 — 19 апреля" />
-                <AdminSelect
-                  label="Месяц"
-                  value={draft.month}
-                  onChange={(v) => update("month", v)}
-                  options={[
-                    { value: "ЯНВАРЬ", label: "Январь" },
-                    { value: "ФЕВРАЛЬ", label: "Февраль" },
-                    { value: "МАРТ", label: "Март" },
-                    { value: "АПРЕЛЬ", label: "Апрель" },
-                    { value: "МАЙ", label: "Май" },
-                    { value: "ИЮНЬ", label: "Июнь" },
-                    { value: "ИЮЛЬ", label: "Июль" },
-                    { value: "АВГУСТ", label: "Август" },
-                    { value: "СЕНТЯБРЬ", label: "Сентябрь" },
-                    { value: "ОКТЯБРЬ", label: "Октябрь" },
-                    { value: "НОЯБРЬ", label: "Ноябрь" },
-                    { value: "ДЕКАБРЬ", label: "Декабрь" },
-                  ]}
-                />
-                <AdminInput label="Год" value={draft.year} onChange={(v) => update("year", parseInt(v) || 2026)} type="number" />
+                <AdminReadonly label="Год" value={draft.year} />
+                <AdminReadonly label="Длительность" value={`${draft.totalDays} дн.`} />
+                <AdminInput label="Дней в пути" value={draft.trekDays} onChange={(v) => update("trekDays", parseInt(v) || 0)} type="number" />
                 <AdminSelect
                   label="Сложность"
                   value={draft.difficulty}
@@ -474,8 +593,7 @@ function ExpeditionEditor({
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <AdminInput label="Всего дней" value={draft.totalDays} onChange={(v) => update("totalDays", parseInt(v) || 1)} type="number" />
-                <AdminInput label="Дней в пути" value={draft.trekDays} onChange={(v) => update("trekDays", parseInt(v) || 0)} type="number" />
+                <AdminReadonly label="Всего дней" value={draft.totalDays} />
                 <AdminInput label="Дней отдыха" value={draft.restDays} onChange={(v) => update("restDays", parseInt(v) || 0)} type="number" />
                 <AdminInput label="Дистанция" value={draft.distance} onChange={(v) => update("distance", v)} placeholder="~680 км" />
               </div>
@@ -567,60 +685,42 @@ function ExpeditionEditor({
             >
               <div className="p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="text-white/40 uppercase tracking-[0.1em] mb-4" style={{ fontSize: 10 }}>
-                  Позиция на карте экспедиций
+                  Позиция на шкале экспедиций
                 </div>
                 <p className="text-white/50 mb-6" style={{ fontSize: 13 }}>
-                  Карта экспедиций имеет размер 2500 x 540 пикселей. Укажите координаты для точки маршрута.
+                  Точка на шкале теперь рассчитывается автоматически по дате старта. После удаления других экспедиций пустых дыр не остаётся: шкала всегда пересобирается сама.
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <AdminInput
-                    label="Позиция X (0-2500)"
-                    value={draft.mapX}
-                    onChange={(v) => update("mapX", parseInt(v) || 0)}
-                    type="number"
-                  />
-                  <AdminInput
-                    label="Позиция Y (0-540)"
-                    value={draft.mapY}
-                    onChange={(v) => update("mapY", parseInt(v) || 0)}
-                    type="number"
-                  />
-                  <AdminSelect
-                    label="Подпись над/под"
-                    value={draft.labelAbove ? "above" : "below"}
-                    onChange={(v) => update("labelAbove", v === "above")}
-                    options={[
-                      { value: "above", label: "Над точкой" },
-                      { value: "below", label: "Под точкой" },
-                    ]}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <AdminReadonly label="Дата старта" value={draft.startDate || "—"} />
+                  <AdminReadonly label="Дата окончания" value={draft.endDate || "—"} />
+                  <AdminReadonly label="Статус на шкале" value={draft.isActive ? "Активная / будущая" : "Закрыта или архив"} />
                 </div>
 
-                {/* Mini map preview */}
                 <div
                   className="relative mt-6 overflow-hidden"
                   style={{
                     width: "100%",
-                    aspectRatio: "2500 / 540",
+                    aspectRatio: "12 / 2.8",
                     background: "rgba(255,255,255,0.02)",
                     border: "1px solid rgba(255,255,255,0.08)",
                   }}
                 >
-                  {/* Grid */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 2500 540" preserveAspectRatio="xMidYMid meet">
-                    {[0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500].map((x) => (
-                      <line key={`vx-${x}`} x1={x} y1={0} x2={x} y2={540} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
+                  <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
+                  <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex">
+                    {MONTH_LABELS.map((month) => (
+                      <div key={month} className="flex-1 text-center text-white/35 uppercase tracking-[0.12em]" style={{ fontSize: 10 }}>
+                        {month.slice(0, 3)}
+                      </div>
                     ))}
-                    {[0, 135, 270, 405, 540].map((y) => (
-                      <line key={`hy-${y}`} x1={0} y1={y} x2={2500} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
-                    ))}
-                    {/* Current dot */}
-                    <circle cx={draft.mapX} cy={draft.mapY} r={12} fill="rgba(145,4,12,0.3)" stroke="#91040C" strokeWidth={2} />
-                    <circle cx={draft.mapX} cy={draft.mapY} r={4} fill="#91040C" />
-                    <text x={draft.mapX + 16} y={draft.mapY + 4} fill="white" fontSize={16} opacity={0.7}>
-                      {draft.title || "Точка"}
-                    </text>
-                  </svg>
+                  </div>
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2"
+                    style={{
+                      left: `calc(${((parseDateInput(draft.startDate)?.getMonth() ?? 0) / 11) * 100}% - 8px)`,
+                    }}
+                  >
+                    <div className="w-4 h-4 rounded-full bg-[#91040C] shadow-[0_0_18px_rgba(145,4,12,0.45)]" />
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -668,10 +768,11 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
   /* Save */
   const handleSave = useCallback(
     (data: ExpeditionData) => {
+      const normalized = normalizeExpeditionDates(data);
       if (isCreating) {
-        addExpedition(data);
+        addExpedition(normalized);
       } else if (editingId) {
-        updateExpedition(editingId, data);
+        updateExpedition(normalized);
       }
       setEditingId(null);
       setIsCreating(false);
@@ -689,11 +790,14 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
   const handleDuplicate = (exp: ExpeditionData) => {
     const newId = generateNewId();
     addExpedition({
-      ...exp,
+      ...normalizeExpeditionDates({
+        ...exp,
+        startDate: addDaysToIsoDate(exp.startDate, 7),
+        endDate: addDaysToIsoDate(exp.endDate, 7),
+      }),
       id: newId,
       title: exp.title + " (копия)",
       spotsLeft: exp.groupSize,
-      mapX: exp.mapX + 80,
     });
   };
 

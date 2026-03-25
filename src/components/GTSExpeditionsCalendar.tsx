@@ -15,8 +15,27 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
 
 /* ─── Constants ─── */
-const MAP_WIDTH = 2500;
+const MONTH_TRACK_WIDTH = 220;
+const CYCLE_WIDTH = MONTH_TRACK_WIDTH * 12;
+const MAP_WIDTH = CYCLE_WIDTH * 3;
 const MAP_HEIGHT = 540;
+const TIMELINE_PADDING = 120;
+const TIMELINE_COPIES = [0, 1, 2] as const;
+const TIMELINE_LANES = [150, 230, 320, 400];
+const TIMELINE_MONTHS = [
+  "ЯНВАРЬ",
+  "ФЕВРАЛЬ",
+  "МАРТ",
+  "АПРЕЛЬ",
+  "МАЙ",
+  "ИЮНЬ",
+  "ИЮЛЬ",
+  "АВГУСТ",
+  "СЕНТЯБРЬ",
+  "ОКТЯБРЬ",
+  "НОЯБРЬ",
+  "ДЕКАБРЬ",
+] as const;
 
 /* ─── Types ─── */
 interface Expedition {
@@ -24,6 +43,8 @@ interface Expedition {
   title: string;
   tagline: string;
   dateRange: string;
+  startDate: string;
+  endDate: string;
   month: string;
   duration: string;
   location: string;
@@ -36,9 +57,12 @@ interface Expedition {
   isActive: boolean;
   isFeatured: boolean;
   image: string;
-  x: number;
-  y: number;
+  startProgress: number;
+  status: "upcoming" | "closed" | "completed";
+  centerX: number;
+  centerY: number;
   labelAbove: boolean;
+  sortKey: number;
 }
 
 interface TreadBlock {
@@ -60,7 +84,7 @@ interface Decoration {
 }
 
 /* ─── Expedition Data ─── */
-const expeditions: Expedition[] = [
+const expeditions = [
   {
     id: "exp-1",
     title: "КРЫМ",
@@ -251,11 +275,10 @@ const expeditions: Expedition[] = [
 ];
 
 /* ─── Month labels ─── */
-const MONTHS = [
-  { label: "АПРЕЛЬ", x: 105 },
-  { label: "МАЙ", x: 535 },
-  { label: "ИЮНЬ", x: 2165 },
-];
+const MONTHS = TIMELINE_MONTHS.map((label, index) => ({
+  label,
+  x: index * MONTH_TRACK_WIDTH + MONTH_TRACK_WIDTH / 2,
+}));
 
 /* ─── Decorative illustrations ─── */
 const DECORATIONS: Decoration[] = [
@@ -545,6 +568,159 @@ const DIFF_COLOR: Record<string, string> = {
   Сложный: "#91040C",
 };
 
+const MONTH_NAME_TO_INDEX: Record<string, number> = {
+  ЯНВАРЬ: 0,
+  ЯНВ: 0,
+  ЯНВАРЯ: 0,
+  ФЕВРАЛЬ: 1,
+  ФЕВ: 1,
+  ФЕВРАЛЯ: 1,
+  МАРТ: 2,
+  МАР: 2,
+  МАРТА: 2,
+  АПРЕЛЬ: 3,
+  АПР: 3,
+  АПРЕЛЯ: 3,
+  МАЙ: 4,
+  МАЯ: 4,
+  ИЮНЬ: 5,
+  ИЮН: 5,
+  ИЮНЯ: 5,
+  ИЮЛЬ: 6,
+  ИЮЛ: 6,
+  ИЮЛЯ: 6,
+  АВГУСТ: 7,
+  АВГ: 7,
+  АВГУСТА: 7,
+  СЕНТЯБРЬ: 8,
+  СЕН: 8,
+  СЕНТЯБРЯ: 8,
+  ОКТЯБРЬ: 9,
+  ОКТ: 9,
+  ОКТЯБРЯ: 9,
+  НОЯБРЬ: 10,
+  НОЯ: 10,
+  НОЯБРЯ: 10,
+  ДЕКАБРЬ: 11,
+  ДЕК: 11,
+  ДЕКАБРЯ: 11,
+};
+
+const MONTH_GENITIVE = [
+  "января",
+  "февраля",
+  "марта",
+  "апреля",
+  "мая",
+  "июня",
+  "июля",
+  "августа",
+  "сентября",
+  "октября",
+  "ноября",
+  "декабря",
+] as const;
+
+const MONTH_SHORT = [
+  "янв",
+  "фев",
+  "мар",
+  "апр",
+  "мая",
+  "июн",
+  "июл",
+  "авг",
+  "сен",
+  "окт",
+  "ноя",
+  "дек",
+] as const;
+
+function parseIsoDate(value?: string): Date | null {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateRange(start: Date, end: Date): string {
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const sameMonth = sameYear && start.getMonth() === end.getMonth();
+
+  if (sameMonth) {
+    return `${String(start.getDate()).padStart(2, "0")} — ${String(end.getDate()).padStart(2, "0")} ${MONTH_GENITIVE[end.getMonth()]}`;
+  }
+
+  return `${String(start.getDate()).padStart(2, "0")} ${MONTH_SHORT[start.getMonth()]} — ${String(end.getDate()).padStart(2, "0")} ${MONTH_SHORT[end.getMonth()]}${sameYear ? "" : ` ${end.getFullYear()}`}`;
+}
+
+function inferExpeditionDates(source: {
+  startDate?: string;
+  endDate?: string;
+  dateRange: string;
+  month: string;
+  year: number;
+}): { start: Date; end: Date } {
+  const explicitStart = parseIsoDate(source.startDate);
+  const explicitEnd = parseIsoDate(source.endDate);
+
+  if (explicitStart && explicitEnd) {
+    return { start: explicitStart, end: explicitEnd };
+  }
+
+  if (explicitStart) {
+    return { start: explicitStart, end: explicitEnd ?? explicitStart };
+  }
+
+  const digits = source.dateRange.match(/\d{1,2}/g) ?? [];
+  const tokens = Array.from(source.dateRange.matchAll(/[А-Яа-яЁё]{3,}/g))
+    .map(([token]) => token.replace(/\./g, "").toUpperCase())
+    .filter((token) => token in MONTH_NAME_TO_INDEX);
+
+  const fallbackMonth = MONTH_NAME_TO_INDEX[source.month.toUpperCase()] ?? 0;
+  const startDay = digits[0] ? Number.parseInt(digits[0], 10) : 1;
+  const endDay = digits[1] ? Number.parseInt(digits[1], 10) : startDay;
+  const startMonth = tokens[0] ? MONTH_NAME_TO_INDEX[tokens[0]] : fallbackMonth;
+  const endMonth = tokens[1] ? MONTH_NAME_TO_INDEX[tokens[1]] : startMonth;
+  const startYear = source.year || new Date().getFullYear();
+  const endYear = endMonth < startMonth ? startYear + 1 : startYear;
+
+  const start = new Date(startYear, startMonth, startDay);
+  const end = new Date(endYear, endMonth, endDay);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    const fallback = new Date(startYear, fallbackMonth, 1);
+    return { start: fallback, end: fallback };
+  }
+
+  return { start, end };
+}
+
+function getDayProgress(date: Date): number {
+  const startOfYear = new Date(date.getFullYear(), 0, 1);
+  const startOfNextYear = new Date(date.getFullYear() + 1, 0, 1);
+  const elapsed = date.getTime() - startOfYear.getTime();
+  const total = startOfNextYear.getTime() - startOfYear.getTime();
+  return total > 0 ? elapsed / total : 0;
+}
+
+function getExpeditionStatus(isActive: boolean, spots: { total: number; booked: number }, endDate: Date): Expedition["status"] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const endOfExpedition = new Date(endDate);
+  endOfExpedition.setHours(23, 59, 59, 999);
+
+  if (today.getTime() > endOfExpedition.getTime()) {
+    return "completed";
+  }
+
+  if (!isActive || spots.booked >= spots.total) {
+    return "closed";
+  }
+
+  return "upcoming";
+}
+
 /* ════════════════════════════════════════════════════
    Component
    ════════════════════════════════════════════════════ */
@@ -554,57 +730,118 @@ interface GTSExpeditionsCalendarProps {
 
 export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarProps = {}) {
   const { expeditions: ctxExpeditions } = useExpeditions();
+  const expeditions: Expedition[] = useMemo(() => {
+    const mapped = ctxExpeditions.map((e) => {
+      const { start, end } = inferExpeditionDates({
+        startDate: e.startDate,
+        endDate: e.endDate,
+        dateRange: e.dateRange,
+        month: e.month,
+        year: e.year,
+      });
+      const dateRange = e.dateRange || formatDateRange(start, end);
+      const totalDays = Math.max(e.totalDays, Math.floor((end.getTime() - start.getTime()) / 86400000) + 1);
 
-  // Map context data to local Expedition type
-  const expeditions: Expedition[] = useMemo(() => ctxExpeditions.map((e) => ({
-    id: e.id,
-    title: e.title,
-    tagline: e.tagline,
-    dateRange: e.dateRange,
-    month: e.month,
-    duration: `${e.totalDays} ${e.totalDays === 1 ? "день" : e.totalDays < 5 ? "дня" : "дней"}`,
-    location: e.region,
-    transport: e.transport,
-    price: e.price,
-    difficulty: e.difficulty,
-    spots: { total: e.groupSize, booked: e.groupSize - e.spotsLeft },
-    description: e.description,
-    highlights: e.highlights,
-    isActive: e.isActive,
-    isFeatured: e.isFeatured,
-    image: e.heroImage,
-    x: e.mapX,
-    y: e.mapY,
-    labelAbove: e.labelAbove,
-  })), [ctxExpeditions]);
+      return {
+        id: e.id,
+        title: e.title,
+        tagline: e.tagline,
+        dateRange,
+        startDate: start.toISOString().slice(0, 10),
+        endDate: end.toISOString().slice(0, 10),
+        month: TIMELINE_MONTHS[start.getMonth()],
+        duration: `${totalDays} ${totalDays === 1 ? "день" : totalDays < 5 ? "дня" : "дней"}`,
+        location: e.region,
+        transport: e.transport,
+        price: e.price,
+        difficulty: e.difficulty,
+        spots: { total: e.groupSize, booked: e.groupSize - e.spotsLeft },
+        description: e.description,
+        highlights: e.highlights,
+        isActive: e.isActive,
+        isFeatured: e.isFeatured,
+        image: e.heroImage,
+        startProgress: getDayProgress(start),
+        status: getExpeditionStatus(e.isActive, { total: e.groupSize, booked: e.groupSize - e.spotsLeft }, end),
+        centerX: 0,
+        centerY: 0,
+        labelAbove: true,
+        sortKey: start.getMonth() * 100 + start.getDate(),
+      };
+    });
 
-  const [selectedId, setSelectedId] = useState("exp-1");
+    const sorted = mapped.sort((a, b) => a.sortKey - b.sortKey || a.title.localeCompare(b.title, "ru"));
+    const usableWidth = CYCLE_WIDTH - TIMELINE_PADDING * 2;
+
+    return sorted.map((exp, index) => {
+      const laneIndex = index % TIMELINE_LANES.length;
+      return {
+        ...exp,
+        centerX: CYCLE_WIDTH + TIMELINE_PADDING + exp.startProgress * usableWidth,
+        centerY: TIMELINE_LANES[laneIndex],
+        labelAbove: laneIndex < 2,
+      };
+    });
+  }, [ctxExpeditions]);
+
+  const renderedExpeditions = useMemo(
+    () =>
+      TIMELINE_COPIES.flatMap((copy) =>
+        expeditions.map((exp) => ({
+          ...exp,
+          renderId: `${copy}-${exp.id}`,
+          x: exp.centerX + (copy - 1) * CYCLE_WIDTH,
+          y: exp.centerY,
+        }))
+      ),
+    [expeditions]
+  );
+
+  const renderedMonths = useMemo(
+    () =>
+      TIMELINE_COPIES.flatMap((copy) =>
+        MONTHS.map((month) => ({
+          ...month,
+          key: `${copy}-${month.label}`,
+          x: month.x + copy * CYCLE_WIDTH,
+        }))
+      ),
+    []
+  );
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [treadBlocks, setTreadBlocks] = useState<TreadBlock[]>([]);
   const [leftWall, setLeftWall] = useState("");
   const [rightWall, setRightWall] = useState("");
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const infoCardRef = useRef<HTMLDivElement>(null);
+  const initialScrollDoneRef = useRef(false);
   const selected = expeditions.find((e) => e.id === selectedId) || expeditions[0];
+  const hasMultipleExpeditions = expeditions.length > 1;
+
+  useEffect(() => {
+    if (!expeditions.length) {
+      setSelectedId(null);
+      return;
+    }
+
+    if (selectedId && expeditions.some((exp) => exp.id === selectedId)) {
+      return;
+    }
+
+    const preferred = expeditions.find((exp) => exp.status === "upcoming") ?? expeditions[0];
+    setSelectedId(preferred.id);
+  }, [expeditions, selectedId]);
 
   /* ── Compute ROUTE_PATH from expedition coordinates ── */
   const ROUTE_PATH = useMemo(() => {
-    const sorted = [...expeditions].sort((a, b) => a.x - b.x);
+    const sorted = [...renderedExpeditions].sort((a, b) => a.x - b.x);
     if (sorted.length < 2) return "";
     return buildSmoothPath(sorted.map((e) => ({ x: e.x, y: e.y })));
-  }, [expeditions]);
-
-  /* ── Track scroll position for arrow visibility ── */
-  const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 20);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 20);
-  }, []);
+  }, [renderedExpeditions]);
 
   /* ── Tire tread generation ── */
   useEffect(() => {
@@ -696,7 +933,13 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     };
     const onTouchEnd = () => { isDrag = false; };
 
-    const onScroll = () => updateScrollState();
+    const onScroll = () => {
+      if (el.scrollLeft < CYCLE_WIDTH * 0.5) {
+        el.scrollLeft += CYCLE_WIDTH;
+      } else if (el.scrollLeft > CYCLE_WIDTH * 1.5) {
+        el.scrollLeft -= CYCLE_WIDTH;
+      }
+    };
 
     el.addEventListener("mousedown", onDown);
     window.addEventListener("mousemove", onMove);
@@ -705,8 +948,6 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     el.addEventListener("touchmove", onTouchMove, { passive: true });
     el.addEventListener("touchend", onTouchEnd);
     el.addEventListener("scroll", onScroll);
-
-    updateScrollState();
 
     return () => {
       el.removeEventListener("mousedown", onDown);
@@ -717,14 +958,14 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       el.removeEventListener("touchend", onTouchEnd);
       el.removeEventListener("scroll", onScroll);
     };
-  }, [updateScrollState]);
+  }, []);
 
   /* ── Scroll to expedition ── */
-  const scrollToExp = useCallback((exp: Expedition) => {
+  const scrollToExp = useCallback((exp: Expedition, behavior: ScrollBehavior = "smooth") => {
     const el = scrollRef.current;
     if (!el) return;
-    const target = exp.x - el.clientWidth / 2;
-    el.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    const target = exp.centerX - el.clientWidth / 2;
+    el.scrollTo({ left: Math.max(0, target), behavior });
   }, []);
 
   const handleSelect = useCallback(
@@ -737,17 +978,31 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         infoCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 150);
     },
-    [scrollToExp]
+    [expeditions, scrollToExp]
   );
 
+  useEffect(() => {
+    if (!selected || initialScrollDoneRef.current) return;
+    scrollToExp(selected, "auto");
+    initialScrollDoneRef.current = true;
+  }, [selected, scrollToExp]);
+
   const goPrev = () => {
+    if (!expeditions.length) return;
     const idx = expeditions.findIndex((e) => e.id === selectedId);
-    if (idx > 0) handleSelect(expeditions[idx - 1].id);
+    const nextIndex = idx <= 0 ? expeditions.length - 1 : idx - 1;
+    handleSelect(expeditions[nextIndex].id);
   };
   const goNext = () => {
+    if (!expeditions.length) return;
     const idx = expeditions.findIndex((e) => e.id === selectedId);
-    if (idx < expeditions.length - 1) handleSelect(expeditions[idx + 1].id);
+    const nextIndex = idx >= expeditions.length - 1 ? 0 : idx + 1;
+    handleSelect(expeditions[nextIndex].id);
   };
+
+  if (!selected) {
+    return null;
+  }
 
   return (
     <div className="w-full bg-black">
@@ -781,7 +1036,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               className="text-white/45 mt-3"
               style={{ fontSize: "clamp(13px, 1.2vw, 16px)", maxWidth: 520 }}
             >
-              Выберите направление и забронируйте место в экспедиции.
+              Листайте непрерывный 12-месячный цикл и выбирайте экспедиции по дате старта.
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -797,7 +1052,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             )}
             <div className="flex items-center gap-2 text-white/30" style={{ fontSize: 13 }}>
               <GripHorizontal className="w-4 h-4" />
-              <span>Тяните карту для навигации</span>
+              <span>Тяните шкалу для навигации</span>
             </div>
           </div>
         </div>
@@ -812,8 +1067,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             width: 48, height: 48,
             background: "rgba(145,4,12,0.6)",
             border: "1px solid rgba(145,4,12,0.8)",
-            opacity: canScrollLeft ? 1 : 0.3,
-            pointerEvents: canScrollLeft ? "auto" : "none",
+            opacity: hasMultipleExpeditions ? 1 : 0.3,
+            pointerEvents: hasMultipleExpeditions ? "auto" : "none",
           }}
           onClick={goPrev}
           animate={{ x: [0, -4, 0] }}
@@ -830,8 +1085,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             width: 48, height: 48,
             background: "rgba(145,4,12,0.6)",
             border: "1px solid rgba(145,4,12,0.8)",
-            opacity: canScrollRight ? 1 : 0.3,
-            pointerEvents: canScrollRight ? "auto" : "none",
+            opacity: hasMultipleExpeditions ? 1 : 0.3,
+            pointerEvents: hasMultipleExpeditions ? "auto" : "none",
           }}
           onClick={goNext}
           animate={{ x: [0, 4, 0] }}
@@ -854,7 +1109,15 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
           <div
             className="relative select-none"
             style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}
-          >
+            >
+              {renderedMonths.map(({ key, label, x }) => (
+                <div
+                  key={`${key}-line`}
+                  className="absolute top-0 bottom-0 pointer-events-none"
+                  style={{ left: x, width: 1, background: "rgba(255,255,255,0.05)", zIndex: 0 }}
+                />
+              ))}
+
             {/* ── SVG: Tire tread track ── */}
             <svg
               width={MAP_WIDTH}
@@ -878,9 +1141,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             </svg>
 
             {/* ── Month labels ── */}
-            {MONTHS.map(({ label, x }) => (
+            {renderedMonths.map(({ key, label, x }) => (
               <div
-                key={label}
+                key={key}
                 className="absolute z-10 select-none pointer-events-none"
                 style={{ left: x, top: "50%", transform: "translateY(-50%)" }}
               >
@@ -894,7 +1157,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             ))}
 
             {/* ── Expedition markers ── */}
-            {expeditions.map((exp, index) => {
+            {renderedExpeditions.map((exp, index) => {
               const isHovered = hoveredId === exp.id;
               const isSelected = selectedId === exp.id;
               const pinColor = isSelected ? "#91040C" : isHovered ? "#ffffff" : "rgba(255,255,255,0.6)";
@@ -902,7 +1165,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
               return (
                 <motion.div
-                  key={exp.id}
+                  key={exp.renderId}
                   className="absolute cursor-pointer"
                   style={{
                     left: exp.x, top: exp.y,
@@ -936,11 +1199,13 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                     }}>
                       {exp.title}
                     </div>
-                    {exp.isActive ? (
+                    {exp.status === "upcoming" ? (
                       <div className="flex items-center justify-center gap-1.5" style={{ marginTop: 4 }}>
                         <div className="rounded-full animate-pulse" style={{ width: 5, height: 5, background: "#22c55e" }} />
                         <span style={{ color: "#22c55e", fontSize: 11, letterSpacing: "0.04em" }}>идёт набор</span>
                       </div>
+                    ) : exp.status === "completed" ? (
+                      <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, marginTop: 4, letterSpacing: "0.04em" }}>завершена</div>
                     ) : (
                       <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, marginTop: 4, letterSpacing: "0.04em" }}>набор закрыт</div>
                     )}
@@ -976,7 +1241,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                 key={dec.id}
                 className="absolute pointer-events-none"
                 style={{
-                  left: dec.x, top: dec.y,
+                  left: dec.x + CYCLE_WIDTH, top: dec.y,
                   width: dec.width, height: dec.height,
                   transform: dec.rotate ? `rotate(${dec.rotate}deg)` : "none",
                   opacity: dec.opacity,
@@ -1040,11 +1305,15 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                   }}>
                     {selected.difficulty}
                   </span>
-                  {!selected.isActive && (
+                  {selected.status === "completed" ? (
+                    <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/55 border border-white/10" style={{ fontSize: 11 }}>
+                      Завершена
+                    </span>
+                  ) : selected.status === "closed" ? (
                     <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/30 border border-white/10" style={{ fontSize: 11 }}>
                       Набор закрыт
                     </span>
-                  )}
+                  ) : null}
                 </div>
 
                 <h3 className="text-white mb-1" style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: 700, letterSpacing: "0.06em" }}>
@@ -1107,10 +1376,15 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                 </div>
 
                 <div className="flex flex-col gap-3 w-full lg:w-auto">
-                  {selected.isActive ? (
+                  {selected.status === "upcoming" ? (
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                       <span className="text-green-500 uppercase tracking-widest" style={{ fontSize: 11 }}>Идёт набор</span>
+                    </div>
+                  ) : selected.status === "completed" ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-white/50" />
+                      <span className="text-white/50 uppercase tracking-widest" style={{ fontSize: 11 }}>Экспедиция завершена</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -1124,14 +1398,19 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                       className="flex items-center justify-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em] transition-all duration-200"
                       style={{
                         fontSize: "clamp(11px,1vw,13px)",
-                        background: selected.isActive ? "#91040C" : "rgba(255,255,255,0.07)",
-                        border: selected.isActive ? "1px solid #91040C" : "1px solid rgba(255,255,255,0.12)",
-                        cursor: selected.isActive ? "pointer" : "default",
+                        background: selected.status === "upcoming" || selected.status === "completed" ? "#91040C" : "rgba(255,255,255,0.07)",
+                        border: selected.status === "upcoming" || selected.status === "completed" ? "1px solid #91040C" : "1px solid rgba(255,255,255,0.12)",
+                        cursor: selected.status === "closed" ? "default" : "pointer",
                       }}
-                      whileHover={selected.isActive ? { background: "#6d0309", x: 2 } : {}}
-                      whileTap={selected.isActive ? { scale: 0.97 } : {}}
+                      whileHover={selected.status === "closed" ? {} : { background: "#6d0309", x: 2 }}
+                      whileTap={selected.status === "closed" ? {} : { scale: 0.97 }}
+                      onClick={() => {
+                        if (selected.status === "completed" && onNavigate) {
+                          onNavigate({ page: "experience-detail", id: selected.id });
+                        }
+                      }}
                     >
-                      {selected.isActive ? "Забронировать" : "Лист ожидания"}
+                      {selected.status === "completed" ? "Посмотреть, как это было" : selected.status === "upcoming" ? "Забронировать" : "Лист ожидания"}
                       <ArrowRight className="w-4 h-4" />
                     </motion.button>
 

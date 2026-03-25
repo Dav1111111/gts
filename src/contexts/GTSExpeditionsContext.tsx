@@ -19,6 +19,8 @@ export interface ExpeditionData {
   heroImage: string;
   galleryImages: string[];
   dateRange: string;
+  startDate?: string;
+  endDate?: string;
   month: string;
   year: number;
   totalDays: number;
