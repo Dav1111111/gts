@@ -1002,14 +1002,15 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   }, []);
 
   const handleSelect = useCallback(
-    (id: string) => {
+    (id: string, scrollPageDown = false) => {
       setSelectedId(id);
       const exp = expeditions.find((e) => e.id === id);
       if (exp) scrollToExp(exp);
-      // Auto-scroll page to the info card below the map
-      setTimeout(() => {
-        infoCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 150);
+      if (scrollPageDown) {
+        setTimeout(() => {
+          infoCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
+      }
     },
     [expeditions, scrollToExp]
   );
@@ -1159,18 +1160,22 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               style={{ zIndex: 1 }}
             >
               <path ref={pathRef} d={ROUTE_PATH} fill="none" stroke="none" />
-              <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="32" strokeLinecap="round" />
-              {leftWall && <path d={leftWall} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeLinecap="round" />}
-              {rightWall && <path d={rightWall} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeLinecap="round" />}
-              {treadBlocks.map((b, i) => (
-                <rect
-                  key={i}
-                  x={-5} y={-2.5} width={10} height={5} rx={1}
-                  fill="rgba(255,255,255,0.28)"
-                  transform={`translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${b.angle.toFixed(1)})`}
-                />
+              {TIMELINE_COPIES.map((copy) => (
+                <g key={copy} transform={`translate(${(copy - 1) * CYCLE_WIDTH}, 0)`}>
+                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="32" strokeLinecap="round" />
+                  {leftWall && <path d={leftWall} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeLinecap="round" />}
+                  {rightWall && <path d={rightWall} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeLinecap="round" />}
+                  {treadBlocks.map((b, i) => (
+                    <rect
+                      key={i}
+                      x={-5} y={-2.5} width={10} height={5} rx={1}
+                      fill="rgba(255,255,255,0.28)"
+                      transform={`translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${b.angle.toFixed(1)})`}
+                    />
+                  ))}
+                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="4,6" />
+                </g>
               ))}
-              <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="4,6" />
             </svg>
 
             {/* ── Month labels ── */}
@@ -1217,7 +1222,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                   transition={{ delay: 0.3 + index * 0.05, type: "spring", stiffness: 200 }}
                   onMouseEnter={() => setHoveredId(exp.id)}
                   onMouseLeave={() => setHoveredId(null)}
-                  onClick={(e) => { e.stopPropagation(); handleSelect(exp.id); }}
+                  onClick={(e) => { e.stopPropagation(); handleSelect(exp.id, true); }}
                   >
                     {showLabel && (
                       <div
@@ -1231,7 +1236,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                           width: isCompactView ? 110 : isCondensedView ? 140 : "auto",
                           maxWidth: isCompactView ? 110 : isCondensedView ? 140 : 220,
                         }}
-                        onClick={(e) => { e.stopPropagation(); handleSelect(exp.id); }}
+                        onClick={(e) => { e.stopPropagation(); handleSelect(exp.id, true); }}
                       >
                         <div
                           style={{
@@ -1502,7 +1507,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               {expeditions.map((exp) => (
                 <button
                   key={exp.id}
-                  onClick={() => handleSelect(exp.id)}
+                  onClick={() => handleSelect(exp.id, true)}
                   className="transition-all duration-200"
                   title={exp.title}
                   style={{
