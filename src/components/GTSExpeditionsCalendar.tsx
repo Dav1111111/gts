@@ -544,7 +544,7 @@ const DECORATIONS: Decoration[] = [
 function buildSmoothPath(pts: { x: number; y: number }[]): string {
   if (pts.length < 2) return "";
   let d = `M ${pts[0].x},${pts[0].y}`;
-  const t = 0.35;
+  const t = 0.22;
   for (let i = 0; i < pts.length - 1; i++) {
     const p0 = pts[Math.max(0, i - 1)];
     const p1 = pts[i];
@@ -777,23 +777,18 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
     const sorted = mapped.sort((a, b) => a.sortKey - b.sortKey || a.title.localeCompare(b.title, "ru"));
     const usableWidth = CYCLE_WIDTH - TIMELINE_PADDING * 2;
-    const groupCounts = new Map<number, number>();
-    const groupOffsets = new Map<number, number>();
-
-    sorted.forEach((exp) => {
-      groupCounts.set(exp.sortKey, (groupCounts.get(exp.sortKey) ?? 0) + 1);
-    });
+    const MIN_TRACK_STEP = 34;
+    let previousX = CYCLE_WIDTH + TIMELINE_PADDING - MIN_TRACK_STEP;
 
     return sorted.map((exp, index) => {
       const laneIndex = index % TIMELINE_LANES.length;
-      const countInGroup = groupCounts.get(exp.sortKey) ?? 1;
-      const indexInGroup = groupOffsets.get(exp.sortKey) ?? 0;
-      const horizontalOffset = countInGroup > 1 ? (indexInGroup - (countInGroup - 1) / 2) * 26 : 0;
-      groupOffsets.set(exp.sortKey, indexInGroup + 1);
+      const desiredX = CYCLE_WIDTH + TIMELINE_PADDING + exp.startProgress * usableWidth;
+      const centerX = Math.max(desiredX, previousX + MIN_TRACK_STEP);
+      previousX = centerX;
 
       return {
         ...exp,
-        centerX: CYCLE_WIDTH + TIMELINE_PADDING + exp.startProgress * usableWidth + horizontalOffset,
+        centerX,
         centerY: TIMELINE_LANES[laneIndex],
         labelAbove: laneIndex < 2,
       };
@@ -856,9 +851,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
   /* ── Compute ROUTE_PATH from expedition coordinates ── */
   const ROUTE_PATH = useMemo(() => {
-    const sorted = [...expeditions].sort((a, b) => a.centerX - b.centerX);
-    if (sorted.length < 2) return "";
-    return buildSmoothPath(sorted.map((e) => ({ x: e.centerX, y: e.centerY })));
+    if (expeditions.length < 2) return "";
+    return buildSmoothPath(expeditions.map((e) => ({ x: e.centerX, y: e.centerY })));
   }, [expeditions]);
 
   useEffect(() => {
