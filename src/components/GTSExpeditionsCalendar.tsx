@@ -851,8 +851,17 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
   /* ── Compute ROUTE_PATH from expedition coordinates ── */
   const ROUTE_PATH = useMemo(() => {
-    if (expeditions.length < 2) return "";
-    return buildSmoothPath(expeditions.map((e) => ({ x: e.centerX, y: e.centerY })));
+    if (!expeditions.length) return "";
+
+    const first = expeditions[0];
+    const last = expeditions[expeditions.length - 1];
+    const routePoints = [
+      { x: CYCLE_WIDTH, y: first.centerY },
+      ...expeditions.map((e) => ({ x: e.centerX, y: e.centerY })),
+      { x: CYCLE_WIDTH * 2, y: last.centerY },
+    ];
+
+    return buildSmoothPath(routePoints);
   }, [expeditions]);
 
   useEffect(() => {
