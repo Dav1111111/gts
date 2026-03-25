@@ -476,51 +476,54 @@ function ExpeditionEditor({
     <div className="min-h-screen bg-[#0B0B0C]">
       {/* Header */}
       <div
-        className="sticky top-0 z-50 flex items-center justify-between px-6 lg:px-10 py-4"
+        className="sticky top-0 z-50 px-4 py-4 sm:px-6 lg:px-10"
         style={{ background: "rgba(11,11,12,0.95)", borderBottom: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}
       >
-        <div className="flex items-center gap-4">
-          <button onClick={onCancel} className="p-2 text-white/50 hover:text-white transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <div className="text-white/40 uppercase tracking-[0.12em]" style={{ fontSize: 10 }}>
-              {isNew ? "Создание экспедиции" : "Редактирование"}
-            </div>
-            <div className="text-white" style={{ fontSize: 16 }}>
-              {draft.title || "Новая экспедиция"} {draft.tagline && <span className="text-white/40">— {draft.tagline}</span>}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={onCancel} className="p-2 text-white/50 hover:text-white transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <div className="text-white/40 uppercase tracking-[0.12em]" style={{ fontSize: 10 }}>
+                {isNew ? "Создание экспедиции" : "Редактирование"}
+              </div>
+              <div className="text-white" style={{ fontSize: 16 }}>
+                {draft.title || "Новая экспедиция"} {draft.tagline && <span className="text-white/40">— {draft.tagline}</span>}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <motion.button
-            className="flex items-center gap-2 px-4 py-2 text-white/60 transition-colors"
-            style={{ fontSize: 13, border: "1px solid rgba(255,255,255,0.15)" }}
-            whileHover={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.9)" }}
-            onClick={onCancel}
-          >
-            <X className="w-4 h-4" />
-            Отмена
-          </motion.button>
-          <motion.button
-            className="flex items-center gap-2 px-5 py-2 text-white"
-            style={{ fontSize: 13, background: "#91040C", border: "1px solid #91040C" }}
-            whileHover={{ background: "#6d0309" }}
-            onClick={() => onSave(draft)}
-          >
-            <Save className="w-4 h-4" />
-            Сохранить
-          </motion.button>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <motion.button
+              className="flex w-full items-center justify-center gap-2 px-4 py-2 text-white/60 transition-colors sm:w-auto"
+              style={{ fontSize: 13, border: "1px solid rgba(255,255,255,0.15)" }}
+              whileHover={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.9)" }}
+              onClick={onCancel}
+            >
+              <X className="w-4 h-4" />
+              Отмена
+            </motion.button>
+            <motion.button
+              className="flex w-full items-center justify-center gap-2 px-5 py-2 text-white sm:w-auto"
+              style={{ fontSize: 13, background: "#91040C", border: "1px solid #91040C" }}
+              whileHover={{ background: "#6d0309" }}
+              onClick={() => onSave(draft)}
+            >
+              <Save className="w-4 h-4" />
+              Сохранить
+            </motion.button>
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-0 px-6 lg:px-10" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+      <div className="flex gap-0 overflow-x-auto px-4 sm:px-6 lg:px-10" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="px-5 py-3.5 uppercase tracking-[0.1em] transition-colors relative"
+            className="relative shrink-0 px-4 py-3.5 uppercase tracking-[0.1em] transition-colors sm:px-5"
             style={{
               fontSize: 11,
               color: activeTab === tab.id ? "#fff" : "rgba(255,255,255,0.4)",
@@ -539,7 +542,7 @@ function ExpeditionEditor({
       </div>
 
       {/* Content */}
-      <div className="px-6 lg:px-10 py-8 max-w-[1200px]">
+      <div className="max-w-[1200px] px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
         <AnimatePresence mode="wait">
           {activeTab === "general" && (
             <motion.div
@@ -576,7 +579,7 @@ function ExpeditionEditor({
                 <AdminReadonly label="Месяц старта" value={draft.month} />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
                 <AdminReadonly label="Год" value={draft.year} />
                 <AdminReadonly label="Длительность" value={`${draft.totalDays} дн.`} />
                 <AdminInput label="Дней в пути" value={draft.trekDays} onChange={(v) => update("trekDays", parseInt(v) || 0)} type="number" />
@@ -592,26 +595,26 @@ function ExpeditionEditor({
                 />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
                 <AdminReadonly label="Всего дней" value={draft.totalDays} />
                 <AdminInput label="Дней отдыха" value={draft.restDays} onChange={(v) => update("restDays", parseInt(v) || 0)} type="number" />
                 <AdminInput label="Дистанция" value={draft.distance} onChange={(v) => update("distance", v)} placeholder="~680 км" />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 <AdminInput label="Тип тура" value={draft.tourType} onChange={(v) => update("tourType", v)} placeholder="Внедорожная экспедиция" />
                 <AdminInput label="Транспорт" value={draft.transport} onChange={(v) => update("transport", v)} placeholder="Land Cruiser 300" />
                 <AdminInput label="Регион" value={draft.region} onChange={(v) => update("region", v)} placeholder="Крымский полуостров" />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
                 <AdminInput label="Старт" value={draft.startLocation} onChange={(v) => update("startLocation", v)} placeholder="Симферополь" />
                 <AdminInput label="Финиш" value={draft.finishLocation} onChange={(v) => update("finishLocation", v)} placeholder="Севастополь" />
                 <AdminInput label="Размер группы" value={draft.groupSize} onChange={(v) => update("groupSize", parseInt(v) || 1)} type="number" />
                 <AdminInput label="Осталось мест" value={draft.spotsLeft} onChange={(v) => update("spotsLeft", parseInt(v) || 0)} type="number" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <AdminInput label="Цена (отображение)" value={draft.price} onChange={(v) => update("price", v)} placeholder="52 000" />
                 <AdminInput label="Цена (число)" value={draft.priceNumber} onChange={(v) => update("priceNumber", parseInt(v) || 0)} type="number" />
               </div>
@@ -832,10 +835,10 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
     <div className="min-h-screen bg-[#0B0B0C]">
       {/* Header */}
       <div
-        className="sticky top-0 z-50 px-6 lg:px-10 py-5"
+        className="sticky top-0 z-50 px-4 py-5 sm:px-6 lg:px-10"
         style={{ background: "rgba(11,11,12,0.95)", borderBottom: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => onNavigate?.({ page: "landing" })}
@@ -853,7 +856,7 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
             </div>
           </div>
           <motion.button
-            className="flex items-center gap-2 px-5 py-2.5 text-white"
+            className="flex w-full items-center justify-center gap-2 px-5 py-2.5 text-white sm:w-auto"
             style={{ fontSize: 13, background: "#91040C", border: "1px solid #91040C", letterSpacing: "0.06em" }}
             whileHover={{ background: "#6d0309" }}
             onClick={handleCreate}
@@ -864,8 +867,8 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
         </div>
 
         {/* Search & Filters */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-[400px]">
+        <div className="flex flex-col gap-3">
+          <div className="relative w-full max-w-[400px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input
               type="text"
@@ -880,12 +883,12 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
               }}
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
             {["all", "Лёгкий", "Средний", "Сложный"].map((d) => (
               <button
                 key={d}
                 onClick={() => setFilterDifficulty(d)}
-                className="px-3 py-2 uppercase tracking-[0.08em] transition-colors"
+                className="shrink-0 px-3 py-2 uppercase tracking-[0.08em] transition-colors"
                 style={{
                   fontSize: 11,
                   background: filterDifficulty === d ? "rgba(145,4,12,0.2)" : "rgba(255,255,255,0.04)",
@@ -901,7 +904,7 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
       </div>
 
       {/* Stats bar */}
-      <div className="px-6 lg:px-10 py-4 flex items-center gap-6 flex-wrap" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="flex flex-wrap items-center gap-4 px-4 py-4 sm:px-6 lg:px-10" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500" />
           <span className="text-white/50" style={{ fontSize: 12 }}>
@@ -926,7 +929,7 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
       </div>
 
       {/* Expedition list */}
-      <div className="px-6 lg:px-10 py-6 space-y-3">
+      <div className="space-y-3 px-4 py-6 sm:px-6 lg:px-10">
         {filtered.length === 0 ? (
           <div className="py-20 text-center">
             <Mountain className="w-12 h-12 text-white/10 mx-auto mb-4" />
@@ -947,9 +950,9 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
                   border: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
-                <div className="flex items-stretch">
+                <div className="flex flex-col md:flex-row md:items-stretch">
                   {/* Image */}
-                  <div className="hidden md:block w-[200px] flex-shrink-0 relative overflow-hidden">
+                  <div className="relative h-44 overflow-hidden md:h-auto md:w-[200px] md:flex-shrink-0">
                     {exp.heroImage ? (
                       <ImageWithFallback src={exp.heroImage} alt={exp.title} className="absolute inset-0 w-full h-full object-cover" />
                     ) : (
@@ -960,8 +963,8 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 p-5">
-                    <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 p-4 sm:p-5">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-white" style={{ fontSize: 16, letterSpacing: "0.06em" }}>
@@ -1028,7 +1031,7 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="flex flex-wrap items-center gap-1.5 md:flex-shrink-0">
                         <motion.button
                           className="p-2 text-white/30 transition-colors"
                           whileHover={{ color: "rgba(255,255,255,0.8)", background: "rgba(255,255,255,0.05)" }}
@@ -1076,14 +1079,14 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
                       className="overflow-hidden"
                     >
                       <div
-                        className="flex items-center justify-between px-5 py-3"
+                        className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
                         style={{ background: "rgba(239,68,68,0.05)", borderTop: "1px solid rgba(239,68,68,0.15)" }}
                       >
                         <div className="flex items-center gap-2 text-red-400" style={{ fontSize: 13 }}>
                           <AlertTriangle className="w-4 h-4" />
                           Удалить экспедицию «{exp.title} — {exp.tagline}»?
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
                           <button
                             onClick={() => setDeleteConfirm(null)}
                             className="px-3 py-1.5 text-white/50 hover:text-white transition-colors"

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode, useMemo } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useMemo, useEffect } from "react";
 
 /* ═══════════════════════════════════════════════
    Shared Expedition Types
@@ -461,6 +461,30 @@ const DEFAULT_EXPEDITIONS: ExpeditionData[] = [
   }
 ];
 
+const EXPEDITIONS_STORAGE_KEY = "gts_expeditions_v1";
+
+function loadStoredExpeditions(): ExpeditionData[] {
+  if (typeof window === "undefined") {
+    return DEFAULT_EXPEDITIONS;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(EXPEDITIONS_STORAGE_KEY);
+    if (!raw) {
+      return DEFAULT_EXPEDITIONS;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return DEFAULT_EXPEDITIONS;
+    }
+
+    return parsed as ExpeditionData[];
+  } catch {
+    return DEFAULT_EXPEDITIONS;
+  }
+}
+
 interface GTSExpeditionsContextType {
   expeditions: ExpeditionData[];
   getExpeditionById: (id: string) => ExpeditionData | undefined;
@@ -474,7 +498,15 @@ interface GTSExpeditionsContextType {
 const GTSExpeditionsContext = createContext<GTSExpeditionsContextType | undefined>(undefined);
 
 export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
-  const [expeditions, setExpeditions] = useState<ExpeditionData[]>(DEFAULT_EXPEDITIONS);
+  const [expeditions, setExpeditions] = useState<ExpeditionData[]>(() => loadStoredExpeditions());
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(EXPEDITIONS_STORAGE_KEY, JSON.stringify(expeditions));
+  }, [expeditions]);
 
   const getExpeditionById = useCallback((id: string) => {
     return expeditions.find(exp => exp.id === id);

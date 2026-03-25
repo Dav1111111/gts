@@ -21,7 +21,7 @@ const MAP_WIDTH = CYCLE_WIDTH * 3;
 const MAP_HEIGHT = 540;
 const TIMELINE_PADDING = 120;
 const TIMELINE_COPIES = [0, 1, 2] as const;
-const TIMELINE_LANES = [150, 230, 320, 400];
+const TIMELINE_LANES = [120, 185, 250, 315, 385, 450];
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -721,6 +721,10 @@ function getExpeditionStatus(isActive: boolean, spots: { total: number; booked: 
   return "upcoming";
 }
 
+function getCompactTitle(title: string): string {
+  return title.length > 18 ? `${title.slice(0, 18)}...` : title;
+}
+
 /* ════════════════════════════════════════════════════
    Component
    ════════════════════════════════════════════════════ */
@@ -730,6 +734,7 @@ interface GTSExpeditionsCalendarProps {
 
 export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarProps = {}) {
   const { expeditions: ctxExpeditions } = useExpeditions();
+  const [timelineView, setTimelineView] = useState<"full" | "condensed" | "compact">("full");
   const expeditions: Expedition[] = useMemo(() => {
     const mapped = ctxExpeditions.map((e) => {
       const { start, end } = inferExpeditionDates({
@@ -772,12 +777,23 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
     const sorted = mapped.sort((a, b) => a.sortKey - b.sortKey || a.title.localeCompare(b.title, "ru"));
     const usableWidth = CYCLE_WIDTH - TIMELINE_PADDING * 2;
+    const groupCounts = new Map<number, number>();
+    const groupOffsets = new Map<number, number>();
+
+    sorted.forEach((exp) => {
+      groupCounts.set(exp.sortKey, (groupCounts.get(exp.sortKey) ?? 0) + 1);
+    });
 
     return sorted.map((exp, index) => {
       const laneIndex = index % TIMELINE_LANES.length;
+      const countInGroup = groupCounts.get(exp.sortKey) ?? 1;
+      const indexInGroup = groupOffsets.get(exp.sortKey) ?? 0;
+      const horizontalOffset = countInGroup > 1 ? (indexInGroup - (countInGroup - 1) / 2) * 26 : 0;
+      groupOffsets.set(exp.sortKey, indexInGroup + 1);
+
       return {
         ...exp,
-        centerX: CYCLE_WIDTH + TIMELINE_PADDING + exp.startProgress * usableWidth,
+        centerX: CYCLE_WIDTH + TIMELINE_PADDING + exp.startProgress * usableWidth + horizontalOffset,
         centerY: TIMELINE_LANES[laneIndex],
         labelAbove: laneIndex < 2,
       };
@@ -821,6 +837,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const initialScrollDoneRef = useRef(false);
   const selected = expeditions.find((e) => e.id === selectedId) || expeditions[0];
   const hasMultipleExpeditions = expeditions.length > 1;
+  const isCompactView = timelineView === "compact";
+  const isCondensedView = timelineView !== "full";
 
   useEffect(() => {
     if (!expeditions.length) {
@@ -838,10 +856,31 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
   /* ── Compute ROUTE_PATH from expedition coordinates ── */
   const ROUTE_PATH = useMemo(() => {
-    const sorted = [...renderedExpeditions].sort((a, b) => a.x - b.x);
+    const sorted = [...expeditions].sort((a, b) => a.centerX - b.centerX);
     if (sorted.length < 2) return "";
-    return buildSmoothPath(sorted.map((e) => ({ x: e.x, y: e.y })));
-  }, [renderedExpeditions]);
+    return buildSmoothPath(sorted.map((e) => ({ x: e.centerX, y: e.centerY })));
+  }, [expeditions]);
+
+  useEffect(() => {
+    const updateTimelineView = () => {
+      if (window.innerWidth < 768) {
+        setTimelineView("compact");
+        return;
+      }
+
+      if (window.innerWidth < 1440) {
+        setTimelineView("condensed");
+        return;
+      }
+
+      setTimelineView("full");
+    };
+
+    updateTimelineView();
+    window.addEventListener("resize", updateTimelineView);
+
+    return () => window.removeEventListener("resize", updateTimelineView);
+  }, []);
 
   /* ── Tire tread generation ── */
   useEffect(() => {
@@ -1149,7 +1188,13 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               >
                 <span
                   className="block text-white/80 tracking-[0.5em]"
-                  style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: 18, fontWeight: 500, letterSpacing: "0.5em" }}
+                  style={{
+                    writingMode: "vertical-rl",
+                    transform: "rotate(180deg)",
+                    fontSize: isCompactView ? 13 : isCondensedView ? 15 : 18,
+                    fontWeight: 500,
+                    letterSpacing: isCompactView ? "0.24em" : isCondensedView ? "0.34em" : "0.5em",
+                  }}
                 >
                   {label}
                 </span>
@@ -1160,6 +1205,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             {renderedExpeditions.map((exp, index) => {
               const isHovered = hoveredId === exp.id;
               const isSelected = selectedId === exp.id;
+              const showLabel = !isCondensedView || isSelected || isHovered;
               const pinColor = isSelected ? "#91040C" : isHovered ? "#ffffff" : "rgba(255,255,255,0.6)";
               const pinFill = isSelected ? "#91040C" : exp.isFeatured ? "rgba(145,4,12,0.65)" : isHovered ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)";
 
@@ -1178,38 +1224,61 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                   onMouseEnter={() => setHoveredId(exp.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={(e) => { e.stopPropagation(); handleSelect(exp.id); }}
-                >
-                  <div
-                    className="absolute cursor-pointer"
-                    style={{
-                      left: "50%", transform: "translateX(-50%)",
-                      ...(exp.labelAbove ? { bottom: "calc(100% + 10px)" } : { top: "calc(100% + 10px)" }),
-                      textAlign: "center", whiteSpace: "nowrap",
-                    }}
-                    onClick={(e) => { e.stopPropagation(); handleSelect(exp.id); }}
                   >
-                    <div style={{ color: "#91040C", fontSize: 13, letterSpacing: "0.06em", marginBottom: 3, opacity: isSelected ? 1 : 0.85, fontWeight: 500 }}>
-                      {exp.dateRange}
-                    </div>
-                    <div style={{
-                      color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
-                      fontSize: isSelected ? 18 : 16, letterSpacing: "0.1em", fontWeight: 700,
-                      transition: "all 0.2s ease",
-                      textShadow: isSelected ? "0 0 20px rgba(145,4,12,0.5)" : "none",
-                    }}>
-                      {exp.title}
-                    </div>
-                    {exp.status === "upcoming" ? (
-                      <div className="flex items-center justify-center gap-1.5" style={{ marginTop: 4 }}>
-                        <div className="rounded-full animate-pulse" style={{ width: 5, height: 5, background: "#22c55e" }} />
-                        <span style={{ color: "#22c55e", fontSize: 11, letterSpacing: "0.04em" }}>идёт набор</span>
+                    {showLabel && (
+                      <div
+                        className="absolute cursor-pointer"
+                        style={{
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          ...(exp.labelAbove ? { bottom: "calc(100% + 10px)" } : { top: "calc(100% + 10px)" }),
+                          textAlign: "center",
+                          whiteSpace: isCompactView ? "normal" : "nowrap",
+                          width: isCompactView ? 110 : isCondensedView ? 140 : "auto",
+                          maxWidth: isCompactView ? 110 : isCondensedView ? 140 : 220,
+                        }}
+                        onClick={(e) => { e.stopPropagation(); handleSelect(exp.id); }}
+                      >
+                        <div
+                          style={{
+                            color: "#91040C",
+                            fontSize: isCompactView ? 11 : 13,
+                            letterSpacing: isCompactView ? "0.04em" : "0.06em",
+                            marginBottom: 3,
+                            opacity: isSelected ? 1 : 0.85,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {exp.dateRange}
+                        </div>
+                        <div
+                          style={{
+                            color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
+                            fontSize: isCompactView ? (isSelected ? 13 : 11) : isCondensedView ? (isSelected ? 15 : 12) : isSelected ? 18 : 16,
+                            letterSpacing: isCompactView ? "0.06em" : isCondensedView ? "0.08em" : "0.1em",
+                            fontWeight: 700,
+                            transition: "all 0.2s ease",
+                            textShadow: isSelected ? "0 0 20px rgba(145,4,12,0.5)" : "none",
+                            lineHeight: isCompactView ? 1.15 : 1.2,
+                            wordBreak: isCondensedView ? "break-word" : "normal",
+                          }}
+                        >
+                          {isCondensedView && !isSelected ? getCompactTitle(exp.title) : exp.title}
+                        </div>
+                        <div style={{ marginTop: 4 }}>
+                          {exp.status === "upcoming" ? (
+                            <div className="flex items-center justify-center gap-1.5">
+                              <div className="rounded-full animate-pulse" style={{ width: 5, height: 5, background: "#22c55e" }} />
+                              <span style={{ color: "#22c55e", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>идёт набор</span>
+                            </div>
+                          ) : exp.status === "completed" ? (
+                            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>завершена</div>
+                          ) : (
+                            <div style={{ color: "rgba(255,255,255,0.3)", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>набор закрыт</div>
+                          )}
+                        </div>
                       </div>
-                    ) : exp.status === "completed" ? (
-                      <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, marginTop: 4, letterSpacing: "0.04em" }}>завершена</div>
-                    ) : (
-                      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, marginTop: 4, letterSpacing: "0.04em" }}>набор закрыт</div>
                     )}
-                  </div>
 
                   <motion.div
                     animate={isSelected ? { scale: [1, 1.12, 1] } : {}}
@@ -1225,8 +1294,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                       />
                     )}
                     <MapPin style={{
-                      width: isSelected ? 34 : isHovered ? 28 : 24,
-                      height: isSelected ? 34 : isHovered ? 28 : 24,
+                      width: isCompactView ? (isSelected ? 28 : isHovered ? 24 : 20) : isSelected ? 34 : isHovered ? 28 : 24,
+                      height: isCompactView ? (isSelected ? 28 : isHovered ? 24 : 20) : isSelected ? 34 : isHovered ? 28 : 24,
                       color: pinColor, fill: pinFill, transition: "all 0.2s ease",
                       filter: isSelected ? "drop-shadow(0 0 10px rgba(145,4,12,0.85))" : exp.isFeatured ? "drop-shadow(0 0 6px rgba(145,4,12,0.5))" : "none",
                     }} />

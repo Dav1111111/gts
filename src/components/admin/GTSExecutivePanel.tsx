@@ -309,19 +309,19 @@ export function GTSExecutivePanel({ user, onLogout, onBackToHome, onNavigate }: 
         onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
       />
       
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         {/* Sidebar */}
         {sidebarOpen && (
-          <div className="w-64 bg-[#121214] border-r border-[#232428] min-h-screen">
-            <div className="p-4">
-              <nav className="space-y-2">
+          <div className="w-full border-b border-[#232428] bg-[#121214] lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r">
+            <div className="overflow-x-auto p-3 lg:p-4">
+              <nav className="flex min-w-max gap-2 lg:block lg:min-w-0 lg:space-y-2">
                 {modules.map((module) => {
                   const IconComponent = module.icon;
                   return (
                     <button
                       key={module.id}
                       onClick={() => setActiveModule(module.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                      className={`flex min-w-[220px] items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors lg:w-full lg:min-w-0 ${
                         activeModule === module.id
                           ? 'bg-[#91040C] text-white'
                           : 'text-[#A6A7AA] hover:bg-[#17181A] hover:text-white'
@@ -341,7 +341,7 @@ export function GTSExecutivePanel({ user, onLogout, onBackToHome, onNavigate }: 
         )}
 
         {/* Main Content */}
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           {renderModule()}
         </div>
       </div>
