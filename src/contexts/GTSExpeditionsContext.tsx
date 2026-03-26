@@ -462,26 +462,84 @@ const DEFAULT_EXPEDITIONS: ExpeditionData[] = [
 ];
 
 const EXPEDITIONS_STORAGE_KEY = "gts_expeditions_v1";
+const SUPABASE_TABLE = "expeditions";
 
-function loadStoredExpeditions(): ExpeditionData[] {
-  if (typeof window === "undefined") {
-    return DEFAULT_EXPEDITIONS;
-  }
+type SupabaseLoadResult =
+  | { status: "success"; data: ExpeditionData[] }
+  | { status: "empty" }
+  | { status: "error"; error: unknown };
 
+function loadCachedExpeditions(): ExpeditionData[] {
+  if (typeof window === "undefined") return DEFAULT_EXPEDITIONS;
   try {
     const raw = window.localStorage.getItem(EXPEDITIONS_STORAGE_KEY);
-    if (!raw) {
-      return DEFAULT_EXPEDITIONS;
-    }
-
+    if (!raw) return DEFAULT_EXPEDITIONS;
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return DEFAULT_EXPEDITIONS;
-    }
-
-    return parsed as ExpeditionData[];
+    return Array.isArray(parsed) ? (parsed as ExpeditionData[]) : DEFAULT_EXPEDITIONS;
   } catch {
     return DEFAULT_EXPEDITIONS;
+  }
+}
+
+function cacheExpeditions(data: ExpeditionData[]) {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(EXPEDITIONS_STORAGE_KEY, JSON.stringify(data));
+  }
+}
+
+/* ─── Supabase helpers ─── */
+async function loadSupabaseExpeditions(): Promise<SupabaseLoadResult> {
+  try {
+    const { supabase } = await import("../utils/supabase/client");
+    const { data, error } = await supabase.from(SUPABASE_TABLE).select("id, data").order("created_at");
+    if (error) throw error;
+    if (!data || data.length === 0) return { status: "empty" };
+    return {
+      status: "success",
+      data: data.map((row: { id: string; data: ExpeditionData }) => ({ ...row.data, id: row.id })),
+    };
+  } catch (err) {
+    console.warn("[GTS] Supabase load failed, using cache:", err);
+    return { status: "error", error: err };
+  }
+}
+
+async function upsertSupabaseExpedition(exp: ExpeditionData): Promise<boolean> {
+  try {
+    const { supabase } = await import("../utils/supabase/client");
+    const { error } = await supabase
+      .from(SUPABASE_TABLE)
+      .upsert({ id: exp.id, data: exp, updated_at: new Date().toISOString() }, { onConflict: "id" });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error("[GTS] Supabase upsert failed:", err);
+    return false;
+  }
+}
+
+async function deleteSupabaseExpedition(id: string): Promise<boolean> {
+  try {
+    const { supabase } = await import("../utils/supabase/client");
+    const { error } = await supabase.from(SUPABASE_TABLE).delete().eq("id", id);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error("[GTS] Supabase delete failed:", err);
+    return false;
+  }
+}
+
+async function seedSupabase(expeditions: ExpeditionData[]): Promise<boolean> {
+  try {
+    const { supabase } = await import("../utils/supabase/client");
+    const rows = expeditions.map((exp) => ({ id: exp.id, data: exp }));
+    const { error } = await supabase.from(SUPABASE_TABLE).upsert(rows, { onConflict: "id" });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.warn("[GTS] Supabase seed failed:", err);
+    return false;
   }
 }
 
@@ -489,40 +547,102 @@ interface GTSExpeditionsContextType {
   expeditions: ExpeditionData[];
   getExpeditionById: (id: string) => ExpeditionData | undefined;
   featuredExpeditions: ExpeditionData[];
-  addExpedition: (expedition: ExpeditionData) => void;
-  updateExpedition: (expedition: ExpeditionData) => void;
-  deleteExpedition: (id: string) => void;
+  addExpedition: (expedition: ExpeditionData) => Promise<boolean>;
+  updateExpedition: (expedition: ExpeditionData) => Promise<boolean>;
+  deleteExpedition: (id: string) => Promise<boolean>;
   generateNewId: () => string;
 }
 
 const GTSExpeditionsContext = createContext<GTSExpeditionsContextType | undefined>(undefined);
 
 export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
-  const [expeditions, setExpeditions] = useState<ExpeditionData[]>(() => loadStoredExpeditions());
+  const [expeditions, setExpeditions] = useState<ExpeditionData[]>(() => loadCachedExpeditions());
 
+  /* ── Load from Supabase on mount, seed if table is empty ── */
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    let cancelled = false;
+    (async () => {
+      const remote = await loadSupabaseExpeditions();
+      if (cancelled) return;
 
-    window.localStorage.setItem(EXPEDITIONS_STORAGE_KEY, JSON.stringify(expeditions));
+      if (remote.status === "success") {
+        setExpeditions(remote.data);
+        cacheExpeditions(remote.data);
+        return;
+      }
+
+      if (remote.status === "empty") {
+        const sourceForSeed = expeditions.length ? expeditions : DEFAULT_EXPEDITIONS;
+        const seeded = await seedSupabase(sourceForSeed);
+        if (cancelled) return;
+
+        if (seeded) {
+          setExpeditions(sourceForSeed);
+          cacheExpeditions(sourceForSeed);
+        } else {
+          console.warn("[GTS] Supabase table is empty and seed failed, keeping cached expeditions.");
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ── Keep localStorage cache in sync ── */
+  useEffect(() => {
+    cacheExpeditions(expeditions);
   }, [expeditions]);
 
   const getExpeditionById = useCallback((id: string) => {
     return expeditions.find(exp => exp.id === id);
   }, [expeditions]);
 
-  const addExpedition = useCallback((newExp: ExpeditionData) => {
+  const addExpedition = useCallback(async (newExp: ExpeditionData) => {
     setExpeditions(prev => [...prev, newExp]);
+    const success = await upsertSupabaseExpedition(newExp);
+
+    if (!success) {
+      setExpeditions(prev => prev.filter(exp => exp.id !== newExp.id));
+    }
+
+    return success;
   }, []);
 
-  const updateExpedition = useCallback((updatedExp: ExpeditionData) => {
+  const updateExpedition = useCallback(async (updatedExp: ExpeditionData) => {
+    const previousExp = expeditions.find(exp => exp.id === updatedExp.id);
+
     setExpeditions(prev => prev.map(exp => exp.id === updatedExp.id ? updatedExp : exp));
-  }, []);
+    const success = await upsertSupabaseExpedition(updatedExp);
 
-  const deleteExpedition = useCallback((id: string) => {
+    if (!success && previousExp) {
+      setExpeditions(prev => prev.map(exp => exp.id === previousExp.id ? previousExp : exp));
+    }
+
+    return success;
+  }, [expeditions]);
+
+  const deleteExpedition = useCallback(async (id: string) => {
+    const previousIndex = expeditions.findIndex(exp => exp.id === id);
+    const previousExp = previousIndex >= 0 ? expeditions[previousIndex] : undefined;
+
     setExpeditions(prev => prev.filter(exp => exp.id !== id));
-  }, []);
+    const success = await deleteSupabaseExpedition(id);
+
+    if (!success && previousExp) {
+      setExpeditions(prev => {
+        if (prev.some(exp => exp.id === id)) {
+          return prev;
+        }
+
+        const next = [...prev];
+        const insertIndex = Math.min(previousIndex, next.length);
+        next.splice(insertIndex, 0, previousExp);
+        return next;
+      });
+    }
+
+    return success;
+  }, [expeditions]);
 
   const generateNewId = useCallback(() => {
     return `exp-${Date.now()}`;
@@ -531,9 +651,9 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
   const featuredExpeditions = useMemo(() => expeditions.filter(exp => exp.isFeatured), [expeditions]);
 
   return (
-    <GTSExpeditionsContext.Provider value={{ 
-      expeditions, 
-      getExpeditionById, 
+    <GTSExpeditionsContext.Provider value={{
+      expeditions,
+      getExpeditionById,
       featuredExpeditions,
       addExpedition,
       updateExpedition,

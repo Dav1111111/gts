@@ -770,13 +770,21 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
 
   /* Save */
   const handleSave = useCallback(
-    (data: ExpeditionData) => {
+    async (data: ExpeditionData) => {
       const normalized = normalizeExpeditionDates(data);
+      let success = false;
+
       if (isCreating) {
-        addExpedition(normalized);
+        success = await addExpedition(normalized);
       } else if (editingId) {
-        updateExpedition(normalized);
+        success = await updateExpedition(normalized);
       }
+
+      if (!success) {
+        window.alert("Не удалось сохранить экспедицию в общей базе. Локальные изменения отменены.");
+        return;
+      }
+
       setEditingId(null);
       setIsCreating(false);
     },
@@ -784,15 +792,19 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
   );
 
   /* Delete */
-  const handleDelete = (id: string) => {
-    deleteExpedition(id);
+  const handleDelete = async (id: string) => {
+    const success = await deleteExpedition(id);
+    if (!success) {
+      window.alert("Не удалось удалить экспедицию из общей базы. Локальные изменения отменены.");
+      return;
+    }
     setDeleteConfirm(null);
   };
 
   /* Duplicate */
-  const handleDuplicate = (exp: ExpeditionData) => {
+  const handleDuplicate = async (exp: ExpeditionData) => {
     const newId = generateNewId();
-    addExpedition({
+    const success = await addExpedition({
       ...normalizeExpeditionDates({
         ...exp,
         startDate: addDaysToIsoDate(exp.startDate, 7),
@@ -802,6 +814,10 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
       title: exp.title + " (копия)",
       spotsLeft: exp.groupSize,
     });
+
+    if (!success) {
+      window.alert("Не удалось создать копию экспедиции в общей базе. Локальные изменения отменены.");
+    }
   };
 
   /* ═══ EDITOR MODE ═══ */

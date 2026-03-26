@@ -21,7 +21,8 @@ const MAP_WIDTH = CYCLE_WIDTH * 3;
 const MAP_HEIGHT = 540;
 const TIMELINE_PADDING = 120;
 const TIMELINE_COPIES = [0, 1, 2] as const;
-const TIMELINE_LANES = [120, 185, 250, 315, 385, 450];
+const SERPENTINE_TOP = { min: 120, max: 200 };
+const SERPENTINE_BOTTOM = { min: 380, max: 460 };
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -777,20 +778,26 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
     const sorted = mapped.sort((a, b) => a.sortKey - b.sortKey || a.title.localeCompare(b.title, "ru"));
     const usableWidth = CYCLE_WIDTH - TIMELINE_PADDING * 2;
-    const MIN_TRACK_STEP = 34;
+    const MIN_TRACK_STEP = 80;
     let previousX = CYCLE_WIDTH + TIMELINE_PADDING - MIN_TRACK_STEP;
 
     return sorted.map((exp, index) => {
-      const laneIndex = index % TIMELINE_LANES.length;
       const desiredX = CYCLE_WIDTH + TIMELINE_PADDING + exp.startProgress * usableWidth;
       const centerX = Math.max(desiredX, previousX + MIN_TRACK_STEP);
       previousX = centerX;
 
+      // Serpentine: alternate top ↔ bottom zones for winding S-curve track
+      const isBottom = index % 2 !== 0;
+      const zone = isBottom ? SERPENTINE_BOTTOM : SERPENTINE_TOP;
+      const spread = zone.max - zone.min;
+      const variation = (index * 37 + 13) % (spread + 1);
+      const centerY = zone.min + variation;
+
       return {
         ...exp,
         centerX,
-        centerY: TIMELINE_LANES[laneIndex],
-        labelAbove: laneIndex < 2,
+        centerY,
+        labelAbove: isBottom,
       };
     });
   }, [ctxExpeditions]);
