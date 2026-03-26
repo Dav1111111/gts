@@ -49,6 +49,8 @@ export interface ExpeditionData {
   labelAbove: boolean;
   isFeatured: boolean;
   highlights: string[];
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 }
 
 /* ═══════════════════════════════════════════════
@@ -469,13 +471,25 @@ type SupabaseLoadResult =
   | { status: "empty" }
   | { status: "error"; error: unknown };
 
+function sanitizeExpeditionForStorage(expedition: ExpeditionData): ExpeditionData {
+  return {
+    ...expedition,
+    isDeleted: expedition.isDeleted ?? false,
+    deletedAt: expedition.isDeleted ? expedition.deletedAt ?? new Date().toISOString() : null,
+  };
+}
+
+function getVisibleExpeditions(expeditions: ExpeditionData[]): ExpeditionData[] {
+  return expeditions.filter((expedition) => !expedition.isDeleted);
+}
+
 function loadCachedExpeditions(): ExpeditionData[] {
   if (typeof window === "undefined") return DEFAULT_EXPEDITIONS;
   try {
     const raw = window.localStorage.getItem(EXPEDITIONS_STORAGE_KEY);
     if (!raw) return DEFAULT_EXPEDITIONS;
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as ExpeditionData[]) : DEFAULT_EXPEDITIONS;
+    return Array.isArray(parsed) ? getVisibleExpeditions(parsed as ExpeditionData[]) : DEFAULT_EXPEDITIONS;
   } catch {
     return DEFAULT_EXPEDITIONS;
   }
@@ -494,9 +508,10 @@ async function loadSupabaseExpeditions(): Promise<SupabaseLoadResult> {
     const { data, error } = await supabase.from(SUPABASE_TABLE).select("id, data").order("created_at");
     if (error) throw error;
     if (!data || data.length === 0) return { status: "empty" };
+    const mapped = data.map((row: { id: string; data: ExpeditionData }) => sanitizeExpeditionForStorage({ ...row.data, id: row.id }));
     return {
       status: "success",
-      data: data.map((row: { id: string; data: ExpeditionData }) => ({ ...row.data, id: row.id })),
+      data: getVisibleExpeditions(mapped),
     };
   } catch (err) {
     console.warn("[GTS] Supabase load failed, using cache:", err);
@@ -509,7 +524,7 @@ async function upsertSupabaseExpedition(exp: ExpeditionData): Promise<boolean> {
     const { supabase } = await import("../utils/supabase/client");
     const { error } = await supabase
       .from(SUPABASE_TABLE)
-      .upsert({ id: exp.id, data: exp, updated_at: new Date().toISOString() }, { onConflict: "id" });
+      .upsert({ id: exp.id, data: sanitizeExpeditionForStorage(exp), updated_at: new Date().toISOString() }, { onConflict: "id" });
     if (error) throw error;
     return true;
   } catch (err) {
@@ -518,12 +533,26 @@ async function upsertSupabaseExpedition(exp: ExpeditionData): Promise<boolean> {
   }
 }
 
-async function deleteSupabaseExpedition(id: string): Promise<boolean> {
+async function softDeleteSupabaseExpedition(expedition: ExpeditionData): Promise<boolean> {
+  return upsertSupabaseExpedition({
+    ...expedition,
+    isDeleted: true,
+    deletedAt: new Date().toISOString(),
+    isActive: false,
+  });
+}
+
+async function deleteSupabaseExpedition(expedition: ExpeditionData): Promise<boolean> {
   try {
     const { supabase } = await import("../utils/supabase/client");
-    const { error } = await supabase.from(SUPABASE_TABLE).delete().eq("id", id);
-    if (error) throw error;
-    return true;
+    const { error } = await supabase.from(SUPABASE_TABLE).delete().eq("id", expedition.id);
+    if (!error) return true;
+
+    console.warn("[GTS] Hard delete failed, trying soft delete:", error);
+    const softDeleted = await softDeleteSupabaseExpedition(expedition);
+    if (softDeleted) return true;
+
+    throw error;
   } catch (err) {
     console.error("[GTS] Supabase delete failed:", err);
     return false;
@@ -533,7 +562,7 @@ async function deleteSupabaseExpedition(id: string): Promise<boolean> {
 async function seedSupabase(expeditions: ExpeditionData[]): Promise<boolean> {
   try {
     const { supabase } = await import("../utils/supabase/client");
-    const rows = expeditions.map((exp) => ({ id: exp.id, data: exp }));
+    const rows = expeditions.map((exp) => ({ id: exp.id, data: sanitizeExpeditionForStorage(exp) }));
     const { error } = await supabase.from(SUPABASE_TABLE).upsert(rows, { onConflict: "id" });
     if (error) throw error;
     return true;
@@ -626,7 +655,7 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
     const previousExp = previousIndex >= 0 ? expeditions[previousIndex] : undefined;
 
     setExpeditions(prev => prev.filter(exp => exp.id !== id));
-    const success = await deleteSupabaseExpedition(id);
+    const success = previousExp ? await deleteSupabaseExpedition(previousExp) : true;
 
     if (!success && previousExp) {
       setExpeditions(prev => {
