@@ -264,6 +264,13 @@ export function GTSLoginPage({ onNavigate }: GTSLoginPageProps) {
                     </div>
                   )}
 
+                  {selectedRole === "employee" && (
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded text-amber-300 text-sm">
+                      <p className="mb-1">Для входа сотрудника теперь нужен реальный аккаунт в общей базе.</p>
+                      <p>Используйте email сотрудника и настоящий пароль из Supabase Auth.</p>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between text-sm">
                     <label className="flex items-center text-white/70 cursor-pointer">
                       <input type="checkbox" className="mr-2" />

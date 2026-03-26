@@ -26,6 +26,86 @@ const GTSAuthContext = createContext<GTSAuthContextType | undefined>(undefined);
 const GTS_AUTH_STORAGE_KEY = "gts-auth-user";
 const GTS_DEMO_SESSION_KEY = "gts-demo-session";
 const GTS_AUTH_CHANGE_EVENT = "gts-auth-change";
+const MANAGEMENT_EMAIL_ROLE_MAP: Record<string, Extract<UserRole, "staff" | "executive">> = {
+  "staff@gts.ru": "staff",
+  "executive@gts.com": "executive",
+  "admin@gts.com": "executive",
+};
+
+interface SupabaseAuthUserLike {
+  id: string;
+  email?: string;
+  created_at?: string;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+}
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+function isManagementRole(role?: UserRole | null): role is Extract<UserRole, "staff" | "executive"> {
+  return role === "staff" || role === "executive";
+}
+
+function readStoredAuthUser(): GTSUser | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const raw = localStorage.getItem(GTS_AUTH_STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw) as GTSUser;
+  } catch {
+    return null;
+  }
+}
+
+function resolveManagementRole(authUser: SupabaseAuthUserLike): Extract<UserRole, "staff" | "executive"> | null {
+  const emailRole = authUser.email ? MANAGEMENT_EMAIL_ROLE_MAP[normalizeEmail(authUser.email)] : undefined;
+  const metadataRoleCandidates = [
+    authUser.app_metadata?.role,
+    authUser.user_metadata?.role,
+  ];
+
+  for (const candidate of metadataRoleCandidates) {
+    if (candidate === "staff") return "staff";
+    if (candidate === "executive" || candidate === "admin") return "executive";
+  }
+
+  return emailRole ?? null;
+}
+
+function mapSupabaseUserToGTSUser(authUser: SupabaseAuthUserLike): GTSUser | null {
+  const email = authUser.email ? normalizeEmail(authUser.email) : "";
+  const role = resolveManagementRole(authUser);
+
+  if (!email || !role) {
+    return null;
+  }
+
+  const fallbackUser = mockUsers[email];
+  const metadata = authUser.user_metadata ?? {};
+  const metadataName =
+    (typeof metadata.full_name === "string" && metadata.full_name) ||
+    (typeof metadata.name === "string" && metadata.name) ||
+    fallbackUser?.name ||
+    email.split("@")[0];
+
+  return {
+    id: authUser.id,
+    name: metadataName,
+    email,
+    role,
+    avatar: fallbackUser?.avatar,
+    permissions: fallbackUser?.permissions ?? (role === "executive" ? ["all"] : ["manage-bookings", "view-reports"]),
+    joinedDate: fallbackUser?.joinedDate ?? authUser.created_at?.slice(0, 10),
+  };
+}
 
 function createLegacyDemoSession(user: GTSUser) {
   const role = user.role;
@@ -135,29 +215,125 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<GTSUser | null>(null);
 
   useEffect(() => {
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+
     if (typeof window === "undefined") {
-      return;
+      return undefined;
     }
 
-    const storedUser = localStorage.getItem(GTS_AUTH_STORAGE_KEY);
-    if (!storedUser) {
-      return;
-    }
+    const restoreSession = async () => {
+      const storedUser = readStoredAuthUser();
 
-    try {
-      setUser(JSON.parse(storedUser) as GTSUser);
-    } catch (error) {
-      console.error("Failed to restore GTS user session:", error);
-      persistAuthUser(null);
-    }
+      try {
+        const { supabase } = await import("../utils/supabase/client");
+        const { data } = await supabase.auth.getSession();
+        const managedUser = data.session?.user
+          ? mapSupabaseUserToGTSUser(data.session.user as SupabaseAuthUserLike)
+          : null;
+
+        if (!active) {
+          return;
+        }
+
+        if (managedUser) {
+          setUser(managedUser);
+          persistAuthUser(managedUser);
+        } else if (storedUser && !isManagementRole(storedUser.role)) {
+          setUser(storedUser);
+        } else {
+          setUser(null);
+          if (storedUser && isManagementRole(storedUser.role)) {
+            persistAuthUser(null);
+          }
+        }
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+          const nextManagedUser = session?.user
+            ? mapSupabaseUserToGTSUser(session.user as SupabaseAuthUserLike)
+            : null;
+
+          if (nextManagedUser) {
+            setUser(nextManagedUser);
+            persistAuthUser(nextManagedUser);
+            return;
+          }
+
+          const currentStoredUser = readStoredAuthUser();
+          if (currentStoredUser && isManagementRole(currentStoredUser.role)) {
+            setUser((currentUser) => (currentUser && isManagementRole(currentUser.role) ? null : currentUser));
+            persistAuthUser(null);
+          }
+        });
+
+        unsubscribe = () => authListener.subscription.unsubscribe();
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+
+        console.error("Failed to restore GTS auth session:", error);
+
+        if (storedUser && !isManagementRole(storedUser.role)) {
+          setUser(storedUser);
+        } else {
+          setUser(null);
+          if (storedUser && isManagementRole(storedUser.role)) {
+            persistAuthUser(null);
+          }
+        }
+      }
+    };
+
+    restoreSession();
+
+    return () => {
+      active = false;
+      unsubscribe?.();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Mock login - в реальности здесь будет API call
+    const normalizedEmail = normalizeEmail(email);
+    const foundUser = mockUsers[normalizedEmail];
+    const shouldUseSupabase = isManagementRole(foundUser?.role) || !foundUser;
+
+    if (shouldUseSupabase) {
+      const { supabase } = await import("../utils/supabase/client");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
+
+      if (!error && data.user) {
+        const managedUser = mapSupabaseUserToGTSUser(data.user as SupabaseAuthUserLike);
+
+        if (!managedUser) {
+          await supabase.auth.signOut();
+          throw new Error("У пользователя нет прав доступа к административной панели");
+        }
+
+        setUser(managedUser);
+        persistAuthUser(managedUser);
+        return managedUser;
+      }
+
+      if (isManagementRole(foundUser?.role) || !foundUser) {
+        throw new Error("Invalid credentials");
+      }
+    }
+
+    // Mock login - для публичных демо-ролей
     await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const foundUser = mockUsers[email];
+
     if (foundUser) {
+      try {
+        const { supabase } = await import("../utils/supabase/client");
+        await supabase.auth.signOut();
+      } catch {
+        // no-op: demo users do not depend on Supabase auth
+      }
+
       setUser(foundUser);
       persistAuthUser(foundUser);
       return foundUser;
@@ -167,6 +343,9 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    import("../utils/supabase/client")
+      .then(({ supabase }) => supabase.auth.signOut())
+      .catch(() => undefined);
     setUser(null);
     persistAuthUser(null);
   };
