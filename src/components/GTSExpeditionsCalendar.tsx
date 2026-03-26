@@ -21,8 +21,7 @@ const MAP_WIDTH = CYCLE_WIDTH * 3;
 const MAP_HEIGHT = 540;
 const TIMELINE_PADDING = 120;
 const TIMELINE_COPIES = [0, 1, 2] as const;
-const SERPENTINE_TOP = { min: 120, max: 200 };
-const SERPENTINE_BOTTOM = { min: 380, max: 460 };
+const ROUTE_PROFILE = [300, 285, 300, 345, 405, 220, 390, 230, 375, 245, 290, 300] as const;
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -63,6 +62,7 @@ interface Expedition {
   centerX: number;
   centerY: number;
   labelAbove: boolean;
+  labelOffsetX: number;
   sortKey: number;
 }
 
@@ -560,6 +560,49 @@ function buildSmoothPath(pts: { x: number; y: number }[]): string {
   return d;
 }
 
+function smoothStep(value: number): number {
+  const t = Math.max(0, Math.min(1, value));
+  return t * t * (3 - 2 * t);
+}
+
+function getRouteBounds(cycleStartX: number) {
+  const inset = TIMELINE_PADDING * 0.45;
+  return {
+    startX: cycleStartX + inset,
+    endX: cycleStartX + CYCLE_WIDTH - inset,
+  };
+}
+
+function getRouteGuidePoints(cycleStartX: number): { x: number; y: number }[] {
+  const { startX, endX } = getRouteBounds(cycleStartX);
+  const usableWidth = endX - startX;
+  const points = ROUTE_PROFILE.map((y, index) => ({
+    x: startX + (usableWidth * index) / (ROUTE_PROFILE.length - 1),
+    y,
+  }));
+
+  return [
+    { x: cycleStartX + 6, y: ROUTE_PROFILE[0] },
+    { x: startX - 90, y: ROUTE_PROFILE[0] },
+    ...points,
+    { x: endX + 90, y: ROUTE_PROFILE[ROUTE_PROFILE.length - 1] },
+    { x: cycleStartX + CYCLE_WIDTH - 6, y: ROUTE_PROFILE[ROUTE_PROFILE.length - 1] },
+  ];
+}
+
+function getRouteYForX(x: number, cycleStartX: number): number {
+  const { startX, endX } = getRouteBounds(cycleStartX);
+  const clampedX = Math.max(startX, Math.min(endX, x));
+  const rawPosition = ((clampedX - startX) / (endX - startX)) * (ROUTE_PROFILE.length - 1);
+  const leftIndex = Math.floor(rawPosition);
+  const rightIndex = Math.min(ROUTE_PROFILE.length - 1, leftIndex + 1);
+  const mix = smoothStep(rawPosition - leftIndex);
+  const leftY = ROUTE_PROFILE[leftIndex];
+  const rightY = ROUTE_PROFILE[rightIndex];
+
+  return leftY + (rightY - leftY) * mix;
+}
+
 // ROUTE_PATH is now computed inside the component using context data
 
 /* ─── Difficulty colors ─── */
@@ -772,32 +815,49 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         centerX: 0,
         centerY: 0,
         labelAbove: true,
+        labelOffsetX: 0,
         sortKey: start.getMonth() * 100 + start.getDate(),
       };
     });
 
     const sorted = mapped.sort((a, b) => a.sortKey - b.sortKey || a.title.localeCompare(b.title, "ru"));
-    const usableWidth = CYCLE_WIDTH - TIMELINE_PADDING * 2;
-    const MIN_TRACK_STEP = 80;
-    let previousX = CYCLE_WIDTH + TIMELINE_PADDING - MIN_TRACK_STEP;
+    const { startX, endX } = getRouteBounds(CYCLE_WIDTH);
+    const usableWidth = endX - startX;
+    const groupedByDay = new Map<string, Expedition[]>();
 
-    return sorted.map((exp, index) => {
-      const desiredX = CYCLE_WIDTH + TIMELINE_PADDING + exp.startProgress * usableWidth;
-      const centerX = Math.max(desiredX, previousX + MIN_TRACK_STEP);
-      previousX = centerX;
+    sorted.forEach((exp) => {
+      const group = groupedByDay.get(exp.startDate) ?? [];
+      group.push(exp);
+      groupedByDay.set(exp.startDate, group);
+    });
 
-      // Serpentine: alternate top ↔ bottom zones for winding S-curve track
-      const isBottom = index % 2 !== 0;
-      const zone = isBottom ? SERPENTINE_BOTTOM : SERPENTINE_TOP;
-      const spread = zone.max - zone.min;
-      const variation = (index * 37 + 13) % (spread + 1);
-      const centerY = zone.min + variation;
+    const seenPerDay = new Map<string, number>();
+
+    return sorted.map((exp) => {
+      const sameDayGroup = groupedByDay.get(exp.startDate) ?? [exp];
+      const siblingIndex = seenPerDay.get(exp.startDate) ?? 0;
+      seenPerDay.set(exp.startDate, siblingIndex + 1);
+
+      const laneOffsetX = sameDayGroup.length > 1
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * 30
+        : 0;
+      const desiredX = startX + exp.startProgress * usableWidth;
+      const centerX = Math.max(startX, Math.min(endX, desiredX + laneOffsetX));
+      const centerY = getRouteYForX(centerX, CYCLE_WIDTH);
+      const baseLabelAbove = centerY > MAP_HEIGHT * 0.54;
+      const labelAbove = sameDayGroup.length > 1 && siblingIndex % 2 === 1
+        ? !baseLabelAbove
+        : baseLabelAbove;
+      const labelOffsetX = sameDayGroup.length > 1
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * 18
+        : 0;
 
       return {
         ...exp,
         centerX,
         centerY,
-        labelAbove: isBottom,
+        labelAbove,
+        labelOffsetX,
       };
     });
   }, [ctxExpeditions]);
@@ -858,18 +918,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
   /* ── Compute ROUTE_PATH from expedition coordinates ── */
   const ROUTE_PATH = useMemo(() => {
-    if (!expeditions.length) return "";
-
-    const first = expeditions[0];
-    const last = expeditions[expeditions.length - 1];
-    const routePoints = [
-      { x: CYCLE_WIDTH, y: first.centerY },
-      ...expeditions.map((e) => ({ x: e.centerX, y: e.centerY })),
-      { x: CYCLE_WIDTH * 2, y: last.centerY },
-    ];
-
-    return buildSmoothPath(routePoints);
-  }, [expeditions]);
+    return buildSmoothPath(getRouteGuidePoints(CYCLE_WIDTH));
+  }, []);
 
   useEffect(() => {
     const updateTimelineView = () => {
@@ -901,10 +951,10 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     const lPts: string[] = [];
     const rPts: string[] = [];
 
-    const BLOCK_SPACING = 20;
-    const BLOCK_OFFSET = 9;
-    const CHEVRON = 15;
-    const WALL_OFFSET = 14;
+    const BLOCK_SPACING = 24;
+    const BLOCK_OFFSET = 8;
+    const CHEVRON = 14;
+    const WALL_OFFSET = 15;
 
     for (let d = 0; d < totalLen; d += BLOCK_SPACING) {
       const p = path.getPointAtLength(d);
@@ -1178,18 +1228,19 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               <path ref={pathRef} d={ROUTE_PATH} fill="none" stroke="none" />
               {TIMELINE_COPIES.map((copy) => (
                 <g key={copy} transform={`translate(${(copy - 1) * CYCLE_WIDTH}, 0)`}>
-                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="32" strokeLinecap="round" />
-                  {leftWall && <path d={leftWall} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeLinecap="round" />}
-                  {rightWall && <path d={rightWall} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" strokeLinecap="round" />}
+                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.028)" strokeWidth="38" strokeLinecap="round" />
+                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="28" strokeLinecap="round" />
+                  {leftWall && <path d={leftWall} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.4" strokeLinecap="round" />}
+                  {rightWall && <path d={rightWall} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.4" strokeLinecap="round" />}
                   {treadBlocks.map((b, i) => (
                     <rect
                       key={i}
-                      x={-5} y={-2.5} width={10} height={5} rx={1}
-                      fill="rgba(255,255,255,0.28)"
+                      x={-4.5} y={-2} width={9} height={4} rx={1}
+                      fill="rgba(255,255,255,0.24)"
                       transform={`translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${b.angle.toFixed(1)})`}
                     />
                   ))}
-                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="4,6" />
+                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.045)" strokeWidth="1" strokeDasharray="5,7" />
                 </g>
               ))}
             </svg>
@@ -1244,7 +1295,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                       <div
                         className="absolute cursor-pointer"
                         style={{
-                          left: "50%",
+                          left: `calc(50% + ${exp.labelOffsetX}px)`,
                           transform: "translateX(-50%)",
                           ...(exp.labelAbove ? { bottom: "calc(100% + 10px)" } : { top: "calc(100% + 10px)" }),
                           textAlign: "center",
@@ -1257,10 +1308,10 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                         <div
                           style={{
                             color: "#91040C",
-                            fontSize: isCompactView ? 11 : 13,
-                            letterSpacing: isCompactView ? "0.04em" : "0.06em",
-                            marginBottom: 3,
-                            opacity: isSelected ? 1 : 0.85,
+                            fontSize: isCompactView ? 11 : 12,
+                            letterSpacing: isCompactView ? "0.05em" : "0.08em",
+                            marginBottom: 4,
+                            opacity: isSelected ? 1 : 0.78,
                             fontWeight: 500,
                           }}
                         >
@@ -1270,7 +1321,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                           style={{
                             color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
                             fontSize: isCompactView ? (isSelected ? 13 : 11) : isCondensedView ? (isSelected ? 15 : 12) : isSelected ? 18 : 16,
-                            letterSpacing: isCompactView ? "0.06em" : isCondensedView ? "0.08em" : "0.1em",
+                            letterSpacing: isCompactView ? "0.04em" : isCondensedView ? "0.06em" : "0.08em",
                             fontWeight: 700,
                             transition: "all 0.2s ease",
                             textShadow: isSelected ? "0 0 20px rgba(145,4,12,0.5)" : "none",
