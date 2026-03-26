@@ -18,10 +18,11 @@ import { useExpeditions } from "../contexts/GTSExpeditionsContext";
 const MONTH_TRACK_WIDTH = 220;
 const CYCLE_WIDTH = MONTH_TRACK_WIDTH * 12;
 const MAP_WIDTH = CYCLE_WIDTH * 3;
-const MAP_HEIGHT = 540;
 const TIMELINE_PADDING = 120;
 const TIMELINE_COPIES = [0, 1, 2] as const;
-const ROUTE_PROFILE = [300, 285, 300, 345, 405, 220, 390, 230, 375, 245, 290, 300] as const;
+const ROUTE_PROFILE_FULL = [286, 270, 290, 336, 388, 202, 378, 212, 366, 220, 274, 286] as const;
+const ROUTE_PROFILE_CONDENSED = [276, 264, 280, 320, 362, 206, 350, 214, 340, 222, 270, 280] as const;
+const ROUTE_PROFILE_COMPACT = [232, 224, 236, 270, 308, 168, 298, 176, 288, 184, 228, 236] as const;
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -573,32 +574,32 @@ function getRouteBounds(cycleStartX: number) {
   };
 }
 
-function getRouteGuidePoints(cycleStartX: number): { x: number; y: number }[] {
+function getRouteGuidePoints(cycleStartX: number, profile: readonly number[]): { x: number; y: number }[] {
   const { startX, endX } = getRouteBounds(cycleStartX);
   const usableWidth = endX - startX;
-  const points = ROUTE_PROFILE.map((y, index) => ({
-    x: startX + (usableWidth * index) / (ROUTE_PROFILE.length - 1),
+  const points = profile.map((y, index) => ({
+    x: startX + (usableWidth * index) / (profile.length - 1),
     y,
   }));
 
   return [
-    { x: cycleStartX + 6, y: ROUTE_PROFILE[0] },
-    { x: startX - 90, y: ROUTE_PROFILE[0] },
+    { x: cycleStartX + 6, y: profile[0] },
+    { x: startX - 90, y: profile[0] },
     ...points,
-    { x: endX + 90, y: ROUTE_PROFILE[ROUTE_PROFILE.length - 1] },
-    { x: cycleStartX + CYCLE_WIDTH - 6, y: ROUTE_PROFILE[ROUTE_PROFILE.length - 1] },
+    { x: endX + 90, y: profile[profile.length - 1] },
+    { x: cycleStartX + CYCLE_WIDTH - 6, y: profile[profile.length - 1] },
   ];
 }
 
-function getRouteYForX(x: number, cycleStartX: number): number {
+function getRouteYForX(x: number, cycleStartX: number, profile: readonly number[]): number {
   const { startX, endX } = getRouteBounds(cycleStartX);
   const clampedX = Math.max(startX, Math.min(endX, x));
-  const rawPosition = ((clampedX - startX) / (endX - startX)) * (ROUTE_PROFILE.length - 1);
+  const rawPosition = ((clampedX - startX) / (endX - startX)) * (profile.length - 1);
   const leftIndex = Math.floor(rawPosition);
-  const rightIndex = Math.min(ROUTE_PROFILE.length - 1, leftIndex + 1);
+  const rightIndex = Math.min(profile.length - 1, leftIndex + 1);
   const mix = smoothStep(rawPosition - leftIndex);
-  const leftY = ROUTE_PROFILE[leftIndex];
-  const rightY = ROUTE_PROFILE[rightIndex];
+  const leftY = profile[leftIndex];
+  const rightY = profile[rightIndex];
 
   return leftY + (rightY - leftY) * mix;
 }
@@ -779,6 +780,13 @@ interface GTSExpeditionsCalendarProps {
 export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarProps = {}) {
   const { expeditions: ctxExpeditions } = useExpeditions();
   const [timelineView, setTimelineView] = useState<"full" | "condensed" | "compact">("full");
+  const mapHeight = timelineView === "compact" ? 420 : timelineView === "condensed" ? 500 : 540;
+  const routeProfile = timelineView === "compact"
+    ? ROUTE_PROFILE_COMPACT
+    : timelineView === "condensed"
+      ? ROUTE_PROFILE_CONDENSED
+      : ROUTE_PROFILE_FULL;
+  const monthInset = timelineView === "compact" ? 32 : timelineView === "condensed" ? 38 : 44;
   const expeditions: Expedition[] = useMemo(() => {
     const mapped = ctxExpeditions.map((e) => {
       const { start, end } = inferExpeditionDates({
@@ -822,34 +830,55 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
     const sorted = mapped.sort((a, b) => a.sortKey - b.sortKey || a.title.localeCompare(b.title, "ru"));
     const { startX, endX } = getRouteBounds(CYCLE_WIDTH);
-    const usableWidth = endX - startX;
     const groupedByDay = new Map<string, Expedition[]>();
+    const groupedByMonth = new Map<number, Expedition[]>();
 
     sorted.forEach((exp) => {
       const group = groupedByDay.get(exp.startDate) ?? [];
       group.push(exp);
       groupedByDay.set(exp.startDate, group);
+
+      const monthIndex = parseIsoDate(exp.startDate)?.getMonth() ?? 0;
+      const monthGroup = groupedByMonth.get(monthIndex) ?? [];
+      monthGroup.push(exp);
+      groupedByMonth.set(monthIndex, monthGroup);
     });
 
     const seenPerDay = new Map<string, number>();
+    const seenPerMonth = new Map<number, number>();
 
     return sorted.map((exp) => {
       const sameDayGroup = groupedByDay.get(exp.startDate) ?? [exp];
       const siblingIndex = seenPerDay.get(exp.startDate) ?? 0;
       seenPerDay.set(exp.startDate, siblingIndex + 1);
 
+      const startDate = parseIsoDate(exp.startDate) ?? new Date();
+      const monthIndex = startDate.getMonth();
+      const monthGroup = groupedByMonth.get(monthIndex) ?? [exp];
+      const monthOrderIndex = seenPerMonth.get(monthIndex) ?? 0;
+      seenPerMonth.set(monthIndex, monthOrderIndex + 1);
+
+      const daysInMonth = new Date(startDate.getFullYear(), monthIndex + 1, 0).getDate();
+      const dayRatio = daysInMonth > 1 ? (startDate.getDate() - 1) / (daysInMonth - 1) : 0.5;
+      const spreadRatio = monthGroup.length > 1 ? monthOrderIndex / (monthGroup.length - 1) : 0.5;
+      const monthStartX = startX + monthIndex * MONTH_TRACK_WIDTH;
+      const monthUsableWidth = MONTH_TRACK_WIDTH - monthInset * 2;
+      const withinMonthRatio = monthGroup.length > 1
+        ? dayRatio * 0.38 + spreadRatio * 0.62
+        : dayRatio * 0.45 + 0.275;
+
       const laneOffsetX = sameDayGroup.length > 1
-        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * 30
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 18 : 24)
         : 0;
-      const desiredX = startX + exp.startProgress * usableWidth;
+      const desiredX = monthStartX + monthInset + withinMonthRatio * monthUsableWidth;
       const centerX = Math.max(startX, Math.min(endX, desiredX + laneOffsetX));
-      const centerY = getRouteYForX(centerX, CYCLE_WIDTH);
-      const baseLabelAbove = centerY > MAP_HEIGHT * 0.54;
+      const centerY = getRouteYForX(centerX, CYCLE_WIDTH, routeProfile);
+      const baseLabelAbove = centerY > mapHeight * 0.54;
       const labelAbove = sameDayGroup.length > 1 && siblingIndex % 2 === 1
         ? !baseLabelAbove
         : baseLabelAbove;
       const labelOffsetX = sameDayGroup.length > 1
-        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * 18
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 12 : 16)
         : 0;
 
       return {
@@ -860,7 +889,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         labelOffsetX,
       };
     });
-  }, [ctxExpeditions]);
+  }, [ctxExpeditions, mapHeight, monthInset, routeProfile, timelineView]);
 
   const renderedExpeditions = useMemo(
     () =>
@@ -901,6 +930,20 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const hasMultipleExpeditions = expeditions.length > 1;
   const isCompactView = timelineView === "compact";
   const isCondensedView = timelineView !== "full";
+  const visibleDecorations = useMemo(() => {
+    if (isCompactView) {
+      return DECORATIONS.filter((dec) => ["mountains1", "papakha", "tower", "eagle"].includes(dec.id));
+    }
+
+    if (isCondensedView) {
+      return DECORATIONS.filter((dec) => !["tire", "kinzhal"].includes(dec.id));
+    }
+
+    return DECORATIONS;
+  }, [isCompactView, isCondensedView]);
+  const decorationScale = isCompactView ? 0.72 : isCondensedView ? 0.88 : 1;
+  const arrowSize = isCompactView ? 42 : 48;
+  const fadeWidth = isCompactView ? 12 : 20;
 
   useEffect(() => {
     if (!expeditions.length) {
@@ -918,8 +961,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
   /* ── Compute ROUTE_PATH from expedition coordinates ── */
   const ROUTE_PATH = useMemo(() => {
-    return buildSmoothPath(getRouteGuidePoints(CYCLE_WIDTH));
-  }, []);
+    return buildSmoothPath(getRouteGuidePoints(CYCLE_WIDTH, routeProfile));
+  }, [routeProfile]);
 
   useEffect(() => {
     const updateTimelineView = () => {
@@ -1162,9 +1205,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       <div className="relative">
         {/* Navigation arrow — LEFT */}
         <motion.button
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
+          className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
           style={{
-            width: 48, height: 48,
+            width: arrowSize, height: arrowSize,
             background: "rgba(145,4,12,0.6)",
             border: "1px solid rgba(145,4,12,0.8)",
             opacity: hasMultipleExpeditions ? 1 : 0.3,
@@ -1180,9 +1223,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
         {/* Navigation arrow — RIGHT */}
         <motion.button
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
+          className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
           style={{
-            width: 48, height: 48,
+            width: arrowSize, height: arrowSize,
             background: "rgba(145,4,12,0.6)",
             border: "1px solid rgba(145,4,12,0.8)",
             opacity: hasMultipleExpeditions ? 1 : 0.3,
@@ -1197,18 +1240,18 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         </motion.button>
 
         {/* Gradient fades */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black to-transparent z-30 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black to-transparent z-30 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-black to-transparent z-30 pointer-events-none" style={{ width: `${fadeWidth}rem` }} />
+        <div className="absolute right-0 top-0 bottom-0 bg-gradient-to-l from-black to-transparent z-30 pointer-events-none" style={{ width: `${fadeWidth}rem` }} />
 
         {/* Scrollable container */}
         <div
           ref={scrollRef}
           className="tire-scroll overflow-x-auto"
-          style={{ cursor: "grab", height: MAP_HEIGHT }}
+          style={{ cursor: "grab", height: mapHeight }}
         >
           <div
             className="relative select-none"
-            style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}
+            style={{ width: MAP_WIDTH, height: mapHeight }}
             >
               {renderedMonths.map(({ key, label, x }) => (
                 <div
@@ -1221,7 +1264,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             {/* ── SVG: Tire tread track ── */}
             <svg
               width={MAP_WIDTH}
-              height={MAP_HEIGHT}
+              height={mapHeight}
               className="absolute inset-0"
               style={{ zIndex: 1 }}
             >
@@ -1257,12 +1300,12 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                   style={{
                     writingMode: "vertical-rl",
                     transform: "rotate(180deg)",
-                    fontSize: isCompactView ? 13 : isCondensedView ? 15 : 18,
+                    fontSize: isCompactView ? 12 : isCondensedView ? 15 : 18,
                     fontWeight: 500,
-                    letterSpacing: isCompactView ? "0.24em" : isCondensedView ? "0.34em" : "0.5em",
+                    letterSpacing: isCompactView ? "0.18em" : isCondensedView ? "0.34em" : "0.5em",
                   }}
                 >
-                  {label}
+                  {isCompactView ? label.slice(0, 3) : label}
                 </span>
               </div>
             ))}
@@ -1360,8 +1403,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                       />
                     )}
                     <MapPin style={{
-                      width: isCompactView ? (isSelected ? 28 : isHovered ? 24 : 20) : isSelected ? 34 : isHovered ? 28 : 24,
-                      height: isCompactView ? (isSelected ? 28 : isHovered ? 24 : 20) : isSelected ? 34 : isHovered ? 28 : 24,
+                      width: isCompactView ? (isSelected ? 24 : isHovered ? 21 : 18) : isSelected ? 34 : isHovered ? 28 : 24,
+                      height: isCompactView ? (isSelected ? 24 : isHovered ? 21 : 18) : isSelected ? 34 : isHovered ? 28 : 24,
                       color: pinColor, fill: pinFill, transition: "all 0.2s ease",
                       filter: isSelected ? "drop-shadow(0 0 10px rgba(145,4,12,0.85))" : exp.isFeatured ? "drop-shadow(0 0 6px rgba(145,4,12,0.5))" : "none",
                     }} />
@@ -1371,15 +1414,17 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             })}
 
             {/* ── Decorative illustrations ── */}
-            {DECORATIONS.map((dec) => (
+            {visibleDecorations.map((dec) => (
               <svg
                 key={dec.id}
                 className="absolute pointer-events-none"
                 style={{
-                  left: dec.x + CYCLE_WIDTH, top: dec.y,
-                  width: dec.width, height: dec.height,
+                  left: dec.x + CYCLE_WIDTH,
+                  top: dec.y * decorationScale + (isCompactView ? 10 : isCondensedView ? 6 : 0),
+                  width: dec.width * decorationScale,
+                  height: dec.height * decorationScale,
                   transform: dec.rotate ? `rotate(${dec.rotate}deg)` : "none",
-                  opacity: dec.opacity,
+                  opacity: dec.opacity * (isCompactView ? 0.7 : isCondensedView ? 0.85 : 1),
                   zIndex: 2,
                 }}
                 viewBox={dec.viewBox}
