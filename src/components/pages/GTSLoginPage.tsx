@@ -104,7 +104,7 @@ export function GTSLoginPage({ onNavigate }: GTSLoginPageProps) {
       const user = await login(credentials.email, credentials.password);
       onNavigate(getRouteForUserRole(user.role));
     } catch (err) {
-      setError("Неверный email или пароль");
+      setError(err instanceof Error ? err.message : "Не удалось войти. Повторите попытку.");
     } finally {
       setIsLoading(false);
     }

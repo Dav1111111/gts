@@ -80,6 +80,32 @@ function resolveManagementRole(authUser: SupabaseAuthUserLike): Extract<UserRole
   return emailRole ?? null;
 }
 
+function formatManagementLoginErrorMessage(message?: string | null) {
+  const normalized = message?.trim().toLowerCase() ?? "";
+
+  if (!normalized) {
+    return "Не удалось войти в административную панель. Проверьте email и пароль.";
+  }
+
+  if (normalized.includes("invalid login credentials")) {
+    return "Неверный email или пароль.";
+  }
+
+  if (normalized.includes("email not confirmed")) {
+    return "Email администратора ещё не подтвержден в Supabase Auth.";
+  }
+
+  if (normalized.includes("invalid api key") || normalized.includes("publishable") || normalized.includes("jwt")) {
+    return "Ошибка подключения к Supabase. Проверьте URL проекта и publishable key.";
+  }
+
+  if (normalized.includes("fetch") || normalized.includes("network") || normalized.includes("timed out")) {
+    return "Не удалось связаться с сервером авторизации. Проверьте подключение и настройки Supabase.";
+  }
+
+  return message!.trim();
+}
+
 function mapSupabaseUserToGTSUser(authUser: SupabaseAuthUserLike): GTSUser | null {
   const email = authUser.email ? normalizeEmail(authUser.email) : "";
   const role = resolveManagementRole(authUser);
@@ -319,7 +345,7 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (isManagementRole(foundUser?.role) || !foundUser) {
-        throw new Error("Invalid credentials");
+        throw new Error(formatManagementLoginErrorMessage(error?.message));
       }
     }
 
