@@ -133,6 +133,24 @@ function mapSupabaseUserToGTSUser(authUser: SupabaseAuthUserLike): GTSUser | nul
   };
 }
 
+function buildManagementFallbackUser(
+  email: string,
+  authUser: SupabaseAuthUserLike,
+): GTSUser | null {
+  const fallbackUser = mockUsers[email];
+
+  if (!fallbackUser || !isManagementRole(fallbackUser.role)) {
+    return null;
+  }
+
+  return {
+    ...fallbackUser,
+    id: authUser.id,
+    email,
+    joinedDate: fallbackUser.joinedDate ?? authUser.created_at?.slice(0, 10),
+  };
+}
+
 function createLegacyDemoSession(user: GTSUser) {
   const role = user.role;
   const now = new Date().toISOString();
@@ -332,7 +350,10 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!error && data.user) {
-        const managedUser = mapSupabaseUserToGTSUser(data.user as SupabaseAuthUserLike);
+        const authUser = data.user as SupabaseAuthUserLike;
+        const managedUser =
+          mapSupabaseUserToGTSUser(authUser) ??
+          buildManagementFallbackUser(normalizedEmail, authUser);
 
         if (!managedUser) {
           await supabase.auth.signOut();
