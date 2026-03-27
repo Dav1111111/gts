@@ -797,7 +797,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     : timelineView === "condensed"
       ? MONTH_HEADER_TOPS_CONDENSED
       : MONTH_HEADER_TOPS_FULL;
-  const monthInset = timelineView === "compact" ? 34 : timelineView === "condensed" ? 40 : 48;
+  const monthInset = timelineView === "compact" ? 20 : timelineView === "condensed" ? 24 : 28;
   const expeditions: Expedition[] = useMemo(() => {
     const mapped = ctxExpeditions.map((e) => {
       const { start, end } = inferExpeditionDates({
@@ -875,11 +875,11 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       const monthStartX = startX + monthIndex * MONTH_TRACK_WIDTH;
       const monthUsableWidth = MONTH_TRACK_WIDTH - monthInset * 2;
       const withinMonthRatio = monthGroup.length > 1
-        ? dayRatio * 0.38 + spreadRatio * 0.62
-        : dayRatio * 0.45 + 0.275;
+        ? dayRatio * 0.16 + spreadRatio * 0.84
+        : dayRatio * 0.28 + 0.36;
 
       const laneOffsetX = sameDayGroup.length > 1
-        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 18 : 24)
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 22 : 30)
         : 0;
       const desiredX = monthStartX + monthInset + withinMonthRatio * monthUsableWidth;
       const centerX = Math.max(startX, Math.min(endX, desiredX + laneOffsetX));
@@ -889,7 +889,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         ? !baseLabelAbove
         : baseLabelAbove;
       const labelOffsetX = sameDayGroup.length > 1
-        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 12 : 16)
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 16 : 22)
         : 0;
 
       return {
@@ -1075,16 +1075,25 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       }
     };
 
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) < 0.5 && Math.abs(e.deltaY) < 0.5) return;
+      e.preventDefault();
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      el.scrollLeft += delta;
+    };
+
     el.addEventListener("mousedown", onDown);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     el.addEventListener("scroll", onScroll);
+    el.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
       el.removeEventListener("mousedown", onDown);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
       el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("wheel", onWheel);
     };
   }, []);
 
