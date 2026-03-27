@@ -30,6 +30,7 @@ const MANAGEMENT_EMAIL_ROLE_MAP: Record<string, Extract<UserRole, "staff" | "exe
   "staff@gts.ru": "staff",
   "executive@gts.com": "executive",
   "admin@gts.com": "executive",
+  "grandtourspirit@gmail.com": "executive",
 };
 
 interface SupabaseAuthUserLike {
@@ -151,6 +152,16 @@ function buildManagementFallbackUser(
   };
 }
 
+function resolveManagedUser(authUser: SupabaseAuthUserLike): GTSUser | null {
+  const email = authUser.email ? normalizeEmail(authUser.email) : "";
+
+  if (!email) {
+    return null;
+  }
+
+  return mapSupabaseUserToGTSUser(authUser) ?? buildManagementFallbackUser(email, authUser);
+}
+
 function createLegacyDemoSession(user: GTSUser) {
   const role = user.role;
   const now = new Date().toISOString();
@@ -252,6 +263,15 @@ const mockUsers: Record<string, GTSUser> = {
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
     permissions: ["all"],
     joinedDate: "2022-09-01"
+  },
+  "grandtourspirit@gmail.com": {
+    id: "admin-002",
+    name: "Администратор GTS",
+    email: "grandtourspirit@gmail.com",
+    role: "executive",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
+    permissions: ["all"],
+    joinedDate: "2022-09-01"
   }
 };
 
@@ -273,7 +293,7 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
         const { supabase } = await import("../utils/supabase/client");
         const { data } = await supabase.auth.getSession();
         const managedUser = data.session?.user
-          ? mapSupabaseUserToGTSUser(data.session.user as SupabaseAuthUserLike)
+          ? resolveManagedUser(data.session.user as SupabaseAuthUserLike)
           : null;
 
         if (!active) {
@@ -294,7 +314,7 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
 
         const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
           const nextManagedUser = session?.user
-            ? mapSupabaseUserToGTSUser(session.user as SupabaseAuthUserLike)
+            ? resolveManagedUser(session.user as SupabaseAuthUserLike)
             : null;
 
           if (nextManagedUser) {
@@ -351,9 +371,7 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
 
       if (!error && data.user) {
         const authUser = data.user as SupabaseAuthUserLike;
-        const managedUser =
-          mapSupabaseUserToGTSUser(authUser) ??
-          buildManagementFallbackUser(normalizedEmail, authUser);
+        const managedUser = resolveManagedUser(authUser);
 
         if (!managedUser) {
           await supabase.auth.signOut();
