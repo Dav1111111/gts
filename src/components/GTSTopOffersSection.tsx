@@ -210,7 +210,7 @@ export function GTSTopOffersSection() {
         >
           <Button 
             variant="outline"
-            className="border-white/20 text-white hover:bg-white/5 hover:border-white/40 px-8 py-6 text-base tracking-wider"
+            className="border-white/20 text-white hover:bg-white/5 hover:border-white/40 px-6 py-4 sm:px-8 sm:py-6 text-sm sm:text-base tracking-wider"
             onClick={() => window.location.hash = '/catalog'}
           >
             Смотреть все предложения

@@ -111,7 +111,7 @@ export function GTSAboutSection({ onNavigate }: GTSAboutSectionProps) {
             >
               <Card 
                 onClick={() => handleCardClick(category.link)}
-                className="relative border-0 bg-black shadow-xl hover:shadow-2xl transition-all duration-700 cursor-pointer overflow-hidden h-[480px] lg:h-[520px]"
+                className="relative border-0 bg-black shadow-xl hover:shadow-2xl transition-all duration-700 cursor-pointer overflow-hidden h-[380px] sm:h-[440px] lg:h-[520px]"
               >
                 {/* Background Image */}
                 <ImageWithFallback

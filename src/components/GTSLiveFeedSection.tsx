@@ -274,7 +274,7 @@ export function GTSLiveFeedSection() {
                 viewport={{ once: true, amount: 0.1 }}
               >
                 <Card className="bg-[#121214] border-[#17181A] hover:border-[#91040C]/30 transition-all duration-300 overflow-hidden">
-                  <div className="p-6 lg:p-8">
+                  <div className="p-4 sm:p-6 lg:p-8">
                     {/* Post Header */}
                     <div className="flex items-start justify-between mb-5">
                       <div className="flex items-start space-x-4">

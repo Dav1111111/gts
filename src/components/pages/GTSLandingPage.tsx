@@ -1,6 +1,7 @@
 // GTS Landing Page - All landing sections in one component
 
 import React, { Component, Suspense, lazy, type ReactNode } from "react";
+import { motion } from "motion/react";
 import { GTSNavigationHeader } from "../GTSNavigationHeader";
 import { GTSHeroSection } from "../GTSHeroSection";
 import { GTSFooter } from "../GTSFooter";
@@ -87,7 +88,16 @@ function LazyLandingSection({
 }) {
   return (
     <LandingSectionBoundary sectionName={sectionName}>
-      <Suspense fallback={<LandingSectionLoader />}>{children}</Suspense>
+      <Suspense fallback={<LandingSectionLoader />}>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.08 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          {children}
+        </motion.div>
+      </Suspense>
     </LandingSectionBoundary>
   );
 }

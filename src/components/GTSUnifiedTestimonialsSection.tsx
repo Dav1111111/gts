@@ -33,7 +33,7 @@ export function GTSUnifiedTestimonialsSection() {
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-light mb-4 tracking-wider text-black">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-light mb-4 tracking-wider text-black">
             ОТЗЫВЫ И ИСТОРИИ ГОСТЕЙ
           </h2>
           <p className="text-lg text-black/60 max-w-2xl mx-auto">
@@ -46,7 +46,7 @@ export function GTSUnifiedTestimonialsSection() {
           <div className="bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              className={`px-4 sm:px-6 py-2 text-sm sm:text-base rounded-md font-medium transition-colors ${
                 activeTab === 'reviews' 
                   ? 'bg-white shadow-sm text-black' 
                   : 'text-gray-600 hover:text-black'
@@ -56,7 +56,7 @@ export function GTSUnifiedTestimonialsSection() {
             </button>
             <button
               onClick={() => setActiveTab('stories')}
-              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              className={`px-4 sm:px-6 py-2 text-sm sm:text-base rounded-md font-medium transition-colors ${
                 activeTab === 'stories' 
                   ? 'bg-white shadow-sm text-black' 
                   : 'text-gray-600 hover:text-black'

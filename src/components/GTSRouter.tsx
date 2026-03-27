@@ -317,7 +317,28 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
         return <GTSContentAdmin onNavigate={navigate} />;
       
       default:
-        return <GTSLandingPage onNavigate={navigate} />;
+        return (
+          <div className="min-h-screen bg-[#0B0B0C] text-white flex flex-col items-center justify-center px-6">
+            <div className="text-center">
+              <div className="text-[120px] sm:text-[180px] font-bold leading-none tracking-tight" style={{ color: "#91040C" }}>
+                404
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-semibold mt-4 mb-3">Страница не найдена</h1>
+              <p className="text-white/50 mb-8 max-w-md mx-auto">
+                Похоже, эта дорога ведёт в никуда. Вернитесь на главную и выберите маршрут заново.
+              </p>
+              <button
+                onClick={() => navigate({ page: "landing" })}
+                className="px-8 py-3 text-white font-medium uppercase tracking-wider text-sm transition-colors"
+                style={{ background: "#91040C" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#6d0309")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#91040C")}
+              >
+                На главную
+              </button>
+            </div>
+          </div>
+        );
     }
   };
 
