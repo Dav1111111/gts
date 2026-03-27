@@ -937,6 +937,14 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const pathRef = useRef<SVGPathElement>(null);
   const infoCardRef = useRef<HTMLDivElement>(null);
   const initialScrollDoneRef = useRef(false);
+  const momentumRafRef = useRef(0);
+
+  const stopMomentum = useCallback(() => {
+    if (momentumRafRef.current) {
+      cancelAnimationFrame(momentumRafRef.current);
+      momentumRafRef.current = 0;
+    }
+  }, []);
   const selected = expeditions.find((e) => e.id === selectedId) || expeditions[0];
   const hasMultipleExpeditions = expeditions.length > 1;
   const isCompactView = timelineView === "compact";
@@ -1041,7 +1049,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     setRightWall(rPts.join(" "));
   }, [ROUTE_PATH]);
 
-  /* ── Drag-scroll with momentum ── */
+  /* ── Drag-scroll (no momentum — stops immediately on release) ── */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -1049,57 +1057,24 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     let isDrag = false;
     let startX = 0;
     let scrollStart = 0;
-    let lastX = 0;
-    let lastTime = 0;
-    let velocity = 0;
-    let momentumRaf = 0;
-
-    const stopMomentum = () => {
-      if (momentumRaf) {
-        cancelAnimationFrame(momentumRaf);
-        momentumRaf = 0;
-      }
-    };
-
-    const applyMomentum = () => {
-      if (Math.abs(velocity) < 0.5) {
-        velocity = 0;
-        return;
-      }
-      el.scrollLeft += velocity;
-      velocity *= 0.92;
-      momentumRaf = requestAnimationFrame(applyMomentum);
-    };
 
     const onDown = (e: MouseEvent) => {
       if ((e.target as HTMLElement).closest("button")) return;
       stopMomentum();
       isDrag = true;
       startX = e.pageX;
-      lastX = e.pageX;
-      lastTime = Date.now();
       scrollStart = el.scrollLeft;
-      velocity = 0;
       el.style.cursor = "grabbing";
     };
     const onMove = (e: MouseEvent) => {
       if (!isDrag) return;
       e.preventDefault();
-      const now = Date.now();
-      const dt = Math.max(1, now - lastTime);
-      const dx = e.pageX - lastX;
-      velocity = (-dx / dt) * 16;
-      lastX = e.pageX;
-      lastTime = now;
       el.scrollLeft = scrollStart - (e.pageX - startX);
     };
     const onUp = () => {
       if (!isDrag) return;
       isDrag = false;
       el.style.cursor = "grab";
-      if (Math.abs(velocity) > 1) {
-        momentumRaf = requestAnimationFrame(applyMomentum);
-      }
     };
 
     const onScroll = () => {
@@ -1132,15 +1107,16 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       el.removeEventListener("scroll", onScroll);
       el.removeEventListener("wheel", onWheel);
     };
-  }, []);
+  }, [stopMomentum]);
 
   /* ── Scroll to expedition ── */
   const scrollToExp = useCallback((exp: Expedition, behavior: ScrollBehavior = "smooth") => {
+    stopMomentum();
     const el = scrollRef.current;
     if (!el) return;
     const target = exp.centerX - el.clientWidth / 2;
     el.scrollTo({ left: Math.max(0, target), behavior });
-  }, []);
+  }, [stopMomentum]);
 
   const handleSelect = useCallback(
     (id: string, scrollPageDown = false) => {
@@ -1248,9 +1224,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               color: "rgba(255,107,97,0.92)",
             }}
             onClick={goPrev}
-            animate={{ x: [0, -3, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            whileHover={{ scale: 1.06, color: "#ff8c84" }}
+            whileHover={{ scale: 1.1, color: "#ff8c84" }}
+            whileTap={{ scale: 0.95 }}
           >
             <ChevronLeft className="w-7 h-7" strokeWidth={2.2} />
             <ChevronLeft className="w-7 h-7 -ml-3" strokeWidth={2.2} />
@@ -1264,9 +1239,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               color: "rgba(255,107,97,0.92)",
             }}
             onClick={goNext}
-            animate={{ x: [0, 3, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            whileHover={{ scale: 1.06, color: "#ff8c84" }}
+            whileHover={{ scale: 1.1, color: "#ff8c84" }}
+            whileTap={{ scale: 0.95 }}
           >
             <ChevronRight className="w-7 h-7" strokeWidth={2.2} />
             <ChevronRight className="w-7 h-7 -ml-3" strokeWidth={2.2} />
