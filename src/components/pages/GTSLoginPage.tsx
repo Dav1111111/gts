@@ -62,6 +62,14 @@ function getRequestedProtectedRoute(role: "guest" | "member" | "staff" | "partne
     return { page: "expeditions-admin" };
   }
 
+  if (hash === "executive-panel") {
+    return { page: "executive-panel" };
+  }
+
+  if (hash === "admin") {
+    return { page: "admin" };
+  }
+
   return null;
 }
 
@@ -74,7 +82,7 @@ function getRouteForUserRole(role: "guest" | "member" | "staff" | "partner" | "e
   switch (role) {
     case "staff":
     case "executive":
-      return { page: "executive-panel" };
+      return { page: "admin" };
     case "partner":
       return { page: "partner-portal" };
     case "guest":

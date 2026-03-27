@@ -857,7 +857,7 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
         <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => onNavigate?.({ page: "landing" })}
+              onClick={() => onNavigate?.({ page: "admin" })}
               className="p-2 text-white/50 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />

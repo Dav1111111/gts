@@ -774,8 +774,8 @@ export function GTSContentAdmin({ onNavigate }: GTSContentAdminProps) {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             {onNavigate && (
-              <Button variant="ghost" size="sm" onClick={() => onNavigate({ page: "landing" })} className="w-full text-white/60 hover:text-white hover:bg-white/5 sm:w-auto">
-                <ArrowLeft className="w-4 h-4 mr-2" /> На сайт
+              <Button variant="ghost" size="sm" onClick={() => onNavigate({ page: "admin" })} className="w-full text-white/60 hover:text-white hover:bg-white/5 sm:w-auto">
+                <ArrowLeft className="w-4 h-4 mr-2" /> К разделам
               </Button>
             )}
             <div className="flex items-center gap-3">

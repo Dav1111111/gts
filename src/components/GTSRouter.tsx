@@ -40,6 +40,9 @@ const GTSClientClubPortalComplete = lazy(() =>
 const GTSExecutivePanel = lazy(() =>
   import("./admin/GTSExecutivePanel").then((module) => ({ default: module.GTSExecutivePanel }))
 );
+const GTSAdminHub = lazy(() =>
+  import("./admin/GTSAdminHub").then((module) => ({ default: module.GTSAdminHub }))
+);
 const GTSPartnerPortalUnified = lazy(() =>
   import("./admin/GTSPartnerPortalUnified").then((module) => ({ default: module.GTSPartnerPortalUnified }))
 );
@@ -61,6 +64,7 @@ export type Route =
   | { page: "contacts" }
   | { page: "login" }
   | { page: "member-portal" }
+  | { page: "admin" }
   | { page: "executive-panel" }
   | { page: "partner-portal" }
   | { page: "expeditions-admin" }
@@ -88,17 +92,72 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
   const isManagementUser = user?.role === "staff" || user?.role === "executive";
   const isPartnerUser = user?.role === "partner";
 
+  const syncRouteLocation = (route: Route) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const hashMap: Partial<Record<Route["page"], string>> = {
+      admin: "#admin",
+      "executive-panel": "#executive-panel",
+      "expeditions-admin": "#expeditions-admin",
+      "content-admin": "#content-admin",
+    };
+
+    const nextHash = hashMap[route.page] ?? "";
+    const nextUrl = `${window.location.pathname}${window.location.search}${nextHash}`;
+    window.history.replaceState(null, "", nextUrl);
+  };
+
   const navigate = (route: Route) => {
     setCurrentRoute(route);
+    syncRouteLocation(route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Support hash-based navigation for admin routes
+  // Support hash/path-based navigation for admin routes
   useEffect(() => {
     const handleHash = () => {
+      const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
       const hash = window.location.hash.replace('#', '');
+
+      if (pathname === "/admin") {
+        setCurrentRoute({ page: "admin" });
+        return;
+      }
+
+      if (pathname === "/admin/panel") {
+        setCurrentRoute({ page: "executive-panel" });
+        return;
+      }
+
+      if (pathname === "/admin/content") {
+        setCurrentRoute({ page: 'content-admin' });
+        return;
+      }
+
+      if (pathname === "/admin/expeditions") {
+        setCurrentRoute({ page: "expeditions-admin" });
+        return;
+      }
+
+      if (hash === 'admin') {
+        setCurrentRoute({ page: 'admin' });
+        return;
+      }
+
       if (hash === 'content-admin') {
         setCurrentRoute({ page: 'content-admin' });
+        return;
+      }
+
+      if (hash === 'expeditions-admin') {
+        setCurrentRoute({ page: 'expeditions-admin' });
+        return;
+      }
+
+      if (hash === 'executive-panel') {
+        setCurrentRoute({ page: 'executive-panel' });
       }
     };
     handleHash();
@@ -210,6 +269,19 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
           return <GTSLoginPage onNavigate={navigate} />;
         }
         return <GTSClientClubPortalComplete />;
+
+      case "admin":
+        if (!isManagementUser) {
+          return <GTSLoginPage onNavigate={navigate} />;
+        }
+        return (
+          <GTSAdminHub
+            user={executiveUser}
+            onNavigate={navigate}
+            onLogout={() => navigate({ page: "landing" })}
+            onBackToHome={() => navigate({ page: "landing" })}
+          />
+        );
       
       case "executive-panel":
         if (!isManagementUser) {
@@ -218,7 +290,7 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
         return <GTSExecutivePanel 
           user={executiveUser}
           onLogout={() => navigate({ page: "landing" })}
-          onBackToHome={() => navigate({ page: "landing" })}
+          onBackToHome={() => navigate({ page: "admin" })}
           onNavigate={navigate}
         />;
       

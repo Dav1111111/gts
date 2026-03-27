@@ -218,7 +218,7 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
     }
 
     if (user.role === "staff" || user.role === "executive") {
-      onNavigate({ page: "executive-panel" });
+      onNavigate({ page: "admin" });
       return;
     }
 
