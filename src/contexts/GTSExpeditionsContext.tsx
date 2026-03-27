@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useMemo, useEffect } from "react";
+import { useGTSAuth } from "./GTSAuthContext";
 
 /* ═══════════════════════════════════════════════
    Shared Expedition Types
@@ -585,9 +586,11 @@ interface GTSExpeditionsContextType {
 const GTSExpeditionsContext = createContext<GTSExpeditionsContextType | undefined>(undefined);
 
 export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated, user } = useGTSAuth();
   const [expeditions, setExpeditions] = useState<ExpeditionData[]>(() => loadCachedExpeditions());
+  const isManagementUser = isAuthenticated && (user?.role === "staff" || user?.role === "executive");
 
-  /* ── Load from Supabase on mount, seed if table is empty ── */
+  /* ── Load from Supabase on mount, seed if table is empty and a manager is authenticated ── */
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -600,7 +603,7 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (remote.status === "empty") {
+      if (remote.status === "empty" && isManagementUser) {
         const sourceForSeed = expeditions.length ? expeditions : DEFAULT_EXPEDITIONS;
         const seeded = await seedSupabase(sourceForSeed);
         if (cancelled) return;
@@ -614,8 +617,7 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
       }
     })();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isManagementUser]);
 
   /* ── Keep localStorage cache in sync ── */
   useEffect(() => {
