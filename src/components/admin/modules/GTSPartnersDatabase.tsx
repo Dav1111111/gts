@@ -1756,7 +1756,7 @@ export const GTSPartnersDatabase: React.FC<GTSPartnersDatabaseProps> = ({
                         <p className="text-[var(--gts-portal-text)] mb-2">Перетащите файлы сюда или нажмите для выбора</p>
                         <p className="text-[var(--gts-portal-muted)] text-sm">Поддерживаются форматы: PDF, DOC, DOCX, JPG, PNG</p>
                         <Button variant="outline" className="mt-4">
-                          <FileUpload className="w-4 h-4 mr-2" />
+                          <Upload className="w-4 h-4 mr-2" />
                           Выбрать файлы
                         </Button>
                       </div>

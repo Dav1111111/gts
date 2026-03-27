@@ -25,10 +25,10 @@ function Collapsible({
     <div data-slot="collapsible" {...props}>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && child.type === CollapsibleTrigger) {
-          return React.cloneElement(child, { onClick: handleToggle });
+          return React.cloneElement(child as React.ReactElement<any>, { onClick: handleToggle });
         }
         if (React.isValidElement(child) && child.type === CollapsibleContent) {
-          return React.cloneElement(child, { isOpen });
+          return React.cloneElement(child as React.ReactElement<any>, { isOpen });
         }
         return child;
       })}
@@ -39,8 +39,12 @@ function Collapsible({
 function CollapsibleTrigger({
   children,
   onClick,
+  asChild,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) {
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, { onClick, ...props });
+  }
   return (
     <button
       data-slot="collapsible-trigger"

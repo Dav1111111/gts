@@ -17,14 +17,14 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
 
 /* ─── Constants ─── */
-const MONTH_TRACK_WIDTH = 244;
+const MONTH_TRACK_WIDTH = 320;
 const CYCLE_WIDTH = MONTH_TRACK_WIDTH * 12;
 const MAP_WIDTH = CYCLE_WIDTH * 3;
-const TIMELINE_PADDING = 136;
+const TIMELINE_PADDING = 160;
 const TIMELINE_COPIES = [0, 1, 2] as const;
-const ROUTE_PROFILE_FULL = [312, 284, 326, 394, 344, 222, 296, 362, 316, 236, 282, 320] as const;
-const ROUTE_PROFILE_CONDENSED = [286, 266, 298, 354, 318, 196, 268, 332, 292, 208, 254, 288] as const;
-const ROUTE_PROFILE_COMPACT = [244, 228, 252, 304, 274, 164, 236, 292, 258, 178, 222, 248] as const;
+const ROUTE_PROFILE_FULL = [340, 220, 380, 440, 200, 390, 230, 420, 190, 370, 240, 350] as const;
+const ROUTE_PROFILE_CONDENSED = [310, 200, 350, 400, 180, 360, 210, 380, 170, 340, 220, 320] as const;
+const ROUTE_PROFILE_COMPACT = [270, 170, 300, 340, 150, 310, 180, 330, 145, 290, 190, 275] as const;
 const MONTH_HEADER_TOPS_FULL = [126, 120, 118, 110, 126, 116, 126, 118, 128, 122, 132, 126] as const;
 const MONTH_HEADER_TOPS_CONDENSED = [108, 104, 102, 96, 108, 102, 110, 104, 112, 106, 114, 108] as const;
 const MONTH_HEADER_TOPS_COMPACT = [88, 84, 82, 78, 86, 82, 90, 84, 92, 86, 94, 88] as const;
@@ -552,7 +552,7 @@ const DECORATIONS: Decoration[] = [
 function buildSmoothPath(pts: { x: number; y: number }[]): string {
   if (pts.length < 2) return "";
   let d = `M ${pts[0].x},${pts[0].y}`;
-  const t = 0.22;
+  const t = 0.38;
   for (let i = 0; i < pts.length - 1; i++) {
     const p0 = pts[Math.max(0, i - 1)];
     const p1 = pts[i];
@@ -786,7 +786,7 @@ interface GTSExpeditionsCalendarProps {
 export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarProps = {}) {
   const { expeditions: ctxExpeditions } = useExpeditions();
   const [timelineView, setTimelineView] = useState<"full" | "condensed" | "compact">("full");
-  const mapHeight = timelineView === "compact" ? 430 : timelineView === "condensed" ? 510 : 560;
+  const mapHeight = timelineView === "compact" ? 480 : timelineView === "condensed" ? 560 : 620;
   const routeProfile = timelineView === "compact"
     ? ROUTE_PROFILE_COMPACT
     : timelineView === "condensed"
@@ -797,7 +797,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     : timelineView === "condensed"
       ? MONTH_HEADER_TOPS_CONDENSED
       : MONTH_HEADER_TOPS_FULL;
-  const monthInset = timelineView === "compact" ? 20 : timelineView === "condensed" ? 24 : 28;
+  const monthInset = timelineView === "compact" ? 28 : timelineView === "condensed" ? 36 : 44;
   const expeditions: Expedition[] = useMemo(() => {
     const mapped = ctxExpeditions.map((e) => {
       const { start, end } = inferExpeditionDates({
@@ -875,11 +875,11 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       const monthStartX = startX + monthIndex * MONTH_TRACK_WIDTH;
       const monthUsableWidth = MONTH_TRACK_WIDTH - monthInset * 2;
       const withinMonthRatio = monthGroup.length > 1
-        ? dayRatio * 0.16 + spreadRatio * 0.84
-        : dayRatio * 0.28 + 0.36;
+        ? dayRatio * 0.1 + spreadRatio * 0.9
+        : dayRatio * 0.2 + 0.4;
 
       const laneOffsetX = sameDayGroup.length > 1
-        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 22 : 30)
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 36 : 50)
         : 0;
       const desiredX = monthStartX + monthInset + withinMonthRatio * monthUsableWidth;
       const centerX = Math.max(startX, Math.min(endX, desiredX + laneOffsetX));
@@ -889,7 +889,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         ? !baseLabelAbove
         : baseLabelAbove;
       const labelOffsetX = sameDayGroup.length > 1
-        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 16 : 22)
+        ? (siblingIndex - (sameDayGroup.length - 1) / 2) * (timelineView === "compact" ? 28 : 38)
         : 0;
 
       return {
@@ -943,7 +943,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const isCondensedView = timelineView !== "full";
   const showArrowNav = !isCompactView && hasMultipleExpeditions;
   const showTrackTreads = false;
-  const visibleDecorations = useMemo(() => [], []);
+  const visibleDecorations = useMemo<Decoration[]>(() => [], []);
   const decorationScale = isCompactView ? 0.72 : isCondensedView ? 0.88 : 1;
   const fadeWidth = isCompactView ? 12 : 20;
 
@@ -1040,7 +1040,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     setRightWall(rPts.join(" "));
   }, [ROUTE_PATH]);
 
-  /* ── Drag-scroll ── */
+  /* ── Drag-scroll with momentum ── */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -1048,23 +1048,57 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     let isDrag = false;
     let startX = 0;
     let scrollStart = 0;
+    let lastX = 0;
+    let lastTime = 0;
+    let velocity = 0;
+    let momentumRaf = 0;
+
+    const stopMomentum = () => {
+      if (momentumRaf) {
+        cancelAnimationFrame(momentumRaf);
+        momentumRaf = 0;
+      }
+    };
+
+    const applyMomentum = () => {
+      if (Math.abs(velocity) < 0.5) {
+        velocity = 0;
+        return;
+      }
+      el.scrollLeft += velocity;
+      velocity *= 0.92;
+      momentumRaf = requestAnimationFrame(applyMomentum);
+    };
 
     const onDown = (e: MouseEvent) => {
       if ((e.target as HTMLElement).closest("button")) return;
+      stopMomentum();
       isDrag = true;
       startX = e.pageX;
+      lastX = e.pageX;
+      lastTime = Date.now();
       scrollStart = el.scrollLeft;
+      velocity = 0;
       el.style.cursor = "grabbing";
     };
     const onMove = (e: MouseEvent) => {
       if (!isDrag) return;
       e.preventDefault();
+      const now = Date.now();
+      const dt = Math.max(1, now - lastTime);
+      const dx = e.pageX - lastX;
+      velocity = (-dx / dt) * 16;
+      lastX = e.pageX;
+      lastTime = now;
       el.scrollLeft = scrollStart - (e.pageX - startX);
     };
     const onUp = () => {
       if (!isDrag) return;
       isDrag = false;
       el.style.cursor = "grab";
+      if (Math.abs(velocity) > 1) {
+        momentumRaf = requestAnimationFrame(applyMomentum);
+      }
     };
 
     const onScroll = () => {
@@ -1078,6 +1112,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) < 0.5 && Math.abs(e.deltaY) < 0.5) return;
       e.preventDefault();
+      stopMomentum();
       const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
       el.scrollLeft += delta;
     };
@@ -1089,6 +1124,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     el.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
+      stopMomentum();
       el.removeEventListener("mousedown", onDown);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
@@ -1129,13 +1165,13 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     if (!expeditions.length) return;
     const idx = expeditions.findIndex((e) => e.id === selectedId);
     const nextIndex = idx <= 0 ? expeditions.length - 1 : idx - 1;
-    handleSelect(expeditions[nextIndex].id);
+    handleSelect(expeditions[nextIndex].id, false);
   };
   const goNext = () => {
     if (!expeditions.length) return;
     const idx = expeditions.findIndex((e) => e.id === selectedId);
     const nextIndex = idx >= expeditions.length - 1 ? 0 : idx + 1;
-    handleSelect(expeditions[nextIndex].id);
+    handleSelect(expeditions[nextIndex].id, false);
   };
 
   if (!selected) {

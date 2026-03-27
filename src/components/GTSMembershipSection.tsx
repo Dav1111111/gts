@@ -69,11 +69,11 @@ export function GTSMembershipSection() {
                   <div className={`w-12 h-12 bg-gradient-to-r ${gradientClass} rounded-full flex items-center justify-center mx-auto mb-4`}>
                     {isSilver ? <Star className="w-6 h-6 text-black/70" /> : <Crown className="w-6 h-6 text-black/70" />}
                   </div>
-                  <h3 className="text-xl font-medium text-black mb-2 tracking-wide">{membership.tier}</h3>
+                  <h3 className="text-xl font-medium text-black mb-2 tracking-wide">{membership.name}</h3>
                   <div className="text-2xl font-light text-black mb-2">{membership.price}</div>
                   <div className="text-sm text-black/60 mb-4">{membership.period}</div>
                   <p className="text-sm text-black/60 leading-relaxed">
-                    {membership.features.join(", ")}
+                    {membership.description}
                   </p>
                 </div>
               </Card>

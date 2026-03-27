@@ -34,6 +34,11 @@ interface User {
 }
 
 interface GTSAppShellProps {
+  children?: React.ReactNode;
+  user?: User;
+  currentPath?: string;
+  onNavigate?: (path: string) => void;
+  onLogout?: () => void;
   onBackToHome?: () => void;
 }
 
@@ -218,7 +223,7 @@ function DemoContent({ currentPath, role }: { currentPath: string; role: UserRol
   );
 }
 
-export function GTSAppShell({ onBackToHome }: GTSAppShellProps) {
+export function GTSAppShell({ children, user, currentPath: initialPath, onNavigate: externalNavigate, onLogout: externalLogout, onBackToHome }: GTSAppShellProps) {
   const [selectedUser, setSelectedUser] = useState<User>(demoUsers[0]);
   const [currentPath, setCurrentPath] = useState('/dashboard');
   const [showUserSelect, setShowUserSelect] = useState(true);

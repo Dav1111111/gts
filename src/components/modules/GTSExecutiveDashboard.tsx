@@ -483,7 +483,7 @@ export function GTSExecutiveDashboard({ onBackToHome, onNavigateToModule }: GTSE
                   <AreaChart data={revenueData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--gts-portal-border)" />
                     <XAxis dataKey="month" stroke="var(--gts-portal-muted)" />
-                    <YAxis stroke="var(--gts-portal-muted)" tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`} />
+                    <YAxis stroke="var(--gts-portal-muted)" tickFormatter={(value: number) => `${(value / 1000000).toFixed(1)}M`} />
                     <Tooltip 
                       contentStyle={{ 
                         backgroundColor: 'var(--gts-portal-surface)', 

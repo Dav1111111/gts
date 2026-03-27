@@ -104,7 +104,7 @@ export function GTSGlobalAIAssistant({ userRole = "executive" }: { userRole?: st
       client: "Привет! Я помогу забронировать тур, проверить статус брони, узнать о погоде и получить контакты. Что вас интересует?",
       default: "Добро пожаловать в GTS AI Assistant! Готов ответить на ваши вопросы о бронированиях, услугах и работе системы."
     };
-    return greetings[role] || greetings.default;
+    return (greetings as Record<string, string>)[role] || greetings.default;
   }
 
   useEffect(() => {
@@ -162,7 +162,7 @@ export function GTSGlobalAIAssistant({ userRole = "executive" }: { userRole?: st
     };
 
     const key = Object.keys(responses).find(k => query.toLowerCase().includes(k.replace("-", ""))) || "default";
-    const response = responses[key] || responses.default;
+    const response = (responses as unknown as Record<string, typeof responses.default>)[key] || responses.default;
 
     return {
       id: Date.now().toString(),

@@ -99,7 +99,7 @@ interface Client {
 
 interface CommunicationStatus {
   radio: 'connected' | 'weak' | 'lost';
-  gps: 'active' | 'weak' | 'lost';
+  gps: 'connected' | 'weak' | 'lost';
   cellular: 'connected' | 'weak' | 'lost';
   lastContact: string;
   frequency?: string;
@@ -207,7 +207,7 @@ export function GTSOperationsCenter({ user }: GTSOperationsCenterProps) {
       bookingId: 'book-001',
       communication: {
         radio: 'connected',
-        gps: 'active',
+        gps: 'connected',
         cellular: 'connected',
         lastContact: '2024-01-20T11:45:00',
         frequency: '121.5 MHz'
@@ -272,7 +272,7 @@ export function GTSOperationsCenter({ user }: GTSOperationsCenterProps) {
       bookingId: 'book-002',
       communication: {
         radio: 'connected',
-        gps: 'active',
+        gps: 'connected',
         cellular: 'connected',
         lastContact: '2024-01-20T11:30:00',
         frequency: 'VHF Ch 16'
@@ -337,7 +337,7 @@ export function GTSOperationsCenter({ user }: GTSOperationsCenterProps) {
       bookingId: 'book-003',
       communication: {
         radio: 'weak',
-        gps: 'active',
+        gps: 'connected',
         cellular: 'weak',
         lastContact: '2024-01-20T11:00:00'
       },
@@ -795,7 +795,7 @@ export function GTSOperationsCenter({ user }: GTSOperationsCenterProps) {
                           <span className="text-[#A6A7AA]">GPS</span>
                         </div>
                         <span className={`text-sm ${getCommunicationColor(selectedFlight.communication.gps)}`}>
-                          {selectedFlight.communication.gps === 'active' ? 'Активен' :
+                          {selectedFlight.communication.gps === 'connected' ? 'Активен' :
                            selectedFlight.communication.gps === 'weak' ? 'Слабый сигнал' : 'Потерян'}
                         </span>
                       </div>

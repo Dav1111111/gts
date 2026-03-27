@@ -595,6 +595,7 @@ export function GTSMarketingCenter({ user }: GTSMarketingCenterProps) {
         bounceRate: 23.4,
         avgSessionDuration: 185,
         conversionRate: 5.1,
+        ctr: 7.2,
         cpl: 0,
         roas: 999
       },

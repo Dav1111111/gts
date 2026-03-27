@@ -571,7 +571,7 @@ export const gtsDelay = (delay: number) => ({
  */
 export const gtsCustomTransition = (
   duration: number,
-  ease: number[] = gtsEasing.out,
+  ease: number[] = [...gtsEasing.out],
   delay: number = 0
 ) => ({
   transition: {

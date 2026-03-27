@@ -208,10 +208,9 @@ export function GTSPortal2FA({
                         onChange={(e) => handleCodeChange(index, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         className="w-12 h-12 text-center text-lg font-mono rounded-xl border-0 focus:ring-2 focus:ring-offset-0"
-                        style={{ 
+                        style={{
                           backgroundColor: '#121214',
-                          color: '#FFFFFF',
-                          focusRingColor: '#91040C'
+                          color: '#FFFFFF'
                         }}
                       />
                     ))}

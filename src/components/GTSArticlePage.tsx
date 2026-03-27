@@ -189,7 +189,7 @@ export function GTSArticlePage({ articleId, onBack }: GTSArticlePageProps) {
   // Parse content and insert offers
   const renderContent = () => {
     const paragraphs = sampleArticle.content.trim().split('\n\n');
-    const contentElements = [];
+    const contentElements: React.ReactElement[] = [];
     
     paragraphs.forEach((paragraph, index) => {
       // Add paragraph

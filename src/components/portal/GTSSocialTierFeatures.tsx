@@ -13,7 +13,7 @@ import {
   Plus, Search, Filter, Send, Bell, Settings, Crown, Award,
   Trophy, Camera, Video, Image, Gift, Sparkles, Clock,
   ThumbsUp, MessageSquareReply, Bookmark, Flag, MoreHorizontal,
-  UserPlus, UserMinus, Eye, Edit, Trash2, ChevronRight
+  UserPlus, UserMinus, Eye, Edit, Trash2, ChevronRight, CheckCircle
 } from "lucide-react";
 
 interface GTSSocialTierFeaturesProps {

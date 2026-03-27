@@ -11,18 +11,12 @@ import {
   Home
 } from "lucide-react";
 
-type UserRole = 
-  | 'guest' | 'user' | 'member-bronze' | 'member-silver' | 'member-gold' | 'member-platinum'
-  | 'partner-agent' | 'contractor' | 'brand-partner' | 'ambassador'
-  | 'operator' | 'dispatcher' | 'site-admin' | 'captain' | 'pilot' | 'guide' | 'mechanic' | 'support'
-  | 'marketing' | 'finance' | 'executive' | 'sys-admin'
-  | 'b2b-owner' | 'b2b-finance' | 'b2b-coordinator';
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: string;
   avatar?: string;
 }
 
@@ -32,14 +26,14 @@ interface GTSUnifiedAdminHeaderProps {
   currentPage?: string;
   notificationCount?: number;
   onSearch?: (query: string) => void;
-  onLogin: () => void;
+  onLogin?: () => void;
   onLogout?: () => void;
   onBackToHome?: () => void;
   className?: string;
 }
 
-function getRoleName(role: UserRole): string {
-  const roleNames: Record<UserRole, string> = {
+function getRoleName(role: string): string {
+  const roleNames: Record<string, string> = {
     'guest': 'Гость',
     'user': 'Пользователь', 
     'member-bronze': 'Bronze Member',

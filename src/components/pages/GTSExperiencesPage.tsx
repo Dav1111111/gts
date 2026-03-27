@@ -350,7 +350,7 @@ export function GTSExperiencesPage({ onNavigate, initialCategory = "all" }: GTSE
         </div>
       </main>
 
-      <GTSFooter onNavigate={onNavigate} />
+      <GTSFooter />
     </div>
   );
 }

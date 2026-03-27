@@ -21,7 +21,7 @@ import {
   AlertCircle,
   XCircle,
   Trash2,
-  MarkAsUnreadIcon,
+  MailOpen,
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';

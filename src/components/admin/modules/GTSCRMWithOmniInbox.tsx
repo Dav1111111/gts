@@ -376,7 +376,7 @@ const mockMessages = [
   {
     id: 'm1',
     conversationId: '1',
-    sender: 'client' as const,
+    sender: 'client' as 'client' | 'agent' | 'bot',
     senderName: 'Александр Петров',
     text: 'Добрый день! Интересует вертолетная экскурсия',
     timestamp: '2024-01-15T13:00:00Z',

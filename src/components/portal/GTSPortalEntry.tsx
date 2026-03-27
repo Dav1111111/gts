@@ -304,8 +304,8 @@ export function GTSPortalEntry({ onBackToMain }: GTSPortalEntryProps) {
     // Render Partner-Agent Portal for partner-agent role
     if (currentRole.type === "partner-agent") {
       return (
-        <GTSPartnerAgentPortal 
-          onBackToEntry={() => setCurrentStep("role-switcher")}
+        <GTSPartnerAgentPortal
+          onBackToAdmin={() => setCurrentStep("role-switcher")}
         />
       );
     }
@@ -313,8 +313,8 @@ export function GTSPortalEntry({ onBackToMain }: GTSPortalEntryProps) {
     // Render Contractor Portal for contractor role
     if (currentRole.type === "contractor") {
       return (
-        <GTSContractorPortal 
-          onBackToEntry={() => setCurrentStep("role-switcher")}
+        <GTSContractorPortal
+          onBackToAdmin={() => setCurrentStep("role-switcher")}
         />
       );
     }

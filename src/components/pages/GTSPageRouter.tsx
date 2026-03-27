@@ -22,6 +22,7 @@ import { GTSClientClubPortal } from "../admin/GTSClientClubPortal";
 import { GTSCrewApp } from "../admin/GTSCrewApp";
 
 import { PageType, NavigationContext } from "../../utils/navigation";
+import { Route } from "../GTSRouter";
 
 interface GTSPageRouterProps {
   currentPage: PageType;
@@ -109,9 +110,8 @@ export function GTSPageRouter({
   // Finance - Financial management (includes payouts, reports)
   if (currentPage === "finance") {
     return (
-      <GTSFinanceSystem 
+      <GTSFinanceSystem
         onBackToHome={onBackToHome}
-        navigationContext={navigationContext}
       />
     );
   }
@@ -216,28 +216,70 @@ export function GTSPageRouter({
 
   // Partner Portal - Unified partner management interface
   if (currentPage === "partner-portal") {
-    return <GTSPartnerPortalUnified onBack={onBackToHome} />;
+    const mockPartnerUser = {
+      id: 'partner-001',
+      name: 'Партнер Демо',
+      email: 'partner@gts.com',
+      role: 'partner-agent',
+      permissions: ['view', 'book']
+    };
+    return (
+      <GTSPartnerPortalUnified
+        user={mockPartnerUser}
+        onLogout={() => console.log('Logout from Partner Portal')}
+        onBackToHome={onBackToHome}
+      />
+    );
   }
 
   // Client Club Portal - Premium member interface
   if (currentPage === "client-club-portal") {
-    return <GTSClientClubPortal onBack={onBackToHome} />;
+    const mockClientUser = {
+      id: 'client-001',
+      name: 'Клиент Демо',
+      email: 'client@gts.com',
+      role: 'client',
+      permissions: ['view']
+    };
+    return (
+      <GTSClientClubPortal
+        user={mockClientUser}
+        onLogout={() => console.log('Logout from Client Club Portal')}
+        onBackToHome={onBackToHome}
+      />
+    );
   }
 
   // Crew App - Field crew management interface
   if (currentPage === "crew-app") {
-    return <GTSCrewApp onBack={onBackToHome} />;
+    const mockCrewUser = {
+      id: 'crew-001',
+      name: 'Экипаж Демо',
+      email: 'crew@gts.com',
+      role: 'crew',
+      permissions: ['view', 'checkin']
+    };
+    return (
+      <GTSCrewApp
+        user={mockCrewUser}
+        onLogout={() => console.log('Logout from Crew App')}
+        onBackToHome={onBackToHome}
+      />
+    );
   }
 
   // Default: Landing Page
+  const handleNavigate = (route: Route) => {
+    if (route.page === "login") {
+      onLogin();
+    } else {
+      navigateToModule(route.page, { targetData: route });
+    }
+  };
+
   return (
-    <GTSLandingPage 
-      onLogin={onLogin}
-      onNavigateToUIKit={onNavigateToUIKit}
-      onNavigateToDemo={onNavigateToDemo}
-      onNavigateToB2BPortal={onNavigateToB2BPortal}
-      onNavigateToNewLeadDemo={onNavigateToNewLeadDemo}
-      onNavigateToDemoById={onNavigateToDemoById}
+    <GTSLandingPage
+      onNavigate={handleNavigate}
     />
   );
 }

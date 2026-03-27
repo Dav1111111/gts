@@ -398,9 +398,8 @@ export function GTSFinanceCenterModule({ onBack, onNavigateToPartners }: GTSFina
                         <tr 
                           key={payout.id} 
                           className="border-b hover:bg-opacity-50" 
-                          style={{ 
-                            borderColor: 'var(--gts-portal-border)',
-                            '&:hover': { backgroundColor: 'var(--gts-portal-card)' }
+                          style={{
+                            borderColor: 'var(--gts-portal-border)'
                           }}
                         >
                           <td className="p-4">

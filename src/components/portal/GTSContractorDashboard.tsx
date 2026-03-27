@@ -37,7 +37,7 @@ export function GTSContractorDashboard() {
     utilization: {
       value: 78,
       change: -3,
-      trend: "down" as const
+      trend: "down" as "up" | "down"
     }
   };
 

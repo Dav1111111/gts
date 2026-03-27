@@ -43,7 +43,7 @@ import {
   MapPin, Package, Users, CreditCard, BarChart3,
   
   // Maintenance specific
-  Tool, Cog, AlertOctagon, Calendar as CalendarIcon,
+  Cog, AlertOctagon, Calendar as CalendarIcon,
   ClipboardList, HardHat, Battery, Thermometer,
   
   // Navigation

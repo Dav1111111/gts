@@ -27,7 +27,8 @@ import {
   Mail, Phone, MapPin, Link, Hash, Flag, Award, Gift,
   Heart, ThumbsUp, ThumbsDown, MessageSquare, Bell, Wrench,
   PieChart, LineChart, Activity, Gauge, Layers, Grid,
-  Folder, FolderOpen, Package, Truck, Plane, Ship, Car
+  Folder, FolderOpen, Package, Truck, Plane, Ship, Car,
+  Plus
 } from 'lucide-react';
 
 interface AIModulesDashboardProps {

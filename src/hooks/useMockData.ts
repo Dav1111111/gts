@@ -147,7 +147,7 @@ export function useRealtimeData(table: string) {
 
 // Hook for analytics data with date ranges
 export function useAnalytics(dateRange?: { start: string; end: string }) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

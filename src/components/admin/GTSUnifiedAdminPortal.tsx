@@ -14,7 +14,7 @@ interface User {
   name: string;
   email: string;
   phone?: string;
-  role: UserRole;
+  role: string;
   avatar?: string;
   permissions: string[];
 }

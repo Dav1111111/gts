@@ -34,7 +34,7 @@ export function GTSExperienceDetailPage({ experienceId, onNavigate }: GTSExperie
       <div className="min-h-screen bg-[#0B0B0C] flex flex-col items-center justify-center p-10 text-center">
         <h2 className="text-white text-3xl mb-4">Экспедиция не найдена</h2>
         <button 
-          onClick={() => onNavigate({ type: "experiences" })}
+          onClick={() => onNavigate({ page: "experiences" })}
           className="text-[#91040C] uppercase tracking-widest text-sm border-b border-[#91040C] pb-1"
         >
           Вернуться к списку
@@ -341,7 +341,7 @@ export function GTSExperienceDetailPage({ experienceId, onNavigate }: GTSExperie
       {/* ── VEHICLE RENTAL BLOCK — caucasus-discovery style ── */}
       <VehicleRentalBlock />
 
-      <GTSFooter onNavigate={onNavigate} />
+      <GTSFooter />
     </div>
   );
 }

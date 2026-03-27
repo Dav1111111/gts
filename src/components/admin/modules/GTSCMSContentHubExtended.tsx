@@ -28,7 +28,7 @@ import {
   Bell, Heart, Bookmark, Code, Database, Cloud, Lock, Unlock,
   ChevronRight, ChevronDown, ChevronLeft, ChevronUp, MoreHorizontal,
   Scissors, Crop, Layers, Grid, AlignLeft, AlignCenter, AlignRight,
-  Bold, Italic, Underline, List, Headphones, Mic, ScanLine
+  Bold, Italic, Underline, List, Headphones, Mic, ScanLine, Save
 } from 'lucide-react';
 
 interface CMSContentHubProps {
@@ -1265,7 +1265,7 @@ export function GTSCMSContentHubExtended({ userRole }: CMSContentHubProps) {
             </div>
 
             {/* Мультиязычные поля */}
-            <Tabs value={currentLanguage} onValueChange={(value: Language) => setCurrentLanguage(value)}>
+            <Tabs value={currentLanguage} onValueChange={(value: string) => setCurrentLanguage(value as Language)}>
               <div className="flex items-center justify-between">
                 <h4>Контент на разных языках</h4>
                 <TabsList>

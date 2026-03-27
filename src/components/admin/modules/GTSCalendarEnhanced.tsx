@@ -384,8 +384,8 @@ export function GTSCalendarEnhanced({ onBack, initialMeeting }: GTSCalendarEnhan
   const handleSaveEvent = (eventData: Partial<CalendarEvent>) => {
     if (isCreatingEvent) {
       const newEvent: CalendarEvent = {
-        id: `event-${Date.now()}`,
         ...eventData as CalendarEvent,
+        id: `event-${Date.now()}`,
         lastModified: new Date().toISOString()
       };
       setEvents(prev => [...prev, newEvent]);

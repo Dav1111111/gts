@@ -24,6 +24,7 @@ interface Post {
   id: string;
   type: "news" | "guide_story" | "partner" | "review" | "offer";
   author: Author;
+  name?: string;
   title: string;
   content: string;
   image?: string;

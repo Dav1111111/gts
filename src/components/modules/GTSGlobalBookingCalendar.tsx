@@ -985,13 +985,13 @@ export function GTSGlobalBookingCalendar({ userRole, onLogin, onBack }: GTSGloba
                       .filter(booking => booking.resource.id === selectedResource)
                       .map((booking) => {
                         const IconComponent = resourceTypeIcons[booking.resource.type];
-                        const hasWeatherWarnings = booking.weather.warnings && booking.weather.warnings.length > 0;
+                        const hasWeatherWarnings = booking.weather?.warnings && booking.weather.warnings.length > 0;
                         
                         return (
                           <div 
                             key={booking.id}
                             className="bg-[#121214] p-4 rounded-xl hover:bg-[#1A1B1D] transition-colors cursor-pointer border border-[#232428] hover:border-[#91040C]/50"
-                            onClick={() => handleBookingClick(booking)}
+                            onClick={() => handleBookingClick(booking as any)}
                           >
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-start gap-3">
@@ -1072,18 +1072,18 @@ export function GTSGlobalBookingCalendar({ userRole, onLogin, onBack }: GTSGloba
                             <div className="flex items-center justify-between pt-3 border-t border-[#232428]">
                               <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
-                                  {getWeatherIcon(booking.weather.condition)}
+                                  {getWeatherIcon(booking.weather?.condition as any)}
                                   <span className="text-sm text-[#A6A7AA]">
-                                    {getWeatherCondition(booking.weather.condition)}
+                                    {getWeatherCondition(booking.weather?.condition as any)}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Thermometer className="w-4 h-4 text-orange-400" />
-                                  <span className="text-sm text-[#A6A7AA]">{booking.weather.temp}°C</span>
+                                  <span className="text-sm text-[#A6A7AA]">{booking.weather?.temp}°C</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Wind className="w-4 h-4 text-blue-400" />
-                                  <span className="text-sm text-[#A6A7AA]">{booking.weather.wind}м/с</span>
+                                  <span className="text-sm text-[#A6A7AA]">{booking.weather?.wind}м/с</span>
                                 </div>
                               </div>
                               

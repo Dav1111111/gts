@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
@@ -305,7 +305,7 @@ export function GTSBookingCalendarAdvanced() {
       gold: { icon: Crown, color: 'text-yellow-500' },
       platinum: { icon: Crown, color: 'text-purple-500' }
     };
-    return levels[level] || levels.none;
+    return (levels as Record<string, typeof levels.none>)[level] || levels.none;
   };
 
   // Filter equipment

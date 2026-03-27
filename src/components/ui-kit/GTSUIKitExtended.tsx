@@ -334,8 +334,8 @@ interface GTSChartProps {
 
 export function GTSChart({ type, data, title, height = 300, className }: GTSChartProps) {
   const chartProps = {
-    width: "100%",
-    height: "100%"
+    width: 500,
+    height: 300
   };
 
   const commonAxisProps = {
@@ -425,7 +425,7 @@ export function GTSChart({ type, data, title, height = 300, className }: GTSChar
       )}
       <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
-          {renderChart()}
+          {renderChart() || <BarChart data={data} {...chartProps}><Bar dataKey="value" fill="#91040C" /></BarChart>}
         </ResponsiveContainer>
       </div>
     </Card>

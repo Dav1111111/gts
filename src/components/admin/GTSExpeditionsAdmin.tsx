@@ -772,16 +772,16 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
   const handleSave = useCallback(
     async (data: ExpeditionData) => {
       const normalized = normalizeExpeditionDates(data);
-      let success = false;
+      let result: { success: false; error: string } | Awaited<ReturnType<typeof addExpedition>> = { success: false, error: "Сохранение не было выполнено." };
 
       if (isCreating) {
-        success = await addExpedition(normalized);
+        result = await addExpedition(normalized);
       } else if (editingId) {
-        success = await updateExpedition(normalized);
+        result = await updateExpedition(normalized);
       }
 
-      if (!success) {
-        window.alert("Не удалось сохранить экспедицию в общей базе. Локальные изменения отменены.");
+      if (!result.success) {
+        window.alert(`Не удалось сохранить экспедицию в общей базе. Локальные изменения отменены.\n\nПричина: ${result.error}`);
         return;
       }
 
@@ -793,9 +793,9 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
 
   /* Delete */
   const handleDelete = async (id: string) => {
-    const success = await deleteExpedition(id);
-    if (!success) {
-      window.alert("Не удалось удалить экспедицию из общей базы. Локальные изменения отменены.");
+    const result = await deleteExpedition(id);
+    if (!result.success) {
+      window.alert(`Не удалось удалить экспедицию из общей базы. Локальные изменения отменены.\n\nПричина: ${result.error}`);
       return;
     }
     setDeleteConfirm(null);
@@ -804,7 +804,7 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
   /* Duplicate */
   const handleDuplicate = async (exp: ExpeditionData) => {
     const newId = generateNewId();
-    const success = await addExpedition({
+    const result = await addExpedition({
       ...normalizeExpeditionDates({
         ...exp,
         startDate: addDaysToIsoDate(exp.startDate, 7),
@@ -815,8 +815,8 @@ export function GTSExpeditionsAdmin({ onNavigate }: GTSExpeditionsAdminProps) {
       spotsLeft: exp.groupSize,
     });
 
-    if (!success) {
-      window.alert("Не удалось создать копию экспедиции в общей базе. Локальные изменения отменены.");
+    if (!result.success) {
+      window.alert(`Не удалось создать копию экспедиции в общей базе. Локальные изменения отменены.\n\nПричина: ${result.error}`);
     }
   };
 

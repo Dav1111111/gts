@@ -69,7 +69,6 @@ export function AdminDashboard({ onBackToHome, onNavigateToPartnerAgent, onNavig
       onBackToHome={onBackToHome}
       onNavigateToPartnerAgent={onNavigateToPartnerAgent}
       onNavigateToContractor={onNavigateToContractor}
-      onNavigateToBrandPartner={onNavigateToBrandPartner}
     >
       {renderDashboard()}
     </AdminLayout>

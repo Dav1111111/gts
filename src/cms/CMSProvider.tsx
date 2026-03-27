@@ -108,7 +108,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   ) => {
     update(prev => ({
       ...prev,
-      [key]: (prev[key] as T[]).map(item =>
+      [key]: (prev[key] as unknown as T[]).map(item =>
         item.id === id ? { ...item, ...updates } : item
       )
     }));
@@ -117,14 +117,14 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const addItem = <T,>(key: keyof CMSData, item: T) => {
     update(prev => ({
       ...prev,
-      [key]: [...(prev[key] as T[]), item]
+      [key]: [...(prev[key] as unknown as T[]), item]
     }));
   };
 
   const deleteItem = <T extends { id: string }>(key: keyof CMSData, id: string) => {
     update(prev => ({
       ...prev,
-      [key]: (prev[key] as T[]).filter(item => item.id !== id)
+      [key]: (prev[key] as unknown as T[]).filter(item => item.id !== id)
     }));
   };
 

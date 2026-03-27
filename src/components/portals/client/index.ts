@@ -3,7 +3,7 @@
 
 // Главные клиентские порталы
 export { GTSClientClubPortalComplete } from "../../portal/GTSClientClubPortalComplete";
-export { GTSClientClubPortalFinal } from "../../portal/GTSClientClubPortalFinal";
+// GTSClientClubPortalFinal removed - use GTSClientClubPortalComplete instead
 
 // Социальные функции и лояльность
 export { GTSSocialTierFeatures } from "../../portal/GTSSocialTierFeatures";

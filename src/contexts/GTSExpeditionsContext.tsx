@@ -472,6 +472,39 @@ type SupabaseLoadResult =
   | { status: "empty" }
   | { status: "error"; error: unknown };
 
+export type ExpeditionMutationResult =
+  | { success: true }
+  | { success: false; error: string };
+
+function formatSupabaseError(err: unknown): string {
+  if (typeof err === "object" && err !== null) {
+    const candidate = err as { message?: unknown; details?: unknown; hint?: unknown; code?: unknown };
+    const parts = [candidate.message, candidate.details, candidate.hint, candidate.code]
+      .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+      .map((value) => value.trim());
+
+    if (parts.length > 0) {
+      const combined = parts.join(" | ");
+
+      if (
+        combined.toLowerCase().includes("row-level security") ||
+        combined.toLowerCase().includes("permission denied") ||
+        combined.toLowerCase().includes("not allowed")
+      ) {
+        return "Supabase отклонил запись из-за прав доступа. У аккаунта есть вход в админку, но нет разрешения на запись в таблицу expeditions.";
+      }
+
+      return combined;
+    }
+  }
+
+  if (err instanceof Error && err.message.trim()) {
+    return err.message.trim();
+  }
+
+  return "Неизвестная ошибка записи в Supabase.";
+}
+
 function sanitizeExpeditionForStorage(expedition: ExpeditionData): ExpeditionData {
   return {
     ...expedition,
@@ -520,21 +553,21 @@ async function loadSupabaseExpeditions(): Promise<SupabaseLoadResult> {
   }
 }
 
-async function upsertSupabaseExpedition(exp: ExpeditionData): Promise<boolean> {
+async function upsertSupabaseExpedition(exp: ExpeditionData): Promise<ExpeditionMutationResult> {
   try {
     const { supabase } = await import("../utils/supabase/client");
     const { error } = await supabase
       .from(SUPABASE_TABLE)
       .upsert({ id: exp.id, data: sanitizeExpeditionForStorage(exp), updated_at: new Date().toISOString() }, { onConflict: "id" });
     if (error) throw error;
-    return true;
+    return { success: true };
   } catch (err) {
     console.error("[GTS] Supabase upsert failed:", err);
-    return false;
+    return { success: false, error: formatSupabaseError(err) };
   }
 }
 
-async function softDeleteSupabaseExpedition(expedition: ExpeditionData): Promise<boolean> {
+async function softDeleteSupabaseExpedition(expedition: ExpeditionData): Promise<ExpeditionMutationResult> {
   return upsertSupabaseExpedition({
     ...expedition,
     isDeleted: true,
@@ -543,20 +576,20 @@ async function softDeleteSupabaseExpedition(expedition: ExpeditionData): Promise
   });
 }
 
-async function deleteSupabaseExpedition(expedition: ExpeditionData): Promise<boolean> {
+async function deleteSupabaseExpedition(expedition: ExpeditionData): Promise<ExpeditionMutationResult> {
   try {
     const { supabase } = await import("../utils/supabase/client");
     const { error } = await supabase.from(SUPABASE_TABLE).delete().eq("id", expedition.id);
-    if (!error) return true;
+    if (!error) return { success: true };
 
     console.warn("[GTS] Hard delete failed, trying soft delete:", error);
     const softDeleted = await softDeleteSupabaseExpedition(expedition);
-    if (softDeleted) return true;
+    if (softDeleted.success) return { success: true };
 
     throw error;
   } catch (err) {
     console.error("[GTS] Supabase delete failed:", err);
-    return false;
+    return { success: false, error: formatSupabaseError(err) };
   }
 }
 
@@ -577,9 +610,9 @@ interface GTSExpeditionsContextType {
   expeditions: ExpeditionData[];
   getExpeditionById: (id: string) => ExpeditionData | undefined;
   featuredExpeditions: ExpeditionData[];
-  addExpedition: (expedition: ExpeditionData) => Promise<boolean>;
-  updateExpedition: (expedition: ExpeditionData) => Promise<boolean>;
-  deleteExpedition: (id: string) => Promise<boolean>;
+  addExpedition: (expedition: ExpeditionData) => Promise<ExpeditionMutationResult>;
+  updateExpedition: (expedition: ExpeditionData) => Promise<ExpeditionMutationResult>;
+  deleteExpedition: (id: string) => Promise<ExpeditionMutationResult>;
   generateNewId: () => string;
 }
 
@@ -630,26 +663,26 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
 
   const addExpedition = useCallback(async (newExp: ExpeditionData) => {
     setExpeditions(prev => [...prev, newExp]);
-    const success = await upsertSupabaseExpedition(newExp);
+    const result = await upsertSupabaseExpedition(newExp);
 
-    if (!success) {
+    if (!result.success) {
       setExpeditions(prev => prev.filter(exp => exp.id !== newExp.id));
     }
 
-    return success;
+    return result;
   }, []);
 
   const updateExpedition = useCallback(async (updatedExp: ExpeditionData) => {
     const previousExp = expeditions.find(exp => exp.id === updatedExp.id);
 
     setExpeditions(prev => prev.map(exp => exp.id === updatedExp.id ? updatedExp : exp));
-    const success = await upsertSupabaseExpedition(updatedExp);
+    const result = await upsertSupabaseExpedition(updatedExp);
 
-    if (!success && previousExp) {
+    if (!result.success && previousExp) {
       setExpeditions(prev => prev.map(exp => exp.id === previousExp.id ? previousExp : exp));
     }
 
-    return success;
+    return result;
   }, [expeditions]);
 
   const deleteExpedition = useCallback(async (id: string) => {
@@ -657,9 +690,9 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
     const previousExp = previousIndex >= 0 ? expeditions[previousIndex] : undefined;
 
     setExpeditions(prev => prev.filter(exp => exp.id !== id));
-    const success = previousExp ? await deleteSupabaseExpedition(previousExp) : true;
+    const result = previousExp ? await deleteSupabaseExpedition(previousExp) : { success: true } as const;
 
-    if (!success && previousExp) {
+    if (!result.success && previousExp) {
       setExpeditions(prev => {
         if (prev.some(exp => exp.id === id)) {
           return prev;
@@ -672,7 +705,7 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
       });
     }
 
-    return success;
+    return result;
   }, [expeditions]);
 
   const generateNewId = useCallback(() => {

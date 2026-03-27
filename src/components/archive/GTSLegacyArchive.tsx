@@ -212,7 +212,7 @@ const archiveItems: ArchiveItem[] = [
   {
     id: "legacy-content-blocks",
     title: "Блоки контента legacy",
-    category: "content",
+    category: "modules",
     description: "Карточки услуг, новости, SEO компоненты",
     dateArchived: "2024-03-12",
     reason: "Объединены в централизованную CMS систему",
@@ -246,7 +246,7 @@ function getStatusColor(status: string): string {
   const colors = {
     migrated: GTSStyles.badges.success + " text-green-900",
     archived: GTSStyles.badges.default + " text-white",
-    obsolete: GTSStyles.badges.destructive + " text-white"
+    obsolete: GTSStyles.badges.error + " text-white"
   };
   return colors[status as keyof typeof colors] || GTSStyles.badges.default;
 }
@@ -447,7 +447,7 @@ export function GTSLegacyArchive({ onBackToHome }: GTSLegacyArchiveProps) {
                     {new Date(item.dateArchived).toLocaleDateString('ru-RU')}
                   </span>
                   {item.hasData && (
-                    <Badge variant="outline" className={GTSStyles.badges.secondary}>
+                    <Badge variant="outline" className={GTSStyles.badges.outline}>
                       <Download className="w-3 h-3 mr-1" />
                       Есть данные
                     </Badge>

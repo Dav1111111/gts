@@ -127,7 +127,7 @@ export function usePushNotifications(options: UsePushNotificationsOptions = {}) 
       // Create push subscription
       const pushSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: convertVapidKey(getVapidPublicKey())
+        applicationServerKey: convertVapidKey(getVapidPublicKey()) as BufferSource
       });
 
       setSubscription(pushSubscription);
@@ -237,7 +237,6 @@ export function usePushNotifications(options: UsePushNotificationsOptions = {}) 
           tag: options.tag,
           icon: options.icon || '/favicon.ico',
           badge: options.badge || '/favicon.ico',
-          image: options.image,
           requireInteraction: options.requireInteraction || false,
           silent: options.silent || false,
           data: {

@@ -21,7 +21,7 @@ import {
   Target, Building2, UserCheck, Clock, ArrowUp, ArrowDown,
   Settings, Briefcase, Handshake, Award, Zap, MoreHorizontal,
   TrendingDown, Percent, Calculator, ExternalLink, Copy,
-  Shield, CheckCircle, XCircle, AlertTriangle, Banknote
+  Shield, CheckCircle, XCircle, AlertTriangle, Banknote, Save
 } from 'lucide-react';
 
 interface PartnersProps {

@@ -540,7 +540,7 @@ export function GTSAuditLoggingModule({ onBack }: GTSAuditLoggingModuleProps) {
                 />
               </div>
               
-              <Select value={moduleFilter} onValueChange={setModuleFilter}>
+              <Select value={moduleFilter} onValueChange={setModuleFilter as (value: string) => void}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Modules" />
                 </SelectTrigger>

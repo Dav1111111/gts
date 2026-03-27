@@ -209,7 +209,7 @@ export function GTSCMSModule({ onBack, onNavigateToCRM }: GTSCMSModuleProps) {
   ];
 
   const totalViews = allContent.reduce((sum, item) => sum + item.views, 0);
-  const totalLeads = allContent.reduce((sum, item) => sum + (item.leads || 0), 0);
+  const totalLeads = allContent.reduce((sum, item) => sum + (('leads' in item ? item.leads : 0) || 0), 0);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--gts-portal-bg)' }}>
@@ -665,7 +665,7 @@ export function GTSCMSModule({ onBack, onNavigateToCRM }: GTSCMSModuleProps) {
                         </div>
                         <div className="text-right">
                           <Badge variant="secondary" className="text-xs">
-                            {item.leads || 0} leads
+                            {'leads' in item ? item.leads : 0} leads
                           </Badge>
                         </div>
                       </div>

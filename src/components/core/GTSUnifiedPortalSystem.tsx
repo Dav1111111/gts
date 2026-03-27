@@ -77,6 +77,98 @@ export interface PortalLayout {
   profileMenu: boolean;
 }
 
+// 🎨 REAL COMPONENTS FOR VIP CLIENT PORTAL
+const VIPBookings = ({ user }: { user?: any }) => <GTSVIPBookingsComponent user={user} />;
+const ConciergeService = ({ user }: { user?: any }) => <GTSConciergeServiceComponent user={user} />;
+const LoyaltyProgram = ({ user }: { user?: any }) => {
+  // Transform user data for loyalty component
+  const loyaltyUser = {
+    ...user,
+    tier: 'platinum' as const,
+    bonusBalance: 15420,
+    totalSpent: 2850000,
+    joinDate: '2022-03-15',
+    nextTierProgress: 100,
+    privileges: ['Priority Support', 'Free Upgrades', 'Exclusive Events', 'Concierge Service']
+  };
+  return <GTSLoyaltyProgramComponent user={loyaltyUser} />;
+};
+const ExclusiveOffers = () => (
+  <div className="p-6">Exclusive Offers Component</div>
+);
+const StandardBookings = () => (
+  <div className="p-6">Standard Bookings Component</div>
+);
+const ServiceCatalog = () => (
+  <div className="p-6">Service Catalog Component</div>
+);
+const ClientSupport = () => (
+  <div className="p-6">Client Support Component</div>
+);
+const CorporateBookings = () => (
+  <div className="p-6">Corporate Bookings Component</div>
+);
+const TeamManagement = () => (
+  <div className="p-6">Team Management Component</div>
+);
+const BusinessReports = () => (
+  <div className="p-6">Business Reports Component</div>
+);
+const ContractManagement = () => (
+  <div className="p-6">Contract Management Component</div>
+);
+const PartnerCampaigns = () => (
+  <div className="p-6">Partner Campaigns Component</div>
+);
+const PartnerAnalytics = () => (
+  <div className="p-6">Partner Analytics Component</div>
+);
+const BrandResources = () => (
+  <div className="p-6">Brand Resources Component</div>
+);
+const CommissionTracking = () => (
+  <div className="p-6">Commission Tracking Component</div>
+);
+const ReferralManagement = () => (
+  <div className="p-6">Referral Management Component</div>
+);
+const AgentBookings = () => (
+  <div className="p-6">Agent Bookings Component</div>
+);
+const MarketingTools = () => (
+  <div className="p-6">Marketing Tools Component</div>
+);
+const ContractorOrders = () => (
+  <div className="p-6">Contractor Orders Component</div>
+);
+const ContractorSchedule = () => (
+  <div className="p-6">Contractor Schedule Component</div>
+);
+const ContractorFleet = () => (
+  <div className="p-6">Contractor Fleet Component</div>
+);
+const ContractorFinance = () => (
+  <div className="p-6">Contractor Finance Component</div>
+);
+const StaffTasks = () => (
+  <div className="p-6">Staff Tasks Component</div>
+);
+const StaffSchedule = () => (
+  <div className="p-6">Staff Schedule Component</div>
+);
+const ClientManagement = () => (
+  <div className="p-6">Client Management Component</div>
+);
+const AdminDashboard = () => (
+  <div className="p-6">Admin Dashboard Component</div>
+);
+const UserManagement = () => (
+  <div className="p-6">User Management Component</div>
+);
+const SystemSettings = () => (
+  <div className="p-6">System Settings Component</div>
+);
+
 // 🏗️ PORTAL CONFIGURATIONS
 export const PORTAL_CONFIGS: Record<PortalRole, PortalConfig> =
   {
@@ -443,98 +535,6 @@ export const PORTAL_CONFIGS: Record<PortalRole, PortalConfig> =
       ],
     },
   };
-
-// 🎨 REAL COMPONENTS FOR VIP CLIENT PORTAL
-const VIPBookings = ({ user }: { user?: any }) => <GTSVIPBookingsComponent user={user} />;
-const ConciergeService = ({ user }: { user?: any }) => <GTSConciergeServiceComponent user={user} />;
-const LoyaltyProgram = ({ user }: { user?: any }) => {
-  // Transform user data for loyalty component
-  const loyaltyUser = {
-    ...user,
-    tier: 'platinum' as const,
-    bonusBalance: 15420,
-    totalSpent: 2850000,
-    joinDate: '2022-03-15',
-    nextTierProgress: 100,
-    privileges: ['Priority Support', 'Free Upgrades', 'Exclusive Events', 'Concierge Service']
-  };
-  return <GTSLoyaltyProgramComponent user={loyaltyUser} />;
-};
-const ExclusiveOffers = () => (
-  <div className="p-6">Exclusive Offers Component</div>
-);
-const StandardBookings = () => (
-  <div className="p-6">Standard Bookings Component</div>
-);
-const ServiceCatalog = () => (
-  <div className="p-6">Service Catalog Component</div>
-);
-const ClientSupport = () => (
-  <div className="p-6">Client Support Component</div>
-);
-const CorporateBookings = () => (
-  <div className="p-6">Corporate Bookings Component</div>
-);
-const TeamManagement = () => (
-  <div className="p-6">Team Management Component</div>
-);
-const BusinessReports = () => (
-  <div className="p-6">Business Reports Component</div>
-);
-const ContractManagement = () => (
-  <div className="p-6">Contract Management Component</div>
-);
-const PartnerCampaigns = () => (
-  <div className="p-6">Partner Campaigns Component</div>
-);
-const PartnerAnalytics = () => (
-  <div className="p-6">Partner Analytics Component</div>
-);
-const BrandResources = () => (
-  <div className="p-6">Brand Resources Component</div>
-);
-const CommissionTracking = () => (
-  <div className="p-6">Commission Tracking Component</div>
-);
-const ReferralManagement = () => (
-  <div className="p-6">Referral Management Component</div>
-);
-const AgentBookings = () => (
-  <div className="p-6">Agent Bookings Component</div>
-);
-const MarketingTools = () => (
-  <div className="p-6">Marketing Tools Component</div>
-);
-const ContractorOrders = () => (
-  <div className="p-6">Contractor Orders Component</div>
-);
-const ContractorSchedule = () => (
-  <div className="p-6">Contractor Schedule Component</div>
-);
-const ContractorFleet = () => (
-  <div className="p-6">Contractor Fleet Component</div>
-);
-const ContractorFinance = () => (
-  <div className="p-6">Contractor Finance Component</div>
-);
-const StaffTasks = () => (
-  <div className="p-6">Staff Tasks Component</div>
-);
-const StaffSchedule = () => (
-  <div className="p-6">Staff Schedule Component</div>
-);
-const ClientManagement = () => (
-  <div className="p-6">Client Management Component</div>
-);
-const AdminDashboard = () => (
-  <div className="p-6">Admin Dashboard Component</div>
-);
-const UserManagement = () => (
-  <div className="p-6">User Management Component</div>
-);
-const SystemSettings = () => (
-  <div className="p-6">System Settings Component</div>
-);
 
 interface UnifiedPortalProps {
   role: PortalRole;

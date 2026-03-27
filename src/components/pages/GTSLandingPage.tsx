@@ -32,7 +32,7 @@ const GTSMembershipSection = lazy(() =>
 );
 
 interface GTSLandingPageProps {
-  onNavigate: (route: Route) => void;
+  onNavigate: (route: any) => void;
 }
 
 class LandingSectionBoundary extends Component<

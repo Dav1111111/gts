@@ -272,13 +272,13 @@ export function GTSExecutivePanel({ user, onLogout, onBackToHome, onNavigate }: 
       case 'audit':
         return <GTSAuditLogsExtended userRole={user.role} />;
       case 'staff':
-        return <GTSStaffManagementModule />;
+        return <GTSStaffManagementModule onBack={() => setActiveModule('dashboard')} onNavigateToCalendar={() => setActiveModule('calendar')} />;
       case 'partners':
         return <GTSPartnersExtended userRole={user.role} />;
       case 'cms':
         return <GTSContentAdmin onNavigate={onNavigate} />;
       case 'iam':
-        return <GTSIAMRolesPermissions />;
+        return <GTSIAMRolesPermissions userRole={user.role as any} onBack={() => setActiveModule('dashboard')} />;
       case 'ai':
         return <GTSAIModulesDashboardExtended userRole={user.role} />;
       case 'quality':
@@ -302,11 +302,6 @@ export function GTSExecutivePanel({ user, onLogout, onBackToHome, onNavigate }: 
         user={user}
         onLogout={onLogout}
         onBackToHome={onBackToHome}
-        modules={modules}
-        activeModule={activeModule}
-        onModuleChange={setActiveModule}
-        sidebarOpen={sidebarOpen}
-        onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
       />
       
       <div className="flex flex-col lg:flex-row">

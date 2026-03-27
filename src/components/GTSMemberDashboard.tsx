@@ -224,7 +224,7 @@ export function GTSMemberDashboard({ onBackToHome }: GTSMemberDashboardProps) {
       Gold: ["Скидка 15%", "Персональный менеджер", "VIP-мероприятия", "Бесплатная отмена", "Премиум-техника"],
       Platinum: ["Скидка 20%", "Консьерж-сервис", "Эксклюзивные события", "Персональные маршруты", "Трансфер включён", "Приоритет №1"]
     };
-    return privileges[tier] || [];
+    return (privileges as Record<string, string[]>)[tier] || [];
   };
 
   const getNextTierPrivileges = (tier: string) => {
@@ -613,7 +613,7 @@ export function GTSMemberDashboard({ onBackToHome }: GTSMemberDashboardProps) {
                 </h3>
                 
                 <div className="space-y-3 mb-6">
-                  {getTierPrivileges(memberData.tier).map((privilege, index) => (
+                  {getTierPrivileges(memberData.tier).map((privilege: string, index: number) => (
                     <div key={index} className="flex items-center space-x-2">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
                       <span className="text-sm text-white">{privilege}</span>
@@ -624,7 +624,7 @@ export function GTSMemberDashboard({ onBackToHome }: GTSMemberDashboardProps) {
                 <div className="pt-4 border-t border-gray-800">
                   <p className="text-sm text-gray-400 mb-3">Получите доступ к Platinum:</p>
                   <div className="space-y-2">
-                    {getNextTierPrivileges(memberData.tier).slice(0, 3).map((privilege, index) => (
+                    {getNextTierPrivileges(memberData.tier).slice(0, 3).map((privilege: string, index: number) => (
                       <div key={index} className="flex items-center space-x-2">
                         <Check className="w-4 h-4 text-gray-500 flex-shrink-0" />
                         <span className="text-sm text-gray-500">{privilege}</span>

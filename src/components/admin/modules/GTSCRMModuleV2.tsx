@@ -834,7 +834,7 @@ export function GTSCRMModuleV2({ onBack, onNavigateToCalendar }: GTSCRMModuleV2P
                                 size="sm" 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onNavigateToCalendar();
+                                  onNavigateToCalendar?.();
                                 }}
                                 className="bg-blue-500 hover:bg-blue-600"
                               >

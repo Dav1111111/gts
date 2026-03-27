@@ -257,10 +257,10 @@ function UnifiedPartnerCard({ partner, type, onViewDetails, onViewKPI, onViewOpe
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return GTSStyles.badges.success;
-      case 'inactive': return GTSStyles.badges.secondary;
+      case 'inactive': return GTSStyles.badges.outline;
       case 'pending': return GTSStyles.badges.warning;
-      case 'suspended': return GTSStyles.badges.destructive;
-      default: return GTSStyles.badges.secondary;
+      case 'suspended': return GTSStyles.badges.error;
+      default: return GTSStyles.badges.outline;
     }
   };
 

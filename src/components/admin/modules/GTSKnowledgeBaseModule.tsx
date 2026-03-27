@@ -91,7 +91,7 @@ export function GTSKnowledgeBaseModule({ onBack }: GTSKnowledgeBaseModuleProps) 
   const currentUser = {
     id: "user-001",
     name: "Viktor Kuznetsov",
-    role: userRole || 'executive' as UserRole,
+    role: (userRole || 'executive') as UserRole,
     partnerId: userRole === 'partner' ? "partner-premium-travel" : undefined,
     staffId: userRole === 'staff' ? "staff-001" : undefined
   };
@@ -656,9 +656,8 @@ Payload:
                     <div
                       key={index}
                       className="px-3 py-2 cursor-pointer hover:bg-opacity-50"
-                      style={{ 
-                        color: 'var(--gts-portal-text)',
-                        '&:hover': { backgroundColor: 'var(--gts-portal-card)' }
+                      style={{
+                        color: 'var(--gts-portal-text)'
                       }}
                       onClick={() => {
                         setSearchQuery(suggestion);
@@ -671,7 +670,7 @@ Payload:
                 </div>
               )}
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter as (value: string) => void}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>

@@ -1,24 +1,6 @@
-      {/* Modal Forms */}
-      {showNewLeadForm && (
-        <NewLeadForm 
-          onSubmit={handleNewLead}
-          onClose={() => setShowNewLeadForm(false)}
-        />
-      )}
-      
-      {showNewDealForm && (
-        <NewDealForm 
-          onSubmit={handleNewDeal}
-          onClose={() => setShowNewDealForm(false)}
-        />
-      )}
-      
-      {showAutomationBuilder && (
-        <AutomationRuleBuilder 
-          onSubmit={handleNewAutomation}
-          onClose={() => setShowAutomationBuilder(false)}
-        />
-      )}
-    </div>
-  );
+// Legacy cleanup placeholder kept so TypeScript does not parse a stale JSX fragment.
+export function GTSCRMModuleCompleteEnd() {
+  return null;
 }
+
+export default GTSCRMModuleCompleteEnd;

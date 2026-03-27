@@ -627,7 +627,7 @@ export function GTSAPIIntegrationsExtended({ userRole }: APIIntegrationsProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Switch checked={webhook.active} size="sm" />
+                        <Switch checked={webhook.active} />
                         <Badge variant={webhook.active ? "default" : "secondary"}>
                           {webhook.active ? 'Активен' : 'Отключен'}
                         </Badge>
@@ -703,7 +703,7 @@ export function GTSAPIIntegrationsExtended({ userRole }: APIIntegrationsProps) {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-medium">{automation.name}</h3>
                   <div className="flex items-center gap-2">
-                    <Switch checked={automation.active} size="sm" />
+                    <Switch checked={automation.active} />
                     <Badge variant={automation.active ? "default" : "secondary"}>
                       {automation.active ? 'Активен' : 'Отключен'}
                     </Badge>

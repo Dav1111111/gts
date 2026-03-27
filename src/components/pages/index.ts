@@ -48,8 +48,8 @@ export { FeaturesSection } from "../FeaturesSection";
 export { HeroSection } from "../HeroSection";
 export { ToursSection } from "../ToursSection";
 
-// Executive Access (потенциально переместить в /portals/admin)
-export { GTSExecutiveAccess } from "../GTSExecutiveAccess";
+// Executive Access - removed (functionality integrated into navigation)
+// export { GTSExecutiveAccess } from "../GTSExecutiveAccess";
 
 // UI Library Demo
-export { GTSUILibrary } from "../GTSUILibrary";
+export { default as GTSUILibrary } from "../GTSUILibrary";

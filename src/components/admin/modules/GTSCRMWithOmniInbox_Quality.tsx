@@ -1,3 +1,4 @@
+// @ts-nocheck — This file is a JSX fragment extracted for reference, not a standalone module.
           {/* Quality & Trends Tab */}
           <TabsContent value="quality" className="mt-6">
             <div className="space-y-6">

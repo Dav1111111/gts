@@ -178,7 +178,7 @@ function DraggableDealCard({ deal, onScheduleMeeting }: { deal: Deal; onSchedule
 
   return (
     <Card 
-      ref={drag}
+      ref={drag as any}
       className={`bg-[#17181A] border-[#232428] cursor-move transition-all duration-200 ${
         isDragging ? 'opacity-50 transform rotate-2 scale-105' : 'hover:bg-[#1A1B1D] hover:shadow-lg'
       }`}
@@ -305,7 +305,7 @@ function DroppableStageColumn({
 
   return (
     <div 
-      ref={drop}
+      ref={drop as any}
       className={`space-y-4 transition-all duration-200 ${
         isOver && canDrop ? 'bg-[#17181A]/50 rounded-lg p-2' : ''
       }`}

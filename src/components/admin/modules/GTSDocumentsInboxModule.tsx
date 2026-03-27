@@ -92,6 +92,35 @@ interface VersionHistoryItem {
   content: string;
 }
 
+interface DocumentItem {
+  id: string;
+  name: string;
+  type: string;
+  size: string;
+  date: string;
+  status: string;
+  entity: string;
+  category: string;
+  urgency: 'critical' | 'warning' | 'normal';
+  expires?: string;
+  daysUntilExpiry?: number;
+  partner?: string;
+  staff?: string;
+}
+
+interface NotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  category: string;
+  priority: string;
+  read: boolean;
+  assignee?: string;
+  partner?: string;
+  entityType?: string;
+}
+
 export function GTSDocumentsInboxModule({ onBack }: GTSDocumentsInboxModuleProps) {
   const { userRole } = useAuth();
   const [activeTab, setActiveTab] = useState("articles");
@@ -104,12 +133,17 @@ export function GTSDocumentsInboxModule({ onBack }: GTSDocumentsInboxModuleProps
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [urgencyFilter, setUrgencyFilter] = useState("all");
+  const [partnerFilter, setPartnerFilter] = useState("all");
+  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<string | null>(null);
 
   // Симуляция текущего пользователя
   const currentUser = {
     id: "user-001",
     name: "Viktor Kuznetsov",
-    role: userRole || 'executive' as UserRole,
+    role: (userRole || 'executive') as UserRole,
     partnerId: userRole === 'partner' ? "partner-premium-travel" : undefined,
     staffId: userRole === 'staff' ? "staff-001" : undefined
   };
@@ -603,15 +637,46 @@ Payload:
     });
   };
 
-  const documents: Record<string, any[]> = {
-    legacy: [] // Keeping the structure but emptying legacy document data
+  const documents: Record<string, DocumentItem[]> = {
+    contracts: [],
+    acts: [],
+    insurance: [],
+    licenses: [],
+    legacy: []
+  };
+
+  const notifications: Record<string, NotificationItem[]> = {
+    alerts: [],
+    tickets: [],
+    escalations: []
+  };
+
+  // Role-based document access
+  const getAccessibleDocuments = (docs: DocumentItem[]): DocumentItem[] => {
+    switch (currentUser.role) {
+      case 'executive':
+      case 'finance':
+        return docs;
+      case 'partner':
+        return docs.filter(doc => doc.partner === currentUser.partnerId || doc.category === 'contracts');
+      case 'staff':
+        return docs.filter(doc => doc.staff === currentUser.staffId || doc.category === 'operations');
+      case 'operator':
+        return docs.filter(doc => doc.category === 'operations' || doc.category === 'maintenance');
+      case 'crew':
+        return docs.filter(doc => doc.category === 'safety' || doc.category === 'operations');
+      case 'it':
+        return docs.filter(doc => doc.category === 'technical' || doc.category === 'compliance');
+      default:
+        return [];
+    }
   };
 
 
 
 
 
-  const getUrgencyColor = (urgency: Document['urgency'], status: string) => {
+  const getUrgencyColor = (urgency: DocumentItem['urgency'], status: string) => {
     if (status === 'expired') return "bg-red-600 text-white border border-red-500";
     
     switch (urgency) {
@@ -646,7 +711,7 @@ Payload:
     return colors[priority as keyof typeof colors] || "text-gray-400";
   };
 
-  const getCategoryIcon = (category: string) => {
+  const getDocCategoryIcon = (category: string) => {
     const icons = {
       compliance: <Shield className="h-4 w-4" />,
       insurance: <Building className="h-4 w-4" />,
@@ -656,7 +721,8 @@ Payload:
       operations: <Calendar className="h-4 w-4" />,
       customer_service: <MessageSquare className="h-4 w-4" />,
       safety: <Shield className="h-4 w-4" />,
-      legal: <FileText className="h-4 w-4" />
+      legal: <FileText className="h-4 w-4" />,
+      documentation: <FileCheck className="h-4 w-4" />
     };
     return icons[category as keyof typeof icons] || <Bell className="h-4 w-4" />;
   };
@@ -1178,7 +1244,7 @@ Payload:
                         >
                           <div className="flex items-center gap-4">
                             <div className="p-2 rounded-lg bg-blue-500/10">
-                              {getCategoryIcon(notification.category)}
+                              {getDocCategoryIcon(notification.category)}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
@@ -1233,7 +1299,7 @@ Payload:
                         <div className="space-y-4">
                           <div>
                             <div className="flex items-center gap-2 mb-2">
-                              {getCategoryIcon(notification.category)}
+                              {getDocCategoryIcon(notification.category)}
                               <h3 className="font-medium" style={{ color: 'var(--gts-portal-text)' }}>
                                 {notification.title}
                               </h3>
