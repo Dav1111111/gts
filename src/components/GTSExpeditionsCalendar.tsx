@@ -942,8 +942,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const isCompactView = timelineView === "compact";
   const isCondensedView = timelineView !== "full";
   const showArrowNav = !isCompactView && hasMultipleExpeditions;
-  const showTrackTreads = false;
-  const visibleDecorations = useMemo<Decoration[]>(() => [], []);
+  const showTrackTreads = true;
+  const roadWidth = isCompactView ? 36 : isCondensedView ? 44 : 52;
+  const visibleDecorations = useMemo(() => DECORATIONS, []);
   const decorationScale = isCompactView ? 0.72 : isCondensedView ? 0.88 : 1;
   const fadeWidth = isCompactView ? 12 : 20;
 
@@ -1242,7 +1243,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       >
         {showArrowNav && (
           <motion.button
-            className="absolute left-6 top-3 z-40 flex items-center gap-0.5 transition-colors"
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-40 flex items-center gap-0.5 transition-colors"
             style={{
               color: "rgba(255,107,97,0.92)",
             }}
@@ -1258,7 +1259,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
         {showArrowNav && (
           <motion.button
-            className="absolute right-6 top-3 z-40 flex items-center gap-0.5 transition-colors"
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-40 flex items-center gap-0.5 transition-colors"
             style={{
               color: "rgba(255,107,97,0.92)",
             }}
@@ -1302,15 +1303,23 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               <path ref={pathRef} d={ROUTE_PATH} fill="none" stroke="none" />
               {TIMELINE_COPIES.map((copy) => (
                 <g key={copy} transform={`translate(${(copy - 1) * CYCLE_WIDTH}, 0)`}>
+                  {/* Road surface */}
                   <path
                     d={ROUTE_PATH}
                     fill="none"
-                    stroke="rgba(255,255,255,0.82)"
-                    strokeWidth={isCompactView ? 2.2 : 2.8}
+                    stroke="rgba(35,36,40,0.95)"
+                    strokeWidth={roadWidth}
                     strokeLinecap="round"
-                    strokeDasharray={isCompactView ? "12 12" : "14 14"}
                     strokeLinejoin="round"
                   />
+                  {/* Road edge lines */}
+                  {leftWall && (
+                    <path d={leftWall} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1.2} />
+                  )}
+                  {rightWall && (
+                    <path d={rightWall} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1.2} />
+                  )}
+                  {/* Tread blocks */}
                   {showTrackTreads &&
                     treadBlocks.map((b, i) => (
                       <rect
@@ -1320,10 +1329,20 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                         width={9}
                         height={4}
                         rx={1}
-                        fill="transparent"
+                        fill="rgba(255,255,255,0.05)"
                         transform={`translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${b.angle.toFixed(1)})`}
                       />
                     ))}
+                  {/* Center dashed line */}
+                  <path
+                    d={ROUTE_PATH}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.82)"
+                    strokeWidth={isCompactView ? 2.2 : 2.8}
+                    strokeLinecap="round"
+                    strokeDasharray={isCompactView ? "12 12" : "14 14"}
+                    strokeLinejoin="round"
+                  />
                 </g>
               ))}
             </svg>
