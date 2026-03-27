@@ -15,14 +15,17 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
 
 /* ─── Constants ─── */
-const MONTH_TRACK_WIDTH = 220;
+const MONTH_TRACK_WIDTH = 244;
 const CYCLE_WIDTH = MONTH_TRACK_WIDTH * 12;
 const MAP_WIDTH = CYCLE_WIDTH * 3;
-const TIMELINE_PADDING = 120;
+const TIMELINE_PADDING = 136;
 const TIMELINE_COPIES = [0, 1, 2] as const;
-const ROUTE_PROFILE_FULL = [286, 270, 290, 336, 388, 202, 378, 212, 366, 220, 274, 286] as const;
-const ROUTE_PROFILE_CONDENSED = [276, 264, 280, 320, 362, 206, 350, 214, 340, 222, 270, 280] as const;
-const ROUTE_PROFILE_COMPACT = [232, 224, 236, 270, 308, 168, 298, 176, 288, 184, 228, 236] as const;
+const ROUTE_PROFILE_FULL = [312, 284, 326, 394, 344, 222, 296, 362, 316, 236, 282, 320] as const;
+const ROUTE_PROFILE_CONDENSED = [286, 266, 298, 354, 318, 196, 268, 332, 292, 208, 254, 288] as const;
+const ROUTE_PROFILE_COMPACT = [244, 228, 252, 304, 274, 164, 236, 292, 258, 178, 222, 248] as const;
+const MONTH_HEADER_TOPS_FULL = [30, 126, 74, 34, 122, 66, 132, 48, 124, 62, 118, 44] as const;
+const MONTH_HEADER_TOPS_CONDENSED = [20, 98, 58, 24, 96, 52, 102, 38, 98, 52, 94, 34] as const;
+const MONTH_HEADER_TOPS_COMPACT = [16, 74, 42, 18, 76, 42, 82, 30, 76, 40, 74, 28] as const;
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -278,6 +281,7 @@ const expeditions = [
 
 /* ─── Month labels ─── */
 const MONTHS = TIMELINE_MONTHS.map((label, index) => ({
+  index,
   label,
   x: index * MONTH_TRACK_WIDTH + MONTH_TRACK_WIDTH / 2,
 }));
@@ -780,13 +784,18 @@ interface GTSExpeditionsCalendarProps {
 export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarProps = {}) {
   const { expeditions: ctxExpeditions } = useExpeditions();
   const [timelineView, setTimelineView] = useState<"full" | "condensed" | "compact">("full");
-  const mapHeight = timelineView === "compact" ? 420 : timelineView === "condensed" ? 500 : 540;
+  const mapHeight = timelineView === "compact" ? 430 : timelineView === "condensed" ? 510 : 560;
   const routeProfile = timelineView === "compact"
     ? ROUTE_PROFILE_COMPACT
     : timelineView === "condensed"
       ? ROUTE_PROFILE_CONDENSED
       : ROUTE_PROFILE_FULL;
-  const monthInset = timelineView === "compact" ? 32 : timelineView === "condensed" ? 38 : 44;
+  const monthHeaderTops = timelineView === "compact"
+    ? MONTH_HEADER_TOPS_COMPACT
+    : timelineView === "condensed"
+      ? MONTH_HEADER_TOPS_CONDENSED
+      : MONTH_HEADER_TOPS_FULL;
+  const monthInset = timelineView === "compact" ? 34 : timelineView === "condensed" ? 40 : 48;
   const expeditions: Expedition[] = useMemo(() => {
     const mapped = ctxExpeditions.map((e) => {
       const { start, end } = inferExpeditionDates({
@@ -930,13 +939,15 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const hasMultipleExpeditions = expeditions.length > 1;
   const isCompactView = timelineView === "compact";
   const isCondensedView = timelineView !== "full";
+  const showArrowNav = !isCompactView && hasMultipleExpeditions;
+  const showTrackTreads = timelineView === "full";
   const visibleDecorations = useMemo(() => {
     if (isCompactView) {
-      return DECORATIONS.filter((dec) => ["mountains1", "papakha", "tower", "eagle"].includes(dec.id));
+      return DECORATIONS.filter((dec) => ["crimea", "mountains1", "eagle", "elbrus"].includes(dec.id));
     }
 
     if (isCondensedView) {
-      return DECORATIONS.filter((dec) => !["tire", "kinzhal"].includes(dec.id));
+      return DECORATIONS.filter((dec) => !["tire", "kinzhal", "flag"].includes(dec.id));
     }
 
     return DECORATIONS;
@@ -1064,16 +1075,6 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       isDrag = false;
       el.style.cursor = "grab";
     };
-    const onTouchStart = (e: TouchEvent) => {
-      isDrag = true;
-      startX = e.touches[0].pageX;
-      scrollStart = el.scrollLeft;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDrag) return;
-      el.scrollLeft = scrollStart - (e.touches[0].pageX - startX);
-    };
-    const onTouchEnd = () => { isDrag = false; };
 
     const onScroll = () => {
       if (el.scrollLeft < CYCLE_WIDTH * 0.5) {
@@ -1086,18 +1087,12 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     el.addEventListener("mousedown", onDown);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: true });
-    el.addEventListener("touchend", onTouchEnd);
     el.addEventListener("scroll", onScroll);
 
     return () => {
       el.removeEventListener("mousedown", onDown);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
-      el.removeEventListener("touchend", onTouchEnd);
       el.removeEventListener("scroll", onScroll);
     };
   }, []);
@@ -1179,7 +1174,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               className="text-white/45 mt-3"
               style={{ fontSize: "clamp(13px, 1.2vw, 16px)", maxWidth: 520 }}
             >
-              Листайте непрерывный 12-месячный цикл и выбирайте экспедиции по дате старта.
+              Календарная трасса сезона с ручной композицией по месяцам. На телефоне карту можно листать пальцем.
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -1195,49 +1190,55 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             )}
             <div className="flex items-center gap-2 text-white/30" style={{ fontSize: 13 }}>
               <GripHorizontal className="w-4 h-4" />
-              <span>Тяните шкалу для навигации</span>
+              <span>{isCompactView ? "Листайте карту пальцем" : "Тяните карту или листайте стрелками"}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* ═══ Route Map ═══ */}
-      <div className="relative">
-        {/* Navigation arrow — LEFT */}
-        <motion.button
-          className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
-          style={{
-            width: arrowSize, height: arrowSize,
-            background: "rgba(145,4,12,0.6)",
-            border: "1px solid rgba(145,4,12,0.8)",
-            opacity: hasMultipleExpeditions ? 1 : 0.3,
-            pointerEvents: hasMultipleExpeditions ? "auto" : "none",
-          }}
-          onClick={goPrev}
-          animate={{ x: [0, -4, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.1, background: "rgba(145,4,12,0.9)" }}
-        >
-          <ChevronLeft className="w-6 h-6 text-white" />
-        </motion.button>
+      <div
+        className="relative"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.07), transparent 42%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0))",
+        }}
+      >
+        {showArrowNav && (
+          <motion.button
+            className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
+            style={{
+              width: arrowSize,
+              height: arrowSize,
+              background: "rgba(145,4,12,0.6)",
+              border: "1px solid rgba(145,4,12,0.8)",
+            }}
+            onClick={goPrev}
+            animate={{ x: [0, -4, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            whileHover={{ scale: 1.1, background: "rgba(145,4,12,0.9)" }}
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </motion.button>
+        )}
 
-        {/* Navigation arrow — RIGHT */}
-        <motion.button
-          className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
-          style={{
-            width: arrowSize, height: arrowSize,
-            background: "rgba(145,4,12,0.6)",
-            border: "1px solid rgba(145,4,12,0.8)",
-            opacity: hasMultipleExpeditions ? 1 : 0.3,
-            pointerEvents: hasMultipleExpeditions ? "auto" : "none",
-          }}
-          onClick={goNext}
-          animate={{ x: [0, 4, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.1, background: "rgba(145,4,12,0.9)" }}
-        >
-          <ChevronRight className="w-6 h-6 text-white" />
-        </motion.button>
+        {showArrowNav && (
+          <motion.button
+            className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors"
+            style={{
+              width: arrowSize,
+              height: arrowSize,
+              background: "rgba(145,4,12,0.6)",
+              border: "1px solid rgba(145,4,12,0.8)",
+            }}
+            onClick={goNext}
+            animate={{ x: [0, 4, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            whileHover={{ scale: 1.1, background: "rgba(145,4,12,0.9)" }}
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </motion.button>
+        )}
 
         {/* Gradient fades */}
         <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-black to-transparent z-30 pointer-events-none" style={{ width: `${fadeWidth}rem` }} />
@@ -1247,19 +1248,33 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         <div
           ref={scrollRef}
           className="tire-scroll overflow-x-auto"
-          style={{ cursor: "grab", height: mapHeight }}
+          style={{
+            cursor: isCompactView ? "auto" : "grab",
+            height: mapHeight,
+            touchAction: "pan-x",
+            WebkitOverflowScrolling: "touch",
+            overscrollBehaviorX: "contain",
+          }}
         >
           <div
             className="relative select-none"
             style={{ width: MAP_WIDTH, height: mapHeight }}
-            >
-              {renderedMonths.map(({ key, label, x }) => (
-                <div
-                  key={`${key}-line`}
-                  className="absolute top-0 bottom-0 pointer-events-none"
-                  style={{ left: x, width: 1, background: "rgba(255,255,255,0.05)", zIndex: 0 }}
-                />
-              ))}
+          >
+            {renderedMonths.map(({ key, index, x }) => (
+              <div
+                key={`${key}-band`}
+                className="absolute pointer-events-none"
+                style={{
+                  left: x - MONTH_TRACK_WIDTH / 2 + (isCompactView ? 18 : 24),
+                  top: 0,
+                  width: MONTH_TRACK_WIDTH - (isCompactView ? 36 : 48),
+                  height: mapHeight,
+                  background: `linear-gradient(180deg, rgba(255,255,255,${index % 2 === 0 ? 0.038 : 0.022}) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.014) 100%)`,
+                  opacity: isCompactView ? 0.65 : 1,
+                  zIndex: 0,
+                }}
+              />
+            ))}
 
             {/* ── SVG: Tire tread track ── */}
             <svg
@@ -1271,42 +1286,113 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               <path ref={pathRef} d={ROUTE_PATH} fill="none" stroke="none" />
               {TIMELINE_COPIES.map((copy) => (
                 <g key={copy} transform={`translate(${(copy - 1) * CYCLE_WIDTH}, 0)`}>
-                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.028)" strokeWidth="38" strokeLinecap="round" />
-                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="28" strokeLinecap="round" />
-                  {leftWall && <path d={leftWall} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.4" strokeLinecap="round" />}
-                  {rightWall && <path d={rightWall} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.4" strokeLinecap="round" />}
-                  {treadBlocks.map((b, i) => (
-                    <rect
-                      key={i}
-                      x={-4.5} y={-2} width={9} height={4} rx={1}
-                      fill="rgba(255,255,255,0.24)"
-                      transform={`translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${b.angle.toFixed(1)})`}
+                  <path
+                    d={ROUTE_PATH}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.018)"
+                    strokeWidth={isCompactView ? 36 : isCondensedView ? 42 : 48}
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d={ROUTE_PATH}
+                    fill="none"
+                    stroke="rgba(145,4,12,0.14)"
+                    strokeWidth={isCompactView ? 18 : isCondensedView ? 22 : 24}
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d={ROUTE_PATH}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.05)"
+                    strokeWidth={isCompactView ? 22 : isCondensedView ? 26 : 30}
+                    strokeLinecap="round"
+                  />
+                  {leftWall && (
+                    <path
+                      d={leftWall}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.2)"
+                      strokeWidth={isCompactView ? 1 : 1.35}
+                      strokeLinecap="round"
                     />
-                  ))}
-                  <path d={ROUTE_PATH} fill="none" stroke="rgba(255,255,255,0.045)" strokeWidth="1" strokeDasharray="5,7" />
+                  )}
+                  {rightWall && (
+                    <path
+                      d={rightWall}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.2)"
+                      strokeWidth={isCompactView ? 1 : 1.35}
+                      strokeLinecap="round"
+                    />
+                  )}
+                  {showTrackTreads &&
+                    treadBlocks.map((b, i) => (
+                      <rect
+                        key={i}
+                        x={-4.5}
+                        y={-2}
+                        width={9}
+                        height={4}
+                        rx={1}
+                        fill="rgba(255,255,255,0.18)"
+                        transform={`translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${b.angle.toFixed(1)})`}
+                      />
+                    ))}
+                  <path
+                    d={ROUTE_PATH}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.07)"
+                    strokeWidth="1"
+                    strokeDasharray={isCompactView ? "4,10" : "6,10"}
+                  />
                 </g>
               ))}
             </svg>
 
             {/* ── Month labels ── */}
-            {renderedMonths.map(({ key, label, x }) => (
+            {renderedMonths.map(({ key, label, index, x }) => (
               <div
                 key={key}
                 className="absolute z-10 select-none pointer-events-none"
-                style={{ left: x, top: "50%", transform: "translateY(-50%)" }}
+                style={{
+                  left: x,
+                  top: monthHeaderTops[index],
+                  transform: "translateX(-50%)",
+                }}
               >
-                <span
-                  className="block text-white/80 tracking-[0.5em]"
+                <div className="flex items-center gap-3">
+                  <span
+                    className="uppercase"
+                    style={{
+                      color: "rgba(255,255,255,0.35)",
+                      fontSize: isCompactView ? 10 : 11,
+                      letterSpacing: "0.22em",
+                    }}
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div
+                    style={{
+                      width: isCompactView ? 30 : isCondensedView ? 44 : 62,
+                      height: 1,
+                      background: "rgba(255,255,255,0.18)",
+                    }}
+                  />
+                </div>
+                <div
+                  className="uppercase"
                   style={{
-                    writingMode: "vertical-rl",
-                    transform: "rotate(180deg)",
-                    fontSize: isCompactView ? 12 : isCondensedView ? 15 : 18,
-                    fontWeight: 500,
-                    letterSpacing: isCompactView ? "0.18em" : isCondensedView ? "0.34em" : "0.5em",
+                    marginTop: isCompactView ? 6 : 8,
+                    color: "rgba(255,255,255,0.9)",
+                    fontSize: isCompactView ? 12 : isCondensedView ? 18 : 24,
+                    fontWeight: 700,
+                    letterSpacing: isCompactView ? "0.14em" : isCondensedView ? "0.2em" : "0.26em",
+                    textShadow: "0 0 24px rgba(0,0,0,0.4)",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {isCompactView ? label.slice(0, 3) : label}
-                </span>
+                </div>
               </div>
             ))}
 
@@ -1314,9 +1400,23 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             {renderedExpeditions.map((exp, index) => {
               const isHovered = hoveredId === exp.id;
               const isSelected = selectedId === exp.id;
-              const showLabel = !isCondensedView || isSelected || isHovered;
+              const showLabel = isCompactView
+                ? isSelected
+                : isCondensedView
+                  ? isSelected || isHovered || exp.isFeatured
+                  : true;
               const pinColor = isSelected ? "#91040C" : isHovered ? "#ffffff" : "rgba(255,255,255,0.6)";
               const pinFill = isSelected ? "#91040C" : exp.isFeatured ? "rgba(145,4,12,0.65)" : isHovered ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)";
+              const labelConnector = (
+                <div
+                  style={{
+                    width: 1,
+                    height: isCompactView ? 12 : 16,
+                    background: isSelected ? "rgba(145,4,12,0.85)" : "rgba(255,255,255,0.18)",
+                    margin: "0 auto",
+                  }}
+                />
+              );
 
               return (
                 <motion.div
@@ -1341,50 +1441,76 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                           left: `calc(50% + ${exp.labelOffsetX}px)`,
                           transform: "translateX(-50%)",
                           ...(exp.labelAbove ? { bottom: "calc(100% + 10px)" } : { top: "calc(100% + 10px)" }),
-                          textAlign: "center",
-                          whiteSpace: isCompactView ? "normal" : "nowrap",
-                          width: isCompactView ? 110 : isCondensedView ? 140 : "auto",
-                          maxWidth: isCompactView ? 110 : isCondensedView ? 140 : 220,
+                          textAlign: isCompactView ? "left" : "center",
+                          whiteSpace: "normal",
+                          width: isCompactView ? 148 : isCondensedView ? 164 : 208,
+                          maxWidth: isCompactView ? 148 : isCondensedView ? 164 : 208,
                         }}
                         onClick={(e) => { e.stopPropagation(); handleSelect(exp.id, true); }}
                       >
                         <div
+                          className="flex"
                           style={{
-                            color: "#91040C",
-                            fontSize: isCompactView ? 11 : 12,
-                            letterSpacing: isCompactView ? "0.05em" : "0.08em",
-                            marginBottom: 4,
-                            opacity: isSelected ? 1 : 0.78,
-                            fontWeight: 500,
+                            flexDirection: exp.labelAbove ? "column" : "column-reverse",
+                            gap: 8,
+                            alignItems: isCompactView ? "flex-start" : "center",
                           }}
                         >
-                          {exp.dateRange}
-                        </div>
-                        <div
-                          style={{
-                            color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
-                            fontSize: isCompactView ? (isSelected ? 13 : 11) : isCondensedView ? (isSelected ? 15 : 12) : isSelected ? 18 : 16,
-                            letterSpacing: isCompactView ? "0.04em" : isCondensedView ? "0.06em" : "0.08em",
-                            fontWeight: 700,
-                            transition: "all 0.2s ease",
-                            textShadow: isSelected ? "0 0 20px rgba(145,4,12,0.5)" : "none",
-                            lineHeight: isCompactView ? 1.15 : 1.2,
-                            wordBreak: isCondensedView ? "break-word" : "normal",
-                          }}
-                        >
-                          {isCondensedView && !isSelected ? getCompactTitle(exp.title) : exp.title}
-                        </div>
-                        <div style={{ marginTop: 4 }}>
-                          {exp.status === "upcoming" ? (
-                            <div className="flex items-center justify-center gap-1.5">
-                              <div className="rounded-full animate-pulse" style={{ width: 5, height: 5, background: "#22c55e" }} />
-                              <span style={{ color: "#22c55e", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>идёт набор</span>
+                          {labelConnector}
+                          <div
+                            style={{
+                              padding: isCompactView ? "0" : "2px 0",
+                            }}
+                          >
+                            <div
+                              style={{
+                                color: "#91040C",
+                                fontSize: isCompactView ? 10 : 11,
+                                letterSpacing: isCompactView ? "0.06em" : "0.1em",
+                                marginBottom: 4,
+                                opacity: isSelected ? 1 : 0.84,
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {exp.dateRange}
                             </div>
-                          ) : exp.status === "completed" ? (
-                            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>завершена</div>
-                          ) : (
-                            <div style={{ color: "rgba(255,255,255,0.3)", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>набор закрыт</div>
-                          )}
+                            <div
+                              style={{
+                                color: isSelected ? "#fff" : "rgba(255,255,255,0.92)",
+                                fontSize: isCompactView ? 13 : isCondensedView ? (isSelected ? 15 : 13) : isSelected ? 18 : 16,
+                                letterSpacing: isCompactView ? "0.03em" : isCondensedView ? "0.05em" : "0.08em",
+                                fontWeight: 700,
+                                transition: "all 0.2s ease",
+                                textShadow: isSelected ? "0 0 20px rgba(145,4,12,0.42)" : "none",
+                                lineHeight: isCompactView ? 1.12 : 1.18,
+                                wordBreak: "break-word",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {isCondensedView && !isSelected ? getCompactTitle(exp.title) : exp.title}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 5,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: isCompactView ? "flex-start" : "center",
+                                gap: 6,
+                              }}
+                            >
+                              {exp.status === "upcoming" ? (
+                                <>
+                                  <div className="rounded-full animate-pulse" style={{ width: 5, height: 5, background: "#22c55e" }} />
+                                  <span style={{ color: "#22c55e", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>идёт набор</span>
+                                </>
+                              ) : exp.status === "completed" ? (
+                                <span style={{ color: "rgba(255,255,255,0.5)", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>завершена</span>
+                              ) : (
+                                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: isCompactView ? 10 : 11, letterSpacing: "0.04em" }}>набор закрыт</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
