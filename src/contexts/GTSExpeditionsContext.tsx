@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode, useMemo, useEffect } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useMemo, useEffect, useRef } from "react";
 import { useGTSAuth } from "./GTSAuthContext";
 
 /* ═══════════════════════════════════════════════
@@ -621,81 +621,110 @@ const GTSExpeditionsContext = createContext<GTSExpeditionsContextType | undefine
 export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useGTSAuth();
   const [expeditions, setExpeditions] = useState<ExpeditionData[]>(() => loadCachedExpeditions());
+  const expeditionsRef = useRef(expeditions);
   const isManagementUser = isAuthenticated && (user?.role === "staff" || user?.role === "executive");
+
+  useEffect(() => {
+    expeditionsRef.current = expeditions;
+  }, [expeditions]);
+
+  const refreshFromSupabase = useCallback(async () => {
+    const remote = await loadSupabaseExpeditions();
+
+    if (remote.status !== "success") {
+      return remote;
+    }
+
+    setExpeditions((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(remote.data)) {
+        return prev;
+      }
+
+      return remote.data;
+    });
+    cacheExpeditions(remote.data);
+
+    return remote;
+  }, []);
 
   /* ── Load from Supabase on mount, seed if table is empty and a manager is authenticated ── */
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const remote = await loadSupabaseExpeditions();
+      const remote = await refreshFromSupabase();
       if (cancelled) return;
 
       if (remote.status === "success") {
-        setExpeditions(remote.data);
-        cacheExpeditions(remote.data);
         return;
       }
 
       if (remote.status === "empty" && isManagementUser) {
-        const sourceForSeed = expeditions.length ? expeditions : DEFAULT_EXPEDITIONS;
+        const sourceForSeed = expeditionsRef.current.length ? expeditionsRef.current : DEFAULT_EXPEDITIONS;
         const seeded = await seedSupabase(sourceForSeed);
         if (cancelled) return;
 
         if (seeded) {
-          setExpeditions(sourceForSeed);
-          cacheExpeditions(sourceForSeed);
+          await refreshFromSupabase();
         } else {
           console.warn("[GTS] Supabase table is empty and seed failed, keeping cached expeditions.");
         }
       }
     })();
     return () => { cancelled = true; };
-  }, [isManagementUser]);
+  }, [isManagementUser, refreshFromSupabase]);
 
-  /* ── Supabase Realtime: sync changes from other users ── */
+  /* ── Supabase Realtime + fallback sync ── */
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let channel: any = null;
+    let isMounted = true;
+
+    const syncVisibleClient = () => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+        return;
+      }
+
+      void refreshFromSupabase();
+    };
 
     (async () => {
       const { supabase } = await import("../utils/supabase/client");
+      if (!isMounted) return;
+
       channel = supabase
         .channel("expeditions-realtime")
         .on(
           "postgres_changes" as any,
           { event: "*", schema: "public", table: SUPABASE_TABLE },
-          (payload: any) => {
-            const eventType = payload.eventType as string;
-            const newRow = payload.new as { id: string; data: ExpeditionData } | undefined;
-            const oldRow = payload.old as { id: string } | undefined;
-
-            if (eventType === "INSERT" && newRow) {
-              const exp = sanitizeExpeditionForStorage({ ...newRow.data, id: newRow.id });
-              if (exp.isDeleted) return;
-              setExpeditions(prev => {
-                if (prev.some(e => e.id === exp.id)) return prev;
-                return [...prev, exp];
-              });
-            } else if (eventType === "UPDATE" && newRow) {
-              const exp = sanitizeExpeditionForStorage({ ...newRow.data, id: newRow.id });
-              if (exp.isDeleted) {
-                setExpeditions(prev => prev.filter(e => e.id !== exp.id));
-              } else {
-                setExpeditions(prev => {
-                  const exists = prev.some(e => e.id === exp.id);
-                  if (exists) return prev.map(e => e.id === exp.id ? exp : e);
-                  return [...prev, exp];
-                });
-              }
-            } else if (eventType === "DELETE" && oldRow) {
-              setExpeditions(prev => prev.filter(e => e.id !== oldRow.id));
-            }
+          () => {
+            void refreshFromSupabase();
           }
         )
-        .subscribe();
+        .subscribe((status: string) => {
+          if (status === "SUBSCRIBED") {
+            void refreshFromSupabase();
+            return;
+          }
+
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            console.warn(`[GTS] Expeditions realtime status: ${status}`);
+          }
+        });
     })();
 
+    const intervalId = window.setInterval(syncVisibleClient, 10000);
+    const onFocus = () => syncVisibleClient();
+    const onVisibilityChange = () => syncVisibleClient();
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+
       if (channel) {
         (async () => {
           const { supabase } = await import("../utils/supabase/client");
@@ -703,7 +732,7 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
         })();
       }
     };
-  }, []);
+  }, [refreshFromSupabase]);
 
   /* ── Keep localStorage cache in sync ── */
   useEffect(() => {
