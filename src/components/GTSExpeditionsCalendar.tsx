@@ -18,9 +18,9 @@ const TIMELINE_PADDING_FULL = 160;
 const TIMELINE_PADDING_CONDENSED = 120;
 const TIMELINE_PADDING_COMPACT = 84;
 const MIN_MAP_WIDTH_DESKTOP = 1800;
-const ROUTE_PROFILE_FULL = [248, 150, 292, 334, 168, 308, 158, 324, 172, 300, 194, 282] as const;
-const ROUTE_PROFILE_CONDENSED = [225, 134, 258, 292, 148, 270, 142, 284, 152, 262, 174, 246] as const;
-const ROUTE_PROFILE_COMPACT = [188, 110, 216, 246, 122, 228, 118, 238, 128, 222, 146, 206] as const;
+const ROUTE_PROFILE_FULL = [340, 200, 400, 460, 220, 420, 210, 440, 230, 410, 260, 380] as const;
+const ROUTE_PROFILE_CONDENSED = [300, 175, 350, 400, 195, 370, 185, 390, 200, 360, 230, 340] as const;
+const ROUTE_PROFILE_COMPACT = [250, 145, 290, 330, 160, 300, 155, 320, 165, 295, 190, 275] as const;
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -758,7 +758,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const isCompactView = timelineView === "compact";
   const isCondensedView = timelineView === "condensed";
   const isNarrowView = timelineView !== "full";
-  const mapHeight = isCompactView ? 300 : isCondensedView ? 360 : 430;
+  const mapHeight = isCompactView ? 420 : isCondensedView ? 520 : 600;
   const routeProfile = timelineView === "compact"
     ? ROUTE_PROFILE_COMPACT
     : timelineView === "condensed"

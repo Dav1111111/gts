@@ -652,6 +652,59 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [isManagementUser]);
 
+  /* ── Supabase Realtime: sync changes from other users ── */
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channel: any = null;
+
+    (async () => {
+      const { supabase } = await import("../utils/supabase/client");
+      channel = supabase
+        .channel("expeditions-realtime")
+        .on(
+          "postgres_changes" as any,
+          { event: "*", schema: "public", table: SUPABASE_TABLE },
+          (payload: any) => {
+            const eventType = payload.eventType as string;
+            const newRow = payload.new as { id: string; data: ExpeditionData } | undefined;
+            const oldRow = payload.old as { id: string } | undefined;
+
+            if (eventType === "INSERT" && newRow) {
+              const exp = sanitizeExpeditionForStorage({ ...newRow.data, id: newRow.id });
+              if (exp.isDeleted) return;
+              setExpeditions(prev => {
+                if (prev.some(e => e.id === exp.id)) return prev;
+                return [...prev, exp];
+              });
+            } else if (eventType === "UPDATE" && newRow) {
+              const exp = sanitizeExpeditionForStorage({ ...newRow.data, id: newRow.id });
+              if (exp.isDeleted) {
+                setExpeditions(prev => prev.filter(e => e.id !== exp.id));
+              } else {
+                setExpeditions(prev => {
+                  const exists = prev.some(e => e.id === exp.id);
+                  if (exists) return prev.map(e => e.id === exp.id ? exp : e);
+                  return [...prev, exp];
+                });
+              }
+            } else if (eventType === "DELETE" && oldRow) {
+              setExpeditions(prev => prev.filter(e => e.id !== oldRow.id));
+            }
+          }
+        )
+        .subscribe();
+    })();
+
+    return () => {
+      if (channel) {
+        (async () => {
+          const { supabase } = await import("../utils/supabase/client");
+          supabase.removeChannel(channel!);
+        })();
+      }
+    };
+  }, []);
+
   /* ── Keep localStorage cache in sync ── */
   useEffect(() => {
     cacheExpeditions(expeditions);
