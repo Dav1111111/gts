@@ -252,7 +252,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     dataRef.current = data;
   }, [data]);
 
-  const refreshFromSupabase = useCallback(async () => {
+  const refreshFromSupabase = useCallback(async (options?: { force?: boolean }) => {
     const remote = await loadSupabaseCMS();
 
     if (remote.status !== "success") {
@@ -265,16 +265,27 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     }
 
     const serialized = stableSerialize(remote.data);
-    lastRemoteSnapshotRef.current = serialized;
     setSyncMode("remote");
     setSyncError(null);
 
     setData((prev) => {
-      const changed = stableSerialize(prev) !== serialized;
+      const previousSnapshot = stableSerialize(prev);
+      const changed = previousSnapshot !== serialized;
+      const shouldPreserveLocalState = hasPendingLocalChangesRef.current && !options?.force && changed;
+
+      if (shouldPreserveLocalState) {
+        console.log("[GTS CMS] refreshFromSupabase — skipped overwrite because local changes are pending");
+        return prev;
+      }
+
+      lastRemoteSnapshotRef.current = serialized;
       console.log("[GTS CMS] refreshFromSupabase — changed:", changed);
       return changed ? remote.data! : prev;
     });
-    saveToStorage(remote.data!);
+
+    if (!(hasPendingLocalChangesRef.current && !options?.force)) {
+      saveToStorage(remote.data!);
+    }
 
     return remote;
   }, []);
@@ -300,7 +311,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
           if (cancelled) return;
 
           if (result.success) {
-            await refreshFromSupabase();
+            await refreshFromSupabase({ force: true });
           } else {
             setSyncMode("local");
             setSyncError(result.error || "Не удалось создать общую запись CMS.");
@@ -346,7 +357,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
 
         if (result.success) {
           hasPendingLocalChangesRef.current = false;
-          await refreshFromSupabase();
+          await refreshFromSupabase({ force: true });
         } else {
           setSyncMode("local");
           setSyncError(result.error || "Не удалось сохранить общую версию CMS.");

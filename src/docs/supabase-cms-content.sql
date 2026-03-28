@@ -46,10 +46,22 @@ to authenticated
 using (
   coalesce(auth.jwt() -> 'user_metadata' ->> 'role', auth.jwt() -> 'app_metadata' ->> 'role')
   in ('executive', 'staff')
+  or lower(coalesce(auth.jwt() ->> 'email', auth.email())) in (
+    'grandtourspirit@gmail.com',
+    'staff@gts.ru',
+    'executive@gts.com',
+    'admin@gts.com'
+  )
 )
 with check (
   coalesce(auth.jwt() -> 'user_metadata' ->> 'role', auth.jwt() -> 'app_metadata' ->> 'role')
   in ('executive', 'staff')
+  or lower(coalesce(auth.jwt() ->> 'email', auth.email())) in (
+    'grandtourspirit@gmail.com',
+    'staff@gts.ru',
+    'executive@gts.com',
+    'admin@gts.com'
+  )
 );
 
 alter publication supabase_realtime add table public.cms_content;
