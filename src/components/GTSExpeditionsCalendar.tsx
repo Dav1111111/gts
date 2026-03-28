@@ -15,13 +15,13 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
 
 /* ─── Constants ─── */
-const MONTH_TRACK_WIDTH_FULL = 520;
-const MONTH_TRACK_WIDTH_CONDENSED = 430;
-const MONTH_TRACK_WIDTH_COMPACT = 340;
+const MONTH_TRACK_WIDTH_FULL = 380;
+const MONTH_TRACK_WIDTH_CONDENSED = 320;
+const MONTH_TRACK_WIDTH_COMPACT = 260;
 const TIMELINE_PADDING_FULL = 160;
 const TIMELINE_PADDING_CONDENSED = 120;
 const TIMELINE_PADDING_COMPACT = 84;
-const MIN_MAP_WIDTH_DESKTOP = 2200;
+const MIN_MAP_WIDTH_DESKTOP = 1800;
 const ROUTE_PROFILE_FULL = [268, 182, 318, 356, 204, 326, 196, 334, 202, 322, 226, 302] as const;
 const ROUTE_PROFILE_CONDENSED = [246, 170, 288, 324, 192, 296, 184, 304, 188, 292, 210, 278] as const;
 const ROUTE_PROFILE_COMPACT = [214, 146, 246, 280, 168, 254, 160, 262, 164, 250, 182, 238] as const;
@@ -787,7 +787,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       : TIMELINE_PADDING_FULL;
   const monthInset = isCompactView ? 22 : isCondensedView ? 30 : 38;
   const monthLabelTop = isCompactView ? 56 : isCondensedView ? 76 : 92;
-  const minimumMapWidth = isCompactView ? 1180 : isCondensedView ? 1840 : MIN_MAP_WIDTH_DESKTOP;
+  const minimumMapWidth = isCompactView ? 980 : isCondensedView ? 1440 : MIN_MAP_WIDTH_DESKTOP;
   const roadWidth = isCompactView ? 30 : isCondensedView ? 34 : 38;
   const fadeWidth = isCompactView ? 3.5 : 5.5;
 
@@ -835,9 +835,10 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     return mapped.sort((a, b) => a.sortKey - b.sortKey || a.title.localeCompare(b.title, "ru"));
   }, [ctxExpeditions]);
 
+  const currentMonth = useMemo(() => new Date().getMonth(), []);
   const seasonMonthIndices = useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => i);
-  }, []);
+    return Array.from({ length: 12 }, (_, i) => (currentMonth + i) % 12);
+  }, [currentMonth]);
 
   const mapWidth = useMemo(
     () => Math.max(minimumMapWidth, seasonMonthIndices.length * monthTrackWidth + timelinePadding * 2),
@@ -954,6 +955,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const scrollRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const infoCardRef = useRef<HTMLDivElement>(null);
+  const initialScrollDoneRef = useRef(false);
   const selected = expeditions.find((e) => e.id === selectedId) || expeditions[0];
   const hasMultipleExpeditions = expeditions.length > 1;
   const showArrowNav = hasMultipleExpeditions;
@@ -992,6 +994,19 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     const preferred = expeditions.find((exp) => exp.status === "upcoming") ?? expeditions[0];
     setSelectedId(preferred.id);
   }, [expeditions, selectedId]);
+
+  /* ── Auto-scroll to current month on mount ── */
+  useEffect(() => {
+    if (initialScrollDoneRef.current) return;
+    const el = scrollRef.current;
+    if (!el || !renderedMonths.length) return;
+    const currentMonthSlot = renderedMonths[0];
+    if (currentMonthSlot) {
+      const target = currentMonthSlot.x - el.clientWidth * 0.15;
+      el.scrollLeft = Math.max(0, target);
+      initialScrollDoneRef.current = true;
+    }
+  }, [renderedMonths]);
 
   /* ── Compute ROUTE_PATH from expedition coordinates ── */
   const ROUTE_PATH = useMemo(() => {
@@ -1112,10 +1127,12 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) < 0.5 && Math.abs(e.deltaY) < 0.5) return;
-      e.preventDefault();
-      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      el.scrollLeft += delta;
+      // Only intercept horizontal scroll gestures (trackpad swipe)
+      // Let vertical scroll pass through to page
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 2) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaX;
+      }
     };
 
     el.addEventListener("mousedown", onDown);
@@ -1219,7 +1236,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             )}
             <div className="flex items-center gap-2 text-white/30" style={{ fontSize: 13 }}>
               <GripHorizontal className="w-4 h-4" />
-              <span>{isCompactView ? "Листайте карту пальцем" : "Тачпад влево-вправо или захват мышкой"}</span>
+              <span>{isCompactView ? "← Листайте →" : "← Листайте или перетягивайте карту →"}</span>
             </div>
           </div>
         </div>
@@ -1339,30 +1356,33 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             </svg>
 
             {/* ── Month labels ── */}
-            {renderedMonths.map(({ key, label, x, width }) => (
-              <div
-                key={key}
-                className="absolute z-10 select-none pointer-events-none flex items-center justify-center"
-                style={{
-                  left: x - width / 2,
-                  width,
-                  bottom: isCompactView ? 8 : isCondensedView ? 12 : 16,
-                }}
-              >
-                <span
-                  className="block uppercase text-center"
+            {renderedMonths.map(({ key, label, index: mIdx, x, width }) => {
+              const isCurrentMonth = mIdx === currentMonth;
+              return (
+                <div
+                  key={key}
+                  className="absolute z-10 select-none pointer-events-none flex items-center justify-center"
                   style={{
-                    color: "rgba(255,255,255,0.25)",
-                    fontSize: isCompactView ? 11 : isCondensedView ? 13 : 15,
-                    fontWeight: 600,
-                    letterSpacing: "0.14em",
-                    whiteSpace: "nowrap",
+                    left: x - width / 2,
+                    width,
+                    top: isCompactView ? 10 : isCondensedView ? 12 : 14,
                   }}
                 >
-                  {isCompactView ? label.slice(0, 3) : label}
-                </span>
-              </div>
-            ))}
+                  <span
+                    className="block uppercase text-center"
+                    style={{
+                      color: isCurrentMonth ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.2)",
+                      fontSize: isCompactView ? 13 : isCondensedView ? 16 : 18,
+                      fontWeight: 700,
+                      letterSpacing: "0.12em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {isCompactView ? label.slice(0, 3) : label}
+                  </span>
+                </div>
+              );
+            })}
 
             {/* ── Expedition markers ── */}
             {renderedExpeditions.map((exp, index) => {
@@ -1403,8 +1423,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                           ...(exp.labelAbove ? { bottom: "calc(100% + 4px)" } : { top: "calc(100% + 3px)" }),
                           textAlign: "left",
                           whiteSpace: "normal",
-                          width: isCompactView ? 154 : isCondensedView ? 170 : 188,
-                          maxWidth: isCompactView ? 154 : isCondensedView ? 170 : 188,
+                          width: isCompactView ? 160 : isCondensedView ? 185 : 210,
+                          maxWidth: isCompactView ? 160 : isCondensedView ? 185 : 210,
                           transform: `translateX(${exp.labelOffsetX}px)`,
                         }}
                         onClick={(e) => { e.stopPropagation(); handleSelect(exp.id, true); }}
@@ -1412,9 +1432,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                         <div
                           style={{
                             color: "#91040C",
-                            fontSize: isCompactView ? 9 : 10,
-                            fontWeight: 500,
-                            letterSpacing: "0.06em",
+                            fontSize: isCompactView ? 11 : isCondensedView ? 12 : 13,
+                            fontWeight: 600,
+                            letterSpacing: "0.04em",
                             textTransform: "uppercase",
                             lineHeight: 1.2,
                             marginBottom: 4,
@@ -1424,8 +1444,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                         </div>
                         <div
                           style={{
-                            color: isSelected ? "#ffffff" : "rgba(255,255,255,0.9)",
-                            fontSize: isCompactView ? 11 : isCondensedView ? 13 : 14,
+                            color: isSelected ? "#ffffff" : "rgba(255,255,255,0.92)",
+                            fontSize: isCompactView ? 13 : isCondensedView ? 15 : 17,
                             fontWeight: 700,
                             lineHeight: 1.18,
                             letterSpacing: "0.02em",
