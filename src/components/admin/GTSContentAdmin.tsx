@@ -784,7 +784,33 @@ export function GTSContentAdmin({ onNavigate }: GTSContentAdminProps) {
               </div>
               <div>
                 <h1 className="text-white text-lg font-medium">GTS Content Manager</h1>
-                <p className="text-white/40 text-xs">Управление контентом сайта</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <p className="text-white/40 text-xs">Управление контентом сайта</p>
+                  <Badge
+                    className={`border-0 text-[10px] ${
+                      cms.syncError
+                        ? "bg-red-500/15 text-red-300"
+                        : cms.isSyncing
+                          ? "bg-white/10 text-white/70"
+                          : cms.syncMode === "remote"
+                            ? "bg-emerald-500/15 text-emerald-300"
+                            : "bg-amber-500/15 text-amber-300"
+                    }`}
+                  >
+                    {cms.syncError
+                      ? "Локально"
+                      : cms.isSyncing
+                        ? "Синхронизация..."
+                        : cms.syncMode === "remote"
+                          ? "Общий Supabase"
+                          : "Локальный режим"}
+                  </Badge>
+                </div>
+                {cms.syncError && (
+                  <p className="mt-1 max-w-xl text-[11px] text-red-300/80">
+                    {cms.syncError}
+                  </p>
+                )}
               </div>
             </div>
           </div>

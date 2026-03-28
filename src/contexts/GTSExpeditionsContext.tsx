@@ -513,6 +513,31 @@ function sanitizeExpeditionForStorage(expedition: ExpeditionData): ExpeditionDat
   };
 }
 
+function toStableComparable(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(toStableComparable);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey, "en"))
+        .map(([entryKey, entryValue]) => [entryKey, toStableComparable(entryValue)])
+    );
+  }
+
+  return value;
+}
+
+function stableSerialize(value: unknown): string {
+  return JSON.stringify(toStableComparable(value));
+}
+
+function expeditionsEqual(left: ExpeditionData, right: ExpeditionData): boolean {
+  return stableSerialize(sanitizeExpeditionForStorage(left)) === stableSerialize(sanitizeExpeditionForStorage(right));
+}
+
 function getVisibleExpeditions(expeditions: ExpeditionData[]): ExpeditionData[] {
   return expeditions.filter((expedition) => !expedition.isDeleted);
 }
@@ -556,10 +581,54 @@ async function loadSupabaseExpeditions(): Promise<SupabaseLoadResult> {
 async function upsertSupabaseExpedition(exp: ExpeditionData): Promise<ExpeditionMutationResult> {
   try {
     const { supabase } = await import("../utils/supabase/client");
+    const payload = sanitizeExpeditionForStorage(exp);
+
+    console.log("[GTS] Upsert expedition →", exp.id, {
+      title: exp.title,
+      startDate: exp.startDate,
+      endDate: exp.endDate,
+      price: exp.price,
+      spotsLeft: exp.spotsLeft,
+      isActive: exp.isActive,
+    });
+
     const { error } = await supabase
       .from(SUPABASE_TABLE)
-      .upsert({ id: exp.id, data: sanitizeExpeditionForStorage(exp), updated_at: new Date().toISOString() }, { onConflict: "id" });
+      .upsert({ id: exp.id, data: payload, updated_at: new Date().toISOString() }, { onConflict: "id" });
     if (error) throw error;
+
+    const { data: persistedRow, error: persistedError } = await supabase
+      .from(SUPABASE_TABLE)
+      .select("id, data, updated_at")
+      .eq("id", exp.id)
+      .single();
+
+    if (persistedError) throw persistedError;
+
+    const persistedExpedition = sanitizeExpeditionForStorage({
+      ...(persistedRow.data as ExpeditionData),
+      id: persistedRow.id,
+    });
+    const matches = expeditionsEqual(persistedExpedition, payload);
+
+    console.log("[GTS] Upsert verification ←", exp.id, {
+      matches,
+      updatedAt: persistedRow.updated_at,
+      remoteTitle: persistedExpedition.title,
+      remoteStartDate: persistedExpedition.startDate,
+      remoteEndDate: persistedExpedition.endDate,
+      remotePrice: persistedExpedition.price,
+      remoteSpotsLeft: persistedExpedition.spotsLeft,
+      remoteIsActive: persistedExpedition.isActive,
+    });
+
+    if (!matches) {
+      return {
+        success: false,
+        error: "Supabase принял запрос, но вернул старую версию записи. Изменение не дошло до общей базы.",
+      };
+    }
+
     return { success: true };
   } catch (err) {
     console.error("[GTS] Supabase upsert failed:", err);
@@ -637,7 +706,7 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
     }
 
     setExpeditions((prev) => {
-      const changed = JSON.stringify(prev) !== JSON.stringify(remote.data);
+      const changed = stableSerialize(prev) !== stableSerialize(remote.data);
       console.log("[GTS] refreshFromSupabase — loaded", remote.data.length, "expeditions, changed:", changed);
       if (!changed) return prev;
       return remote.data;
@@ -753,10 +822,12 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
 
     if (!result.success) {
       setExpeditions(prev => prev.filter(exp => exp.id !== newExp.id));
+    } else {
+      await refreshFromSupabase();
     }
 
     return result;
-  }, []);
+  }, [refreshFromSupabase]);
 
   const updateExpedition = useCallback(async (updatedExp: ExpeditionData) => {
     const previousExp = expeditions.find(exp => exp.id === updatedExp.id);
@@ -766,10 +837,12 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
 
     if (!result.success && previousExp) {
       setExpeditions(prev => prev.map(exp => exp.id === previousExp.id ? previousExp : exp));
+    } else if (result.success) {
+      await refreshFromSupabase();
     }
 
     return result;
-  }, [expeditions]);
+  }, [expeditions, refreshFromSupabase]);
 
   const deleteExpedition = useCallback(async (id: string) => {
     const previousIndex = expeditions.findIndex(exp => exp.id === id);
@@ -789,10 +862,12 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
         next.splice(insertIndex, 0, previousExp);
         return next;
       });
+    } else if (result.success) {
+      await refreshFromSupabase();
     }
 
     return result;
-  }, [expeditions]);
+  }, [expeditions, refreshFromSupabase]);
 
   const generateNewId = useCallback(() => {
     return `exp-${Date.now()}`;
