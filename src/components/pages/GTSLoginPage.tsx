@@ -311,13 +311,13 @@ export function GTSLoginPage({ onNavigate }: GTSLoginPageProps) {
 
                 {selectedRole === "member" && (
                   <div className="mt-6 text-center">
-                    <p className="text-white/60 text-sm mb-3">Еще не член клуба?</p>
+                    <p className="text-white/60 text-sm mb-3">Впервые у нас?</p>
                     <Button
-                      onClick={() => onNavigate({ page: "membership" })}
+                      onClick={() => onNavigate({ page: "contacts" })}
                       variant="outline"
                       className="border-white/20 text-white hover:bg-white/5"
                     >
-                      Оформить членство
+                      Связаться с нами
                     </Button>
                   </div>
                 )}

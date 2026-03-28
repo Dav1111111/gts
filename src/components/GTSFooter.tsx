@@ -72,21 +72,6 @@ export function GTSFooter() {
           </div>
         </div>
 
-        {/* Premium Membership CTA */}
-        <div className="border-t border-white/10 pt-8 lg:pt-12 mb-8 lg:mb-12">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 lg:p-8 text-center">
-            <h3 className="text-xl lg:text-2xl font-light text-white mb-3 lg:mb-4 tracking-wide">
-              {footer.membershipCTA?.title || 'ПРЕМИАЛЬНОЕ ЧЛЕНСТВО'}
-            </h3>
-            <p className="text-white/60 mb-4 lg:mb-6 max-w-2xl mx-auto text-sm lg:text-base leading-relaxed">
-              {footer.membershipCTA?.description || 'Присоединяйтесь к нашему клубу'}
-            </p>
-            <button className={`${GTSStyles.buttons.primary} px-6 lg:px-8 py-3 text-sm tracking-wider`}>
-              {footer.membershipCTA?.buttonText || 'УЗНАТЬ ПОДРОБНЕЕ'}
-            </button>
-          </div>
-        </div>
-
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-6 lg:pt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center text-white/40 text-xs lg:text-sm space-y-4 lg:space-y-0">
           <div>
@@ -95,7 +80,6 @@ export function GTSFooter() {
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 lg:space-x-8 text-xs lg:text-sm">
             <a href="#" className="hover:text-white transition-colors">Политика конфиденциальности</a>
             <a href="#" className="hover:text-white transition-colors">Пользовательское соглашение</a>
-            <a href="#" className="hover:text-white transition-colors">Условия членства</a>
           </div>
         </div>
       </div>

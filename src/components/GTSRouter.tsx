@@ -25,9 +25,6 @@ const GTSAuthStoriesPage = lazy(() =>
 const GTSStoryDetailPage = lazy(() =>
   import("./pages/GTSStoryDetailPage").then((module) => ({ default: module.GTSStoryDetailPage }))
 );
-const GTSMembershipPage = lazy(() =>
-  import("./GTSMembershipPage").then((module) => ({ default: module.GTSMembershipPage }))
-);
 const GTSContactsPage = lazy(() =>
   import("./pages/GTSContactsPage").then((module) => ({ default: module.GTSContactsPage }))
 );
@@ -60,7 +57,6 @@ export type Route =
   | { page: "experience-detail"; id: string }
   | { page: "stories"; filter?: string }
   | { page: "story-detail"; id: string }
-  | { page: "membership" }
   | { page: "contacts" }
   | { page: "login" }
   | { page: "member-portal" }
@@ -254,9 +250,6 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
           storyId={currentRoute.id} 
           onNavigate={navigate} 
         />;
-      
-      case "membership":
-        return <GTSMembershipPage onNavigate={navigate} />;
       
       case "contacts":
         return <GTSContactsPage onNavigate={navigate} />;

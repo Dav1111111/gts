@@ -384,11 +384,11 @@ export function GTSAboutPage({ onNavigate }: GTSAboutPageProps) {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
-                  onClick={() => onNavigate({ page: "membership" })}
+                  onClick={() => onNavigate({ page: "contacts" })}
                   className="bg-[#91040C] hover:bg-[#91040C]/90 text-white px-8 py-6 text-lg"
                 >
                   <Award className="w-5 h-5 mr-2" />
-                  Оформить членство
+                  Связаться с нами
                 </Button>
                 <Button
                   onClick={() => onNavigate({ page: "contacts" })}

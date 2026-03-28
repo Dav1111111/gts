@@ -22,7 +22,6 @@ export { GTSUnifiedTestimonialsSection } from "../GTSUnifiedTestimonialsSection"
 export { GTSNewsSection } from "../GTSNewsSection";
 export { GTSUGCFeedSection } from "../GTSUGCFeedSection";
 export { GTSFlashOffersSection } from "../GTSFlashOffersSection";
-export { GTSMembershipSection } from "../GTSMembershipSection";
 export { GTSMinimalClubCTA } from "../GTSMinimalClubCTA";
 export { GTSComparisonSection } from "../GTSComparisonSection";
 export { GTSCompactComparisonSection } from "../GTSCompactComparisonSection";
@@ -36,7 +35,6 @@ export { Footer } from "../Footer";
 // Page Content
 export { GTSArticlePage } from "../GTSArticlePage";
 export { GTSCatalogPage } from "../GTSCatalogPage";
-export { GTSMembershipPage } from "../GTSMembershipPage";
 export { GTSNewsFeedPage } from "../GTSNewsFeedPage";
 
 // Member Components

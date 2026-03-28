@@ -7,7 +7,7 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { 
   Menu, X, ChevronDown, Phone, 
   Ship, Car, Plane, Sparkles, Calendar, 
-  MapPin, Users, Crown, MessageCircle,
+  MapPin, Users, MessageCircle,
   Newspaper, User, LogOut
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -112,31 +112,6 @@ const navItems: NavItem[] = [
     label: "Карта активности",
     href: "landing"
   },
-  {
-    id: "membership",
-    label: "Членство",
-    href: "membership",
-    hasSubmenu: true,
-    submenu: [
-      {
-        title: "Уровни членства",
-        items: [
-          {
-            icon: Crown,
-            label: "VIP членство",
-            description: "Максимум привилегий",
-            href: "membership?tier=vip"
-          },
-          {
-            icon: Users,
-            label: "Преимущества",
-            description: "Что входит в членство",
-            href: "membership?section=benefits"
-          }
-        ]
-      }
-    ]
-  }
 ];
 
 export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {}) {
@@ -192,8 +167,6 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
         } else {
           onNavigate({ page: "stories" });
         }
-      } else if (cleanHref === "membership" || cleanHref.startsWith("membership")) {
-        onNavigate({ page: "membership" });
       } else if (cleanHref === "contacts") {
         onNavigate({ page: "contacts" });
       }

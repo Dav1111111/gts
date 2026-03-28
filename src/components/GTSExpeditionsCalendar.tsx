@@ -10,8 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   GripHorizontal,
-  Sun,
-  Zap,
+  Users,
 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
@@ -1713,11 +1712,11 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
               </motion.div>
             </AnimatePresence>
 
-            {/* ── Right: Abkhazia Promo Hero Panel ── */}
+            {/* ── Right: Abkhazia Promo Hero Panel (light style) ── */}
             <div className="min-w-0 flex flex-col">
-              <div className="flex-1 flex flex-col rounded-lg overflow-hidden border border-white/10" style={{ background: "#0A0A0C" }}>
+              <div className="flex-1 flex flex-col rounded-lg overflow-hidden" style={{ background: "#F5F5F0" }}>
 
-                {/* Hero Image — large, dominant */}
+                {/* Hero Image */}
                 <div className="relative w-full overflow-hidden" style={{ minHeight: "clamp(200px, 22vw, 300px)" }}>
                   <ImageWithFallback
                     src="https://images.unsplash.com/photo-1560717789-0ac7c58ac90a?auto=format&fit=crop&q=80&w=1200"
@@ -1725,41 +1724,44 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                     className="w-full h-full object-cover"
                     style={{ minHeight: "inherit" }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0C] via-[#0A0A0C]/30 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0C]/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
-                  {/* Eyebrow badges over image */}
-                  <div className="absolute top-5 left-5 flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(145,4,12,0.85)", border: "1px solid rgba(145,4,12,0.6)" }}>
-                      <Sun className="w-3.5 h-3.5 text-white/90" />
-                      <span className="text-white uppercase tracking-[0.15em]" style={{ fontSize: 10, fontWeight: 600 }}>Ежедневные маршруты</span>
+                  {/* Badge over image */}
+                  <div className="absolute top-4 left-4">
+                    <div className="flex items-center gap-1.5 px-3.5 py-2 rounded" style={{ background: "#EAB308", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                      <span className="text-black uppercase tracking-[0.14em]" style={{ fontSize: 11, fontWeight: 700 }}>Ежедневные маршруты</span>
                     </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(8px)" }}>
-                      <Zap className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="text-white/80 uppercase tracking-[0.12em]" style={{ fontSize: 10 }}>Главное направление сезона</span>
-                    </div>
-                  </div>
-
-                  {/* Location tag */}
-                  <div className="absolute bottom-5 left-5 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" style={{ color: "#91040C" }} />
-                    <span className="text-white/85 uppercase tracking-widest" style={{ fontSize: 11 }}>Абхазия · Honda Talon</span>
                   </div>
                 </div>
 
-                {/* Content area */}
+                {/* Content area — dark text on light bg */}
                 <div className="flex-1 flex flex-col px-6 py-6 sm:px-7 sm:py-7 lg:px-8 lg:py-8">
 
-                  {/* Title block */}
-                  <h3 className="text-white mb-2" style={{ fontSize: "clamp(26px, 2.8vw, 40px)", fontWeight: 700, letterSpacing: "0.04em", lineHeight: 1.1 }}>
-                    Экспедиции по Абхазии
+                  {/* Badges row */}
+                  <div className="flex flex-wrap items-center gap-2 mb-5">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
+                      <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Ежедневные маршруты</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
+                      <span style={{ fontSize: 12 }}>🏆</span>
+                      <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Главное направление сезона</span>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mb-3" style={{ fontSize: "clamp(28px, 3vw, 42px)", fontWeight: 800, letterSpacing: "0.03em", lineHeight: 1.05, color: "#1A1A1A" }}>
+                    Экспедиции
+                    <br />
+                    по Абхазии
                   </h3>
-                  <p className="mb-4" style={{ color: "#91040C", fontSize: "clamp(13px, 1.2vw, 16px)", letterSpacing: "0.04em", fontWeight: 500 }}>
+
+                  {/* Subtitle */}
+                  <p className="mb-4" style={{ fontSize: "clamp(14px, 1.2vw, 17px)", fontWeight: 600, color: "#333", lineHeight: 1.4 }}>
                     Ежедневные багги-маршруты по главному летнему направлению GTS
                   </p>
 
                   {/* Description */}
-                  <p className="text-white/60 leading-relaxed mb-6" style={{ fontSize: "clamp(13px, 1.05vw, 15px)" }}>
+                  <p className="leading-relaxed mb-6" style={{ fontSize: "clamp(13px, 1.05vw, 15px)", color: "#555", lineHeight: 1.6 }}>
                     Абхазия — главное ежедневное направление GTS в летний сезон.
                     Однодневные и многодневные маршруты на Honda Talon проходят по водопадам, перевалам,
                     альпийским лугам, лесным подъёмам и высокогорным дорогам. Это готовый маршрутный продукт
@@ -1767,41 +1769,37 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                     до собственного экипажа.
                   </p>
 
-                  {/* Accent pills — 3 columns */}
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    {[
-                      { num: "01", label: "1 / 2 / 3 дня" },
-                      { num: "02", label: "Пассажир / экипаж / своя техника" },
-                      { num: "03", label: "Ежедневные выезды в сезон" },
-                    ].map((item) => (
-                      <div
-                        key={item.num}
-                        className="border border-white/8 rounded-lg px-4 py-3.5"
-                        style={{ background: "rgba(255,255,255,0.03)" }}
-                      >
-                        <div className="uppercase tracking-[0.18em] mb-1.5" style={{ fontSize: 10, color: "#91040C", fontWeight: 600 }}>
-                          {item.num}
+                  {/* Accents with icons */}
+                  <div className="mb-6">
+                    <div className="mb-3" style={{ fontSize: 14, fontWeight: 700, color: "#1A1A1A" }}>Короткие акценты</div>
+                    <div className="flex flex-col gap-2.5">
+                      {[
+                        { icon: Clock, text: "1 / 2 / 3 дня" },
+                        { icon: Users, text: "Пассажир / экипаж / своя техника" },
+                        { icon: Calendar, text: "Ежедневные выезды в сезон" },
+                      ].map(({ icon: Icon, text }) => (
+                        <div key={text} className="flex items-center gap-3">
+                          <Icon className="w-4.5 h-4.5 flex-shrink-0" style={{ color: "#555" }} />
+                          <span style={{ fontSize: "clamp(13px, 1.05vw, 15px)", color: "#333" }}>{text}</span>
                         </div>
-                        <div className="text-white/80 leading-snug" style={{ fontSize: "clamp(12px, 1vw, 14px)" }}>
-                          {item.label}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Spacer to push CTA down */}
+                  {/* Spacer */}
                   <div className="mt-auto" />
 
-                  {/* CTA */}
+                  {/* CTA — dark outline style */}
                   <motion.button
-                    className="w-full flex items-center justify-center gap-3 py-4 rounded-none text-white uppercase tracking-[0.12em]"
+                    className="w-full flex items-center justify-center gap-3 py-4 rounded-none uppercase tracking-[0.12em]"
                     style={{
                       fontSize: "clamp(12px, 1.05vw, 14px)",
-                      fontWeight: 600,
-                      background: "#91040C",
-                      border: "1px solid #91040C",
+                      fontWeight: 700,
+                      background: "transparent",
+                      border: "2px solid #1A1A1A",
+                      color: "#1A1A1A",
                     }}
-                    whileHover={{ background: "#6d0309", x: 2 }}
+                    whileHover={{ background: "#1A1A1A", color: "#F5F5F0" }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
                   >
