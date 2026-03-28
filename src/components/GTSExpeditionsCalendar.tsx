@@ -836,11 +836,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   }, [ctxExpeditions]);
 
   const seasonMonthIndices = useMemo(() => {
-    const months = Array.from(
-      new Set(baseExpeditions.map((exp) => parseIsoDate(exp.startDate)?.getMonth() ?? 0))
-    ).sort((a, b) => a - b);
-    return months.length ? months : [new Date().getMonth()];
-  }, [baseExpeditions]);
+    return Array.from({ length: 12 }, (_, i) => i);
+  }, []);
 
   const mapWidth = useMemo(
     () => Math.max(minimumMapWidth, seasonMonthIndices.length * monthTrackWidth + timelinePadding * 2),
@@ -959,7 +956,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const infoCardRef = useRef<HTMLDivElement>(null);
   const selected = expeditions.find((e) => e.id === selectedId) || expeditions[0];
   const hasMultipleExpeditions = expeditions.length > 1;
-  const showArrowNav = !isCompactView && hasMultipleExpeditions;
+  const showArrowNav = hasMultipleExpeditions;
   const showTrackTreads = true;
   const renderedExpeditions = useMemo(
     () =>
@@ -1075,7 +1072,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     setRightWall(rPts.join(" "));
   }, [ROUTE_PATH]);
 
-  /* ── Drag-scroll (no momentum — stops immediately on release) ── */
+  /* ── Drag-scroll (optimized with RAF, touch support) ── */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -1083,23 +1080,35 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     let isDrag = false;
     let startX = 0;
     let scrollStart = 0;
+    let dragRaf = 0;
+    let pendingScrollLeft = 0;
 
     const onDown = (e: MouseEvent) => {
       if ((e.target as HTMLElement).closest("button")) return;
       isDrag = true;
       startX = e.pageX;
       scrollStart = el.scrollLeft;
+      pendingScrollLeft = el.scrollLeft;
       el.style.cursor = "grabbing";
+      el.style.userSelect = "none";
     };
     const onMove = (e: MouseEvent) => {
       if (!isDrag) return;
       e.preventDefault();
-      el.scrollLeft = scrollStart - (e.pageX - startX);
+      pendingScrollLeft = scrollStart - (e.pageX - startX);
+      if (!dragRaf) {
+        dragRaf = requestAnimationFrame(() => {
+          el.scrollLeft = pendingScrollLeft;
+          dragRaf = 0;
+        });
+      }
     };
     const onUp = () => {
       if (!isDrag) return;
       isDrag = false;
       el.style.cursor = "grab";
+      el.style.userSelect = "";
+      if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = 0; }
     };
 
     const onWheel = (e: WheelEvent) => {
@@ -1115,6 +1124,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     el.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
+      if (dragRaf) cancelAnimationFrame(dragRaf);
       el.removeEventListener("mousedown", onDown);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
@@ -1169,8 +1179,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       `}</style>
 
       {/* ═══ Section Header ═══ */}
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 pt-16 pb-6 lg:pt-20 lg:pb-8">
-        <div className="flex items-end justify-between gap-6 flex-wrap">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-10 sm:pt-16 pb-4 sm:pb-6 lg:pt-20 lg:pb-8">
+        <div className="flex items-end justify-between gap-4 sm:gap-6 flex-wrap">
           <div>
             <p
               className="uppercase tracking-[0.3em] mb-3"
@@ -1225,10 +1235,10 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       >
         {showArrowNav && (
           <motion.button
-            className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full transition-colors"
+            className="absolute left-2 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full transition-colors"
             style={{
-              width: isCondensedView ? 42 : 46,
-              height: isCondensedView ? 42 : 46,
+              width: isCompactView ? 36 : isCondensedView ? 42 : 46,
+              height: isCompactView ? 36 : isCondensedView ? 42 : 46,
               color: "#fff",
               background: "rgba(145,4,12,0.9)",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -1244,10 +1254,10 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
         {showArrowNav && (
           <motion.button
-            className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full transition-colors"
+            className="absolute right-2 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full transition-colors"
             style={{
-              width: isCondensedView ? 42 : 46,
-              height: isCondensedView ? 42 : 46,
+              width: isCompactView ? 36 : isCondensedView ? 42 : 46,
+              height: isCompactView ? 36 : isCondensedView ? 42 : 46,
               color: "#fff",
               background: "rgba(145,4,12,0.9)",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -1275,6 +1285,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             touchAction: "pan-x",
             WebkitOverflowScrolling: "touch",
             overscrollBehaviorX: "contain",
+            willChange: "scroll-position",
           }}
         >
           <div
@@ -1328,26 +1339,23 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             </svg>
 
             {/* ── Month labels ── */}
-            {renderedMonths.map(({ key, label, x, top }) => (
+            {renderedMonths.map(({ key, label, x, width }) => (
               <div
                 key={key}
-                className="absolute z-10 select-none pointer-events-none"
+                className="absolute z-10 select-none pointer-events-none flex items-center justify-center"
                 style={{
-                  left: x - (isCompactView ? 90 : isCondensedView ? 104 : 118),
-                  top,
-                  transform: "translateX(-50%)",
+                  left: x - width / 2,
+                  width,
+                  bottom: isCompactView ? 8 : isCondensedView ? 12 : 16,
                 }}
               >
                 <span
-                  className="block uppercase"
+                  className="block uppercase text-center"
                   style={{
-                    writingMode: "vertical-rl",
-                    transform: "rotate(180deg)",
-                    color: "rgba(255,255,255,0.92)",
-                    fontSize: isCompactView ? 22 : isCondensedView ? 34 : 42,
-                    fontWeight: 300,
-                    letterSpacing: isCompactView ? "0.08em" : "0.12em",
-                    lineHeight: 0.92,
+                    color: "rgba(255,255,255,0.25)",
+                    fontSize: isCompactView ? 11 : isCondensedView ? 13 : 15,
+                    fontWeight: 600,
+                    letterSpacing: "0.14em",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -1360,7 +1368,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             {renderedExpeditions.map((exp, index) => {
               const isHovered = hoveredId === exp.id;
               const isSelected = selectedId === exp.id;
-              const showLabel = isCompactView ? isSelected || isHovered : true;
+              const showLabel = true;
               const statusColor =
                 exp.status === "upcoming"
                   ? "#49b447"
@@ -1369,7 +1377,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                     : "rgba(255,255,255,0.45)";
               const markerColor = isSelected ? "#ef4444" : "rgba(255,255,255,0.55)";
               const markerFill = isSelected ? "#ef4444" : "rgba(255,255,255,0.04)";
-              const markerSize = isCompactView ? (isSelected ? 20 : 16) : isSelected ? 26 : isHovered ? 22 : 18;
+              const markerSize = isCompactView ? (isSelected ? 24 : 20) : isSelected ? 26 : isHovered ? 22 : 18;
 
               return (
                 <motion.div
@@ -1504,7 +1512,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="max-w-[1400px] mx-auto px-6 lg:px-12 py-8 lg:py-10"
+            className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-10"
           >
             {/* Expedition Image */}
             <div className="relative w-full overflow-hidden rounded-lg mb-8" style={{ height: "clamp(180px, 22vw, 280px)" }}>
