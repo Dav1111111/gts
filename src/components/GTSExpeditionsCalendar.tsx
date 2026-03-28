@@ -2,15 +2,10 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   MapPin,
-  Calendar,
   Clock,
-  Truck,
   ArrowRight,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  GripHorizontal,
-  Users,
 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
@@ -23,9 +18,9 @@ const TIMELINE_PADDING_FULL = 160;
 const TIMELINE_PADDING_CONDENSED = 120;
 const TIMELINE_PADDING_COMPACT = 84;
 const MIN_MAP_WIDTH_DESKTOP = 1800;
-const ROUTE_PROFILE_FULL = [270, 160, 320, 370, 180, 340, 170, 360, 185, 330, 210, 305] as const;
-const ROUTE_PROFILE_CONDENSED = [245, 140, 280, 330, 160, 300, 150, 320, 165, 295, 190, 275] as const;
-const ROUTE_PROFILE_COMPACT = [200, 115, 230, 270, 130, 245, 125, 260, 135, 240, 155, 225] as const;
+const ROUTE_PROFILE_FULL = [248, 150, 292, 334, 168, 308, 158, 324, 172, 300, 194, 282] as const;
+const ROUTE_PROFILE_CONDENSED = [225, 134, 258, 292, 148, 270, 142, 284, 152, 262, 174, 246] as const;
+const ROUTE_PROFILE_COMPACT = [188, 110, 216, 246, 122, 228, 118, 238, 128, 222, 146, 206] as const;
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -593,13 +588,6 @@ function getRouteYForX(x: number, startX: number, endX: number, profile: readonl
 
 // ROUTE_PATH is now computed inside the component using context data
 
-/* ─── Difficulty colors ─── */
-const DIFF_COLOR: Record<string, string> = {
-  Лёгкий: "#22c55e",
-  Средний: "#f59e0b",
-  Сложный: "#91040C",
-};
-
 const MONTH_NAME_TO_INDEX: Record<string, number> = {
   ЯНВАРЬ: 0,
   ЯНВ: 0,
@@ -770,7 +758,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const isCompactView = timelineView === "compact";
   const isCondensedView = timelineView === "condensed";
   const isNarrowView = timelineView !== "full";
-  const mapHeight = isCompactView ? 340 : isCondensedView ? 420 : 480;
+  const mapHeight = isCompactView ? 300 : isCondensedView ? 360 : 430;
   const routeProfile = timelineView === "compact"
     ? ROUTE_PROFILE_COMPACT
     : timelineView === "condensed"
@@ -787,10 +775,10 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       ? TIMELINE_PADDING_CONDENSED
       : TIMELINE_PADDING_FULL;
   const monthInset = isCompactView ? 22 : isCondensedView ? 30 : 38;
-  const monthLabelTop = isCompactView ? 56 : isCondensedView ? 76 : 92;
+  const monthLabelTop = isCompactView ? 42 : isCondensedView ? 56 : 70;
   const minimumMapWidth = isCompactView ? 980 : isCondensedView ? 1440 : MIN_MAP_WIDTH_DESKTOP;
-  const roadWidth = isCompactView ? 30 : isCondensedView ? 34 : 38;
-  const fadeWidth = isCompactView ? 3.5 : 5.5;
+  const roadWidth = isCompactView ? 28 : isCondensedView ? 32 : 36;
+  const fadeWidth = isCompactView ? 3.5 : isCondensedView ? 4.25 : 5;
 
   const baseExpeditions: Expedition[] = useMemo(() => {
     const mapped = ctxExpeditions.map((e) => {
@@ -957,7 +945,6 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const pathRef = useRef<SVGPathElement>(null);
   const infoCardRef = useRef<HTMLDivElement>(null);
   const initialScrollDoneRef = useRef(false);
-  const selected = expeditions.find((e) => e.id === selectedId) || expeditions[0];
   const hasMultipleExpeditions = expeditions.length > 1;
   const showArrowNav = hasMultipleExpeditions;
   const showTrackTreads = true;
@@ -1185,7 +1172,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
     handleSelect(expeditions[nextIndex].id, false);
   };
 
-  if (!selected) {
+  if (!expeditions.length) {
     return null;
   }
 
@@ -1378,7 +1365,11 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                     : "rgba(255,255,255,0.45)";
               const markerColor = isSelected ? "#ef4444" : "rgba(255,255,255,0.55)";
               const markerFill = isSelected ? "#ef4444" : "rgba(255,255,255,0.04)";
-              const markerSize = isCompactView ? (isSelected ? 24 : 20) : isSelected ? 26 : isHovered ? 22 : 18;
+              const markerSize = isCompactView
+                ? (isSelected ? 24 : isHovered ? 22 : 19)
+                : isCondensedView
+                  ? (isSelected ? 26 : isHovered ? 23 : 19)
+                  : isSelected ? 28 : isHovered ? 24 : 20;
 
               return (
                 <motion.div
@@ -1406,23 +1397,25 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                           whiteSpace: "normal",
                           width: isCompactView ? 160 : isCondensedView ? 185 : 210,
                           maxWidth: isCompactView ? 160 : isCondensedView ? 185 : 210,
-                          transform: `translateX(${exp.labelOffsetX}px) scale(${isHovered || isSelected ? 1.04 : 1})`,
+                          transform: `translateX(${exp.labelOffsetX}px) translateY(${isHovered || isSelected ? "-1px" : "0px"}) scale(${isHovered || isSelected ? 1.055 : 1})`,
                           transformOrigin: "left center",
-                          transition: "transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.2s ease",
-                          opacity: isHovered || isSelected ? 1 : 0.88,
+                          transition: "transform 0.28s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.22s ease, filter 0.22s ease",
+                          opacity: isHovered || isSelected ? 1 : 0.84,
+                          filter: isHovered || isSelected ? "drop-shadow(0 8px 24px rgba(0,0,0,0.32))" : "none",
                         }}
                         onClick={(e) => { e.stopPropagation(); handleSelect(exp.id, true); }}
                       >
                         <div
                           style={{
-                            color: isHovered || isSelected ? "#c41018" : "#91040C",
+                            color: isHovered || isSelected ? "#cf1a23" : "#91040C",
                             fontSize: isCompactView ? 11 : isCondensedView ? 12 : 13,
                             fontWeight: 600,
                             letterSpacing: "0.04em",
                             textTransform: "uppercase",
                             lineHeight: 1.2,
                             marginBottom: 4,
-                            transition: "color 0.25s ease",
+                            transition: "color 0.25s ease, text-shadow 0.25s ease",
+                            textShadow: isHovered || isSelected ? "0 0 14px rgba(145,4,12,0.18)" : "none",
                           }}
                         >
                           {exp.dateRange}
@@ -1436,7 +1429,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                             letterSpacing: "0.02em",
                             textTransform: "uppercase",
                             wordBreak: "break-word",
-                            transition: "color 0.25s ease",
+                            transition: "color 0.25s ease, text-shadow 0.25s ease",
+                            textShadow: isHovered || isSelected ? "0 8px 22px rgba(0,0,0,0.28)" : "none",
                           }}
                         >
                           {isNarrowView && !isSelected ? getCompactTitle(exp.title) : exp.title}
@@ -1459,7 +1453,11 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                       </div>
                     )}
 
-                  <div style={{ position: "relative" }}>
+                  <motion.div
+                    style={{ position: "relative" }}
+                    animate={{ scale: isHovered || isSelected ? 1.08 : 1 }}
+                    transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  >
                     <MapPin
                       style={{
                         width: markerSize,
@@ -1467,11 +1465,11 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                         color: markerColor,
                         fill: markerFill,
                         strokeWidth: 1.9,
-                        transition: "all 0.2s ease",
+                        transition: "all 0.24s ease",
                         filter: isSelected ? "drop-shadow(0 0 8px rgba(239,68,68,0.24))" : "none",
                       }}
                     />
-                  </div>
+                  </motion.div>
                 </motion.div>
               );
             })}
@@ -1509,242 +1507,196 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         </div>
       </div>
 
-      {/* ═══ Selected Expedition Info — full width ═══ */}
+      {/* ═══ Abkhazia Formats Block — full width ═══ */}
       <div ref={infoCardRef} className="w-full bg-[#0B0B0C] border-t border-white/8" style={{ scrollMarginTop: 80 }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedId}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-12">
-              {/* Left: info */}
-              <div className="min-w-0">
-                <div className="flex items-center gap-3 mb-3 flex-wrap">
-                  <span className="px-3 py-1 rounded-full text-white/60 border border-white/10 uppercase tracking-widest" style={{ fontSize: 11 }}>
-                    {selected.month}
-                  </span>
-                  <span className="px-3 py-1 rounded-full uppercase tracking-widest" style={{
-                    fontSize: 11, color: DIFF_COLOR[selected.difficulty],
-                    border: `1px solid ${DIFF_COLOR[selected.difficulty]}40`,
-                    background: `${DIFF_COLOR[selected.difficulty]}12`,
-                  }}>
-                    {selected.difficulty}
-                  </span>
-                  {selected.status === "completed" && (
-                    <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/55 border border-white/10" style={{ fontSize: 11 }}>Завершена</span>
-                  )}
-                  {selected.status === "closed" && (
-                    <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/30 border border-white/10" style={{ fontSize: 11 }}>Набор закрыт</span>
-                  )}
-                </div>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] gap-6 lg:gap-7 items-stretch">
 
-                <h3 className="text-white mb-1" style={{ fontSize: "clamp(22px, 2.5vw, 36px)", fontWeight: 700, letterSpacing: "0.05em" }}>
-                  {selected.title}
-                </h3>
-                <p className="mb-3" style={{ color: "#91040C", fontSize: "clamp(13px, 1.15vw, 15px)", letterSpacing: "0.04em" }}>
-                  {selected.tagline}
-                </p>
+            <div
+              className="rounded-[22px] border border-white/8 overflow-hidden"
+              style={{
+                background: "linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02))",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.28)",
+              }}
+            >
+              <div className="grid h-full lg:grid-rows-[clamp(220px,24vw,300px)_1fr]">
+                <div className="relative overflow-hidden">
+                  <ImageWithFallback
+                    src="https://images.unsplash.com/photo-1560717789-0ac7c58ac90a?auto=format&fit=crop&q=80&w=1400"
+                    alt="Экспедиции по Абхазии"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-[#0B0B0C]/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0C]/38 to-transparent" />
 
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
-                  {[
-                    { icon: Calendar, text: selected.dateRange },
-                    { icon: Clock, text: selected.duration },
-                    { icon: MapPin, text: selected.location },
-                    { icon: Truck, text: selected.transport },
-                  ].map(({ icon: Icon, text }, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      {i > 0 && <span className="text-white/15">·</span>}
-                      <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#91040C" }} />
-                      <span className="text-white/55" style={{ fontSize: "clamp(12px,1.1vw,14px)" }}>{text}</span>
+                  <div className="absolute top-5 left-5 flex flex-wrap gap-2">
+                    <div className="px-3 py-1.5 rounded-full border border-white/10 bg-black/35 backdrop-blur-sm">
+                      <span className="text-white/78 uppercase tracking-[0.16em]" style={{ fontSize: 10 }}>
+                        Абхазия · Honda Talon
+                      </span>
                     </div>
-                  ))}
-                </div>
-
-                <p className="text-white/55 leading-relaxed mb-4" style={{ fontSize: "clamp(13px,1.05vw,15px)", maxWidth: 720 }}>
-                  {selected.description}
-                </p>
-
-                <div className="flex flex-wrap gap-x-5 gap-y-2">
-                  {selected.highlights.map((h) => (
-                    <div key={h} className="flex items-center gap-2 text-white/60" style={{ fontSize: "clamp(12px,1vw,14px)" }}>
-                      <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#91040C" }} />
-                      <span>{h}</span>
+                    <div className="px-3 py-1.5 rounded-full" style={{ background: "rgba(145,4,12,0.92)" }}>
+                      <span className="text-white uppercase tracking-[0.16em]" style={{ fontSize: 10, fontWeight: 700 }}>
+                        Ежедневные маршруты GTS
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right: price + CTA */}
-              <div className="flex flex-col items-start lg:items-end justify-between gap-4 lg:min-w-[200px]">
-                <div>
-                  <div className="text-white/40 mb-1 uppercase tracking-widest" style={{ fontSize: 11 }}>стоимость / чел</div>
-                  <div className="text-white leading-none" style={{ fontSize: "clamp(26px,3vw,40px)", fontWeight: 700 }}>
-                    {selected.price}<span className="text-white/50 ml-1" style={{ fontSize: "0.55em" }}>₽</span>
                   </div>
                 </div>
-                <div>
-                  <div className="text-white/40 mb-2 uppercase tracking-widest" style={{ fontSize: 11 }}>свободных мест</div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      {Array.from({ length: selected.spots.total }).map((_, i) => (
-                        <div key={i} className="rounded-full" style={{ width: 7, height: 7, background: i < selected.spots.booked ? "#91040C" : "rgba(255,255,255,0.2)" }} />
-                      ))}
-                    </div>
-                    <span className="text-white/45" style={{ fontSize: 12 }}>{selected.spots.total - selected.spots.booked}/{selected.spots.total}</span>
+
+                <div className="px-5 py-5 sm:px-7 sm:py-7 lg:px-8 lg:py-8 flex flex-col">
+                  <div className="mb-5">
+                    <p
+                      className="uppercase tracking-[0.28em] mb-3"
+                      style={{ color: "#91040C", fontSize: "clamp(10px, 0.95vw, 12px)" }}
+                    >
+                      Главное летнее направление
+                    </p>
+                    <h3
+                      className="text-white mb-2"
+                      style={{ fontSize: "clamp(28px, 2.9vw, 42px)", fontWeight: 700, letterSpacing: "0.04em", lineHeight: 1.05 }}
+                    >
+                      Экспедиции по Абхазии
+                    </h3>
+                    <p className="text-white/45" style={{ fontSize: "clamp(13px, 1.05vw, 16px)", lineHeight: 1.5 }}>
+                      Ежедневные багги-маршруты по главному летнему направлению GTS
+                    </p>
                   </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2.5 w-full lg:w-auto">
-                  <motion.button
-                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-none text-white uppercase tracking-[0.1em]"
-                    style={{
-                      fontSize: 12,
-                      background: selected.status === "upcoming" || selected.status === "completed" ? "#91040C" : "rgba(255,255,255,0.07)",
-                      border: selected.status === "upcoming" || selected.status === "completed" ? "1px solid #91040C" : "1px solid rgba(255,255,255,0.12)",
-                    }}
-                    whileHover={selected.status === "closed" ? {} : { background: "#6d0309" }}
-                    whileTap={selected.status === "closed" ? {} : { scale: 0.97 }}
-                    onClick={() => { if (selected.status !== "closed" && onNavigate) onNavigate({ page: "experience-detail", id: selected.id }); }}
-                  >
-                    {selected.status === "completed" ? "Как это было" : selected.status === "upcoming" ? "Забронировать" : "Лист ожидания"}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </motion.button>
-                  <motion.button
-                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-none uppercase tracking-[0.1em]"
-                    style={{ fontSize: 12, border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)", background: "transparent" }}
-                    whileHover={{ background: "rgba(255,255,255,0.05)", color: "#fff" }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => onNavigate && onNavigate({ page: "experience-detail", id: selected.id })}
-                  >
-                    Подробнее
-                  </motion.button>
+
+                  <p className="text-white/62 leading-relaxed mb-6" style={{ fontSize: "clamp(13px, 1vw, 15px)" }}>
+                    Абхазия — главное ежедневное направление GTS в летний сезон. Однодневные и многодневные
+                    маршруты на Honda Talon проходят по водопадам, перевалам, альпийским лугам, лесным подъёмам
+                    и высокогорным дорогам. Это готовый маршрутный продукт с сопровождением, техникой и
+                    несколькими форматами участия — от пассажирского места до собственного экипажа.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
+                    {[
+                      "1 / 2 / 3 дня",
+                      "Пассажир / экипаж / своя техника",
+                      "Ежедневные выезды в сезон",
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="rounded-[14px] border border-white/8 px-4 py-3.5"
+                        style={{ background: "rgba(255,255,255,0.03)" }}
+                      >
+                        <span className="text-white/78 leading-snug" style={{ fontSize: "clamp(12px, 0.98vw, 14px)" }}>
+                          {item}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto flex flex-wrap items-center gap-4">
+                    <motion.button
+                      className="flex items-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em]"
+                      style={{ fontSize: 12, background: "#91040C", border: "1px solid #91040C" }}
+                      whileHover={{ background: "#6d0309" }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
+                    >
+                      Смотреть маршруты по Абхазии
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.button>
+                    <div className="flex items-center gap-2 text-white/38" style={{ fontSize: 12 }}>
+                      <MapPin className="w-4 h-4" style={{ color: "#91040C" }} />
+                      <span>Сочи → Гагра → высокогорные маршруты</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Dots pagination */}
-            <div className="flex items-center justify-center gap-2 mt-5 pt-4 border-t border-white/8">
-              {expeditions.map((exp) => (
-                <button key={exp.id} onClick={() => handleSelect(exp.id, true)} className="transition-all duration-200" title={exp.title}
-                  style={{ width: selectedId === exp.id ? 24 : 6, height: 5, borderRadius: 3, background: selectedId === exp.id ? "#91040C" : "rgba(255,255,255,0.18)" }}
-                />
-              ))}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* ═══ Abkhazia Section — full width: storytelling + 3 format cards ═══ */}
-      <div className="w-full bg-[#0B0B0C] border-t border-white/8">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-6 lg:gap-8">
-
-            {/* Left: Storytelling block */}
-            <div className="rounded-lg overflow-hidden" style={{ background: "#F5F5F0" }}>
-              <div className="relative w-full" style={{ height: "clamp(180px, 18vw, 240px)" }}>
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1560717789-0ac7c58ac90a?auto=format&fit=crop&q=80&w=1200"
-                  alt="Экспедиции по Абхазии"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent" />
-                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                  <div className="px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
-                    <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Ежедневные маршруты</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
-                    <span style={{ fontSize: 11 }}>🏆</span>
-                    <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Главное направление сезона</span>
-                  </div>
-                </div>
-              </div>
-              <div className="px-6 py-6 sm:px-7 sm:py-7">
-                <h3 className="mb-2" style={{ fontSize: "clamp(24px, 2.5vw, 36px)", fontWeight: 800, letterSpacing: "0.03em", lineHeight: 1.1, color: "#1A1A1A" }}>
-                  Экспедиции по Абхазии
-                </h3>
-                <p className="mb-3" style={{ fontSize: "clamp(13px, 1.1vw, 16px)", fontWeight: 600, color: "#333", lineHeight: 1.4 }}>
-                  Ежедневные багги-маршруты по главному летнему направлению GTS
-                </p>
-                <p className="leading-relaxed mb-5" style={{ fontSize: "clamp(13px, 1vw, 15px)", color: "#555", lineHeight: 1.65 }}>
-                  Абхазия — главное ежедневное направление GTS в летний сезон.
-                  Однодневные и многодневные маршруты на Honda Talon проходят по водопадам, перевалам,
-                  альпийским лугам, лесным подъёмам и высокогорным дорогам. Это готовый маршрутный продукт
-                  с сопровождением, техникой и несколькими форматами участия — от пассажирского места до собственного экипажа.
-                </p>
-                <motion.button
-                  className="flex items-center gap-2 px-6 py-3 rounded-none uppercase tracking-[0.12em]"
-                  style={{ fontSize: 12, fontWeight: 700, background: "transparent", border: "2px solid #1A1A1A", color: "#1A1A1A" }}
-                  whileHover={{ background: "#1A1A1A", color: "#F5F5F0" }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
-                >
-                  Все маршруты по Абхазии
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
-              </div>
-            </div>
-
-            {/* Right: 3 format cards stacked */}
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {[
                 {
                   duration: "1 день",
-                  title: "Однодневная экспедиция",
-                  desc: "Выезд из Сочи утром — возврат вечером. Водопады, горные перевалы, национальная кухня. Идеальный формат для первого знакомства с Абхазией.",
+                  title: "Однодневные экспедиции",
+                  description:
+                    "Быстрый вход в формат GTS: утренний старт, насыщенный маршрут и возвращение в тот же день. Подходит для первого знакомства с Абхазией.",
+                  details: "Водопады · перевалы · национальная кухня",
                   price: "от 7 500 ₽",
-                  accent: "#49b447",
                 },
                 {
                   duration: "2 дня",
-                  title: "Двухдневная экспедиция",
-                  desc: "Углублённый маршрут с ночёвкой в горах. Альпийские луга, высокогорные озёра, труднодоступные перевалы. Больше маршрута, больше впечатлений.",
+                  title: "Двухдневные экспедиции",
+                  description:
+                    "Более глубокий маршрут с ночёвкой и высокогорными локациями. Формат для тех, кто хочет пройти дальше и увидеть больше за один выезд.",
+                  details: "Ночёвка · озёра · альпийские луга",
                   price: "от 18 000 ₽",
-                  accent: "#EAB308",
                 },
                 {
                   duration: "3 дня",
-                  title: "Трёхдневная экспедиция",
-                  desc: "Полное погружение: побережье, горы, высокогорье. Комплексный маршрут через все ключевые точки Абхазии с двумя ночёвками.",
+                  title: "Трёхдневные экспедиции",
+                  description:
+                    "Максимально насыщенный формат: побережье, перевалы, горные дороги и ключевые точки маршрута в одном цельном путешествии.",
+                  details: "Полное погружение · 2 ночёвки · highland route",
                   price: "от 32 000 ₽",
-                  accent: "#91040C",
                 },
-              ].map((item) => (
-                <motion.div
+              ].map((item, index) => (
+                <motion.button
                   key={item.duration}
-                  className="flex-1 rounded-lg border border-white/8 px-5 py-5 sm:px-6 sm:py-5 cursor-pointer"
-                  style={{ background: "rgba(255,255,255,0.025)" }}
-                  whileHover={{ background: "rgba(255,255,255,0.055)", borderColor: "rgba(255,255,255,0.15)", y: -2 }}
-                  transition={{ duration: 0.2 }}
+                  type="button"
+                  className="w-full text-left rounded-[20px] border border-white/8 px-5 py-5 sm:px-6 sm:py-6"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.018))",
+                    boxShadow: "0 18px 36px rgba(0,0,0,0.18)",
+                  }}
+                  whileHover={{
+                    y: -2,
+                    borderColor: "rgba(145,4,12,0.42)",
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.024))",
+                  }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ duration: 0.22 }}
                   onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2.5 mb-2">
-                        <div className="px-2.5 py-1 rounded" style={{ background: `${item.accent}20`, border: `1px solid ${item.accent}40` }}>
-                          <span className="uppercase tracking-[0.1em]" style={{ fontSize: 10, fontWeight: 700, color: item.accent }}>{item.duration}</span>
+                  <div className="flex items-start justify-between gap-5">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div
+                          className="w-9 h-9 rounded-full flex items-center justify-center border"
+                          style={{ borderColor: "rgba(145,4,12,0.34)", background: "rgba(145,4,12,0.14)" }}
+                        >
+                          <span className="text-white/90" style={{ fontSize: 12, fontWeight: 700 }}>
+                            {index + 1}
+                          </span>
                         </div>
-                        <Clock className="w-3.5 h-3.5" style={{ color: item.accent }} />
+                        <div className="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
+                          <span className="text-white/65 uppercase tracking-[0.14em]" style={{ fontSize: 10 }}>
+                            {item.duration}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-white mb-1.5" style={{ fontSize: "clamp(16px, 1.4vw, 20px)", fontWeight: 700, letterSpacing: "0.03em" }}>
+
+                      <h4 className="text-white mb-2" style={{ fontSize: "clamp(18px, 1.45vw, 24px)", fontWeight: 700, letterSpacing: "0.03em" }}>
                         {item.title}
-                      </div>
-                      <p className="text-white/50 leading-relaxed" style={{ fontSize: "clamp(12px, 1vw, 14px)" }}>
-                        {item.desc}
+                      </h4>
+                      <p className="text-white/55 leading-relaxed mb-3" style={{ fontSize: "clamp(12px, 0.98vw, 14px)" }}>
+                        {item.description}
+                      </p>
+                      <p className="text-white/34 uppercase tracking-[0.18em]" style={{ fontSize: 10 }}>
+                        {item.details}
                       </p>
                     </div>
-                    <div className="flex-shrink-0 text-right">
-                      <div className="text-white/40 uppercase tracking-widest mb-1" style={{ fontSize: 9 }}>цена</div>
-                      <div className="text-white" style={{ fontSize: "clamp(16px, 1.4vw, 20px)", fontWeight: 700 }}>{item.price}</div>
-                      <ArrowRight className="w-4 h-4 text-white/30 mt-2 ml-auto" />
+
+                    <div className="flex flex-col items-end gap-4 flex-shrink-0">
+                      <div className="text-right">
+                        <div className="text-white/35 uppercase tracking-[0.16em] mb-1" style={{ fontSize: 10 }}>
+                          Стоимость
+                        </div>
+                        <div className="text-white" style={{ fontSize: "clamp(18px, 1.4vw, 24px)", fontWeight: 700 }}>
+                          {item.price}
+                        </div>
+                      </div>
+                      <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-white/[0.03]">
+                        <ArrowRight className="w-4 h-4 text-white/65" />
+                      </div>
                     </div>
                   </div>
-                </motion.div>
+                </motion.button>
               ))}
             </div>
-
           </div>
         </div>
       </div>
