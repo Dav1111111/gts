@@ -23,9 +23,9 @@ const TIMELINE_PADDING_FULL = 160;
 const TIMELINE_PADDING_CONDENSED = 120;
 const TIMELINE_PADDING_COMPACT = 84;
 const MIN_MAP_WIDTH_DESKTOP = 1800;
-const ROUTE_PROFILE_FULL = [340, 200, 400, 460, 220, 420, 210, 440, 230, 410, 260, 380] as const;
-const ROUTE_PROFILE_CONDENSED = [300, 175, 350, 400, 195, 370, 185, 390, 200, 360, 230, 340] as const;
-const ROUTE_PROFILE_COMPACT = [250, 145, 290, 330, 160, 300, 155, 320, 165, 295, 190, 275] as const;
+const ROUTE_PROFILE_FULL = [270, 160, 320, 370, 180, 340, 170, 360, 185, 330, 210, 305] as const;
+const ROUTE_PROFILE_CONDENSED = [245, 140, 280, 330, 160, 300, 150, 320, 165, 295, 190, 275] as const;
+const ROUTE_PROFILE_COMPACT = [200, 115, 230, 270, 130, 245, 125, 260, 135, 240, 155, 225] as const;
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -770,7 +770,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const isCompactView = timelineView === "compact";
   const isCondensedView = timelineView === "condensed";
   const isNarrowView = timelineView !== "full";
-  const mapHeight = isCompactView ? 420 : isCondensedView ? 520 : 600;
+  const mapHeight = isCompactView ? 340 : isCondensedView ? 420 : 480;
   const routeProfile = timelineView === "compact"
     ? ROUTE_PROFILE_COMPACT
     : timelineView === "condensed"
@@ -1217,28 +1217,8 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             >
               КАРТА <span style={{ color: "#91040C" }}>ЭКСПЕДИЦИЙ</span>
             </h2>
-            <p
-              className="text-white/45 mt-3"
-              style={{ fontSize: "clamp(13px, 1.2vw, 16px)", maxWidth: 520 }}
-            >
-              Выберите направление и управляйте картой вручную: тачпадом влево-вправо, захватом мышки или стрелками.
-            </p>
           </div>
           <div className="flex items-center gap-4">
-            {onNavigate && (
-              <motion.button
-                className="flex items-center gap-2 px-4 py-2 text-white/40 uppercase tracking-[0.1em]"
-                style={{ fontSize: 11, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)" }}
-                whileHover={{ background: "rgba(145,4,12,0.15)", borderColor: "rgba(145,4,12,0.4)", color: "rgba(255,255,255,0.8)" }}
-                onClick={() => onNavigate({ page: "expeditions-admin" })}
-              >
-                Админ
-              </motion.button>
-            )}
-            <div className="flex items-center gap-2 text-white/30" style={{ fontSize: 13 }}>
-              <GripHorizontal className="w-4 h-4" />
-              <span>{isCompactView ? "← Листайте →" : "← Листайте или перетягивайте карту →"}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -1426,32 +1406,37 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                           whiteSpace: "normal",
                           width: isCompactView ? 160 : isCondensedView ? 185 : 210,
                           maxWidth: isCompactView ? 160 : isCondensedView ? 185 : 210,
-                          transform: `translateX(${exp.labelOffsetX}px)`,
+                          transform: `translateX(${exp.labelOffsetX}px) scale(${isHovered || isSelected ? 1.04 : 1})`,
+                          transformOrigin: "left center",
+                          transition: "transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.2s ease",
+                          opacity: isHovered || isSelected ? 1 : 0.88,
                         }}
                         onClick={(e) => { e.stopPropagation(); handleSelect(exp.id, true); }}
                       >
                         <div
                           style={{
-                            color: "#91040C",
+                            color: isHovered || isSelected ? "#c41018" : "#91040C",
                             fontSize: isCompactView ? 11 : isCondensedView ? 12 : 13,
                             fontWeight: 600,
                             letterSpacing: "0.04em",
                             textTransform: "uppercase",
                             lineHeight: 1.2,
                             marginBottom: 4,
+                            transition: "color 0.25s ease",
                           }}
                         >
                           {exp.dateRange}
                         </div>
                         <div
                           style={{
-                            color: isSelected ? "#ffffff" : "rgba(255,255,255,0.92)",
+                            color: isSelected ? "#ffffff" : isHovered ? "#ffffff" : "rgba(255,255,255,0.85)",
                             fontSize: isCompactView ? 13 : isCondensedView ? 15 : 17,
                             fontWeight: 700,
                             lineHeight: 1.18,
                             letterSpacing: "0.02em",
                             textTransform: "uppercase",
                             wordBreak: "break-word",
+                            transition: "color 0.25s ease",
                           }}
                         >
                           {isNarrowView && !isSelected ? getCompactTitle(exp.title) : exp.title}
@@ -1524,37 +1509,21 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         </div>
       </div>
 
-      {/* ═══ Expedition Info + Abkhazia ═══ */}
+      {/* ═══ Selected Expedition Info — full width ═══ */}
       <div ref={infoCardRef} className="w-full bg-[#0B0B0C] border-t border-white/8" style={{ scrollMarginTop: 80 }}>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-
-            {/* ── Left: Selected Expedition Card ── */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedId}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                className="min-w-0"
-              >
-                {/* Expedition Image */}
-                <div className="relative w-full overflow-hidden rounded-lg mb-5" style={{ height: "clamp(160px, 16vw, 224px)" }}>
-                  <ImageWithFallback
-                    src={selected.image}
-                    alt={selected.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-transparent to-transparent" style={{ opacity: 0.7 }} />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0C]/40 to-transparent" />
-                  <div className="absolute bottom-4 left-5 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" style={{ color: "#91040C" }} />
-                    <span className="text-white/90 uppercase tracking-widest" style={{ fontSize: 12 }}>{selected.location}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 mb-3.5 flex-wrap">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedId}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-12">
+              {/* Left: info */}
+              <div className="min-w-0">
+                <div className="flex items-center gap-3 mb-3 flex-wrap">
                   <span className="px-3 py-1 rounded-full text-white/60 border border-white/10 uppercase tracking-widest" style={{ fontSize: 11 }}>
                     {selected.month}
                   </span>
@@ -1565,25 +1534,22 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                   }}>
                     {selected.difficulty}
                   </span>
-                  {selected.status === "completed" ? (
-                    <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/55 border border-white/10" style={{ fontSize: 11 }}>
-                      Завершена
-                    </span>
-                  ) : selected.status === "closed" ? (
-                    <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/30 border border-white/10" style={{ fontSize: 11 }}>
-                      Набор закрыт
-                    </span>
-                  ) : null}
+                  {selected.status === "completed" && (
+                    <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/55 border border-white/10" style={{ fontSize: 11 }}>Завершена</span>
+                  )}
+                  {selected.status === "closed" && (
+                    <span className="px-3 py-1 rounded-full uppercase tracking-widest text-white/30 border border-white/10" style={{ fontSize: 11 }}>Набор закрыт</span>
+                  )}
                 </div>
 
-                <h3 className="text-white mb-1" style={{ fontSize: "clamp(22px, 2.3vw, 32px)", fontWeight: 700, letterSpacing: "0.06em" }}>
+                <h3 className="text-white mb-1" style={{ fontSize: "clamp(22px, 2.5vw, 36px)", fontWeight: 700, letterSpacing: "0.05em" }}>
                   {selected.title}
                 </h3>
-                <p className="mb-3.5" style={{ color: "#91040C", fontSize: "clamp(13px, 1.15vw, 15px)", letterSpacing: "0.04em" }}>
+                <p className="mb-3" style={{ color: "#91040C", fontSize: "clamp(13px, 1.15vw, 15px)", letterSpacing: "0.04em" }}>
                   {selected.tagline}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4.5">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
                   {[
                     { icon: Calendar, text: selected.dateRange },
                     { icon: Clock, text: selected.duration },
@@ -1593,221 +1559,190 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                     <div key={i} className="flex items-center gap-2">
                       {i > 0 && <span className="text-white/15">·</span>}
                       <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#91040C" }} />
-                      <span className="text-white/55" style={{ fontSize: "clamp(12px,1.2vw,14px)" }}>{text}</span>
+                      <span className="text-white/55" style={{ fontSize: "clamp(12px,1.1vw,14px)" }}>{text}</span>
                     </div>
                   ))}
                 </div>
 
-                <p className="text-white/60 leading-relaxed mb-4.5" style={{ fontSize: "clamp(13px,1.05vw,15px)", maxWidth: 680 }}>
+                <p className="text-white/55 leading-relaxed mb-4" style={{ fontSize: "clamp(13px,1.05vw,15px)", maxWidth: 720 }}>
                   {selected.description}
                 </p>
 
-                <div className="flex flex-wrap gap-x-5 gap-y-2 mb-5">
+                <div className="flex flex-wrap gap-x-5 gap-y-2">
                   {selected.highlights.map((h) => (
-                    <div key={h} className="flex items-center gap-2 text-white/65" style={{ fontSize: "clamp(12px,1.1vw,14px)" }}>
-                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: "#91040C" }} />
+                    <div key={h} className="flex items-center gap-2 text-white/60" style={{ fontSize: "clamp(12px,1vw,14px)" }}>
+                      <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#91040C" }} />
                       <span>{h}</span>
                     </div>
                   ))}
                 </div>
+              </div>
 
-                {/* Price + spots + CTA row */}
-                <div className="flex flex-wrap items-end gap-x-6 gap-y-4 mb-5">
-                  <div>
-                    <div className="text-white/40 mb-1 uppercase tracking-widest" style={{ fontSize: 11 }}>стоимость / чел</div>
-                    <div className="text-white leading-none" style={{ fontSize: "clamp(24px,2.7vw,36px)", fontWeight: 700 }}>
-                      {selected.price}
-                      <span className="text-white/50 ml-1" style={{ fontSize: "0.55em" }}>₽</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-white/40 mb-2 uppercase tracking-widest" style={{ fontSize: 11 }}>свободных мест</div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex gap-1">
-                        {Array.from({ length: selected.spots.total }).map((_, i) => (
-                          <div key={i} className="rounded-full" style={{ width: 8, height: 8, background: i < selected.spots.booked ? "#91040C" : "rgba(255,255,255,0.25)" }} />
-                        ))}
-                      </div>
-                      <span className="text-white/50" style={{ fontSize: 13 }}>
-                        {selected.spots.total - selected.spots.booked} из {selected.spots.total}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 ml-auto">
-                    {selected.status === "upcoming" ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-green-500 uppercase tracking-widest" style={{ fontSize: 11 }}>Идёт набор</span>
-                      </div>
-                    ) : selected.status === "completed" ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-white/50" />
-                        <span className="text-white/50 uppercase tracking-widest" style={{ fontSize: 11 }}>Завершена</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-white/30" />
-                        <span className="text-white/30 uppercase tracking-widest" style={{ fontSize: 11 }}>Набор закрыт</span>
-                      </div>
-                    )}
+              {/* Right: price + CTA */}
+              <div className="flex flex-col items-start lg:items-end justify-between gap-4 lg:min-w-[200px]">
+                <div>
+                  <div className="text-white/40 mb-1 uppercase tracking-widest" style={{ fontSize: 11 }}>стоимость / чел</div>
+                  <div className="text-white leading-none" style={{ fontSize: "clamp(26px,3vw,40px)", fontWeight: 700 }}>
+                    {selected.price}<span className="text-white/50 ml-1" style={{ fontSize: "0.55em" }}>₽</span>
                   </div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div>
+                  <div className="text-white/40 mb-2 uppercase tracking-widest" style={{ fontSize: 11 }}>свободных мест</div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      {Array.from({ length: selected.spots.total }).map((_, i) => (
+                        <div key={i} className="rounded-full" style={{ width: 7, height: 7, background: i < selected.spots.booked ? "#91040C" : "rgba(255,255,255,0.2)" }} />
+                      ))}
+                    </div>
+                    <span className="text-white/45" style={{ fontSize: 12 }}>{selected.spots.total - selected.spots.booked}/{selected.spots.total}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2.5 w-full lg:w-auto">
                   <motion.button
-                    className="flex items-center justify-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em] transition-all duration-200"
+                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-none text-white uppercase tracking-[0.1em]"
                     style={{
-                      fontSize: "clamp(11px,1vw,13px)",
+                      fontSize: 12,
                       background: selected.status === "upcoming" || selected.status === "completed" ? "#91040C" : "rgba(255,255,255,0.07)",
                       border: selected.status === "upcoming" || selected.status === "completed" ? "1px solid #91040C" : "1px solid rgba(255,255,255,0.12)",
-                      cursor: selected.status === "closed" ? "default" : "pointer",
                     }}
-                    whileHover={selected.status === "closed" ? {} : { background: "#6d0309", x: 2 }}
+                    whileHover={selected.status === "closed" ? {} : { background: "#6d0309" }}
                     whileTap={selected.status === "closed" ? {} : { scale: 0.97 }}
-                    onClick={() => {
-                      if (selected.status === "completed" && onNavigate) {
-                        onNavigate({ page: "experience-detail", id: selected.id });
-                      }
-                    }}
+                    onClick={() => { if (selected.status !== "closed" && onNavigate) onNavigate({ page: "experience-detail", id: selected.id }); }}
                   >
-                    {selected.status === "completed" ? "Посмотреть, как это было" : selected.status === "upcoming" ? "Забронировать" : "Лист ожидания"}
-                    <ArrowRight className="w-4 h-4" />
+                    {selected.status === "completed" ? "Как это было" : selected.status === "upcoming" ? "Забронировать" : "Лист ожидания"}
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </motion.button>
-
                   <motion.button
-                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-none uppercase tracking-[0.12em] transition-all duration-200"
-                    style={{
-                      fontSize: "clamp(11px,1vw,13px)",
-                      background: "rgba(0,0,0,0)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                      cursor: "pointer",
-                      color: "rgba(255,255,255,0.8)",
-                    }}
-                    whileHover={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,1)" }}
+                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-none uppercase tracking-[0.1em]"
+                    style={{ fontSize: 12, border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)", background: "transparent" }}
+                    whileHover={{ background: "rgba(255,255,255,0.05)", color: "#fff" }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => onNavigate && onNavigate({ page: "experience-detail", id: selected.id })}
                   >
                     Подробнее
-                    <ArrowRight className="w-4 h-4" />
-                  </motion.button>
-                </div>
-
-                {/* Dots pagination */}
-                <div className="flex items-center justify-center gap-2 mt-5 pt-4 border-t border-white/8">
-                  {expeditions.map((exp) => (
-                    <button
-                      key={exp.id}
-                      onClick={() => handleSelect(exp.id, true)}
-                      className="transition-all duration-200"
-                      title={exp.title}
-                      style={{
-                        width: selectedId === exp.id ? 26 : 6, height: 6, borderRadius: 3,
-                        background: selectedId === exp.id ? "#91040C" : "rgba(255,255,255,0.2)",
-                      }}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* ── Right: Abkhazia Promo Hero Panel (light style) ── */}
-            <div className="min-w-0 flex flex-col">
-              <div className="flex-1 flex flex-col rounded-lg overflow-hidden" style={{ background: "#F5F5F0" }}>
-
-                {/* Hero Image */}
-                <div className="relative w-full overflow-hidden" style={{ minHeight: "clamp(200px, 22vw, 300px)" }}>
-                  <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1560717789-0ac7c58ac90a?auto=format&fit=crop&q=80&w=1200"
-                    alt="Экспедиции по Абхазии — горы и водопады"
-                    className="w-full h-full object-cover"
-                    style={{ minHeight: "inherit" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-
-                  {/* Badge over image */}
-                  <div className="absolute top-4 left-4">
-                    <div className="flex items-center gap-1.5 px-3.5 py-2 rounded" style={{ background: "#EAB308", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-                      <span className="text-black uppercase tracking-[0.14em]" style={{ fontSize: 11, fontWeight: 700 }}>Ежедневные маршруты</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content area — dark text on light bg */}
-                <div className="flex-1 flex flex-col px-6 py-6 sm:px-7 sm:py-7 lg:px-8 lg:py-8">
-
-                  {/* Badges row */}
-                  <div className="flex flex-wrap items-center gap-2 mb-5">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
-                      <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Ежедневные маршруты</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
-                      <span style={{ fontSize: 12 }}>🏆</span>
-                      <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Главное направление сезона</span>
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="mb-3" style={{ fontSize: "clamp(28px, 3vw, 42px)", fontWeight: 800, letterSpacing: "0.03em", lineHeight: 1.05, color: "#1A1A1A" }}>
-                    Экспедиции
-                    <br />
-                    по Абхазии
-                  </h3>
-
-                  {/* Subtitle */}
-                  <p className="mb-4" style={{ fontSize: "clamp(14px, 1.2vw, 17px)", fontWeight: 600, color: "#333", lineHeight: 1.4 }}>
-                    Ежедневные багги-маршруты по главному летнему направлению GTS
-                  </p>
-
-                  {/* Description */}
-                  <p className="leading-relaxed mb-6" style={{ fontSize: "clamp(13px, 1.05vw, 15px)", color: "#555", lineHeight: 1.6 }}>
-                    Абхазия — главное ежедневное направление GTS в летний сезон.
-                    Однодневные и многодневные маршруты на Honda Talon проходят по водопадам, перевалам,
-                    альпийским лугам, лесным подъёмам и высокогорным дорогам. Это готовый маршрутный продукт
-                    с сопровождением, техникой и несколькими форматами участия — от пассажирского места
-                    до собственного экипажа.
-                  </p>
-
-                  {/* Accents with icons */}
-                  <div className="mb-6">
-                    <div className="mb-3" style={{ fontSize: 14, fontWeight: 700, color: "#1A1A1A" }}>Короткие акценты</div>
-                    <div className="flex flex-col gap-2.5">
-                      {[
-                        { icon: Clock, text: "1 / 2 / 3 дня" },
-                        { icon: Users, text: "Пассажир / экипаж / своя техника" },
-                        { icon: Calendar, text: "Ежедневные выезды в сезон" },
-                      ].map(({ icon: Icon, text }) => (
-                        <div key={text} className="flex items-center gap-3">
-                          <Icon className="w-4.5 h-4.5 flex-shrink-0" style={{ color: "#555" }} />
-                          <span style={{ fontSize: "clamp(13px, 1.05vw, 15px)", color: "#333" }}>{text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Spacer */}
-                  <div className="mt-auto" />
-
-                  {/* CTA — dark outline style */}
-                  <motion.button
-                    className="w-full flex items-center justify-center gap-3 py-4 rounded-none uppercase tracking-[0.12em]"
-                    style={{
-                      fontSize: "clamp(12px, 1.05vw, 14px)",
-                      fontWeight: 700,
-                      background: "transparent",
-                      border: "2px solid #1A1A1A",
-                      color: "#1A1A1A",
-                    }}
-                    whileHover={{ background: "#1A1A1A", color: "#F5F5F0" }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
-                  >
-                    Смотреть маршруты по Абхазии
-                    <ArrowRight className="w-4 h-4" />
                   </motion.button>
                 </div>
               </div>
+            </div>
+
+            {/* Dots pagination */}
+            <div className="flex items-center justify-center gap-2 mt-5 pt-4 border-t border-white/8">
+              {expeditions.map((exp) => (
+                <button key={exp.id} onClick={() => handleSelect(exp.id, true)} className="transition-all duration-200" title={exp.title}
+                  style={{ width: selectedId === exp.id ? 24 : 6, height: 5, borderRadius: 3, background: selectedId === exp.id ? "#91040C" : "rgba(255,255,255,0.18)" }}
+                />
+              ))}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* ═══ Abkhazia Section — full width: storytelling + 3 format cards ═══ */}
+      <div className="w-full bg-[#0B0B0C] border-t border-white/8">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-6 lg:gap-8">
+
+            {/* Left: Storytelling block */}
+            <div className="rounded-lg overflow-hidden" style={{ background: "#F5F5F0" }}>
+              <div className="relative w-full" style={{ height: "clamp(180px, 18vw, 240px)" }}>
+                <ImageWithFallback
+                  src="https://images.unsplash.com/photo-1560717789-0ac7c58ac90a?auto=format&fit=crop&q=80&w=1200"
+                  alt="Экспедиции по Абхазии"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent" />
+                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                  <div className="px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
+                    <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Ежедневные маршруты</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded" style={{ background: "#EAB308" }}>
+                    <span style={{ fontSize: 11 }}>🏆</span>
+                    <span className="text-black uppercase tracking-[0.12em]" style={{ fontSize: 10, fontWeight: 700 }}>Главное направление сезона</span>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 py-6 sm:px-7 sm:py-7">
+                <h3 className="mb-2" style={{ fontSize: "clamp(24px, 2.5vw, 36px)", fontWeight: 800, letterSpacing: "0.03em", lineHeight: 1.1, color: "#1A1A1A" }}>
+                  Экспедиции по Абхазии
+                </h3>
+                <p className="mb-3" style={{ fontSize: "clamp(13px, 1.1vw, 16px)", fontWeight: 600, color: "#333", lineHeight: 1.4 }}>
+                  Ежедневные багги-маршруты по главному летнему направлению GTS
+                </p>
+                <p className="leading-relaxed mb-5" style={{ fontSize: "clamp(13px, 1vw, 15px)", color: "#555", lineHeight: 1.65 }}>
+                  Абхазия — главное ежедневное направление GTS в летний сезон.
+                  Однодневные и многодневные маршруты на Honda Talon проходят по водопадам, перевалам,
+                  альпийским лугам, лесным подъёмам и высокогорным дорогам. Это готовый маршрутный продукт
+                  с сопровождением, техникой и несколькими форматами участия — от пассажирского места до собственного экипажа.
+                </p>
+                <motion.button
+                  className="flex items-center gap-2 px-6 py-3 rounded-none uppercase tracking-[0.12em]"
+                  style={{ fontSize: 12, fontWeight: 700, background: "transparent", border: "2px solid #1A1A1A", color: "#1A1A1A" }}
+                  whileHover={{ background: "#1A1A1A", color: "#F5F5F0" }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
+                >
+                  Все маршруты по Абхазии
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Right: 3 format cards stacked */}
+            <div className="flex flex-col gap-4">
+              {[
+                {
+                  duration: "1 день",
+                  title: "Однодневная экспедиция",
+                  desc: "Выезд из Сочи утром — возврат вечером. Водопады, горные перевалы, национальная кухня. Идеальный формат для первого знакомства с Абхазией.",
+                  price: "от 7 500 ₽",
+                  accent: "#49b447",
+                },
+                {
+                  duration: "2 дня",
+                  title: "Двухдневная экспедиция",
+                  desc: "Углублённый маршрут с ночёвкой в горах. Альпийские луга, высокогорные озёра, труднодоступные перевалы. Больше маршрута, больше впечатлений.",
+                  price: "от 18 000 ₽",
+                  accent: "#EAB308",
+                },
+                {
+                  duration: "3 дня",
+                  title: "Трёхдневная экспедиция",
+                  desc: "Полное погружение: побережье, горы, высокогорье. Комплексный маршрут через все ключевые точки Абхазии с двумя ночёвками.",
+                  price: "от 32 000 ₽",
+                  accent: "#91040C",
+                },
+              ].map((item) => (
+                <motion.div
+                  key={item.duration}
+                  className="flex-1 rounded-lg border border-white/8 px-5 py-5 sm:px-6 sm:py-5 cursor-pointer"
+                  style={{ background: "rgba(255,255,255,0.025)" }}
+                  whileHover={{ background: "rgba(255,255,255,0.055)", borderColor: "rgba(255,255,255,0.15)", y: -2 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="px-2.5 py-1 rounded" style={{ background: `${item.accent}20`, border: `1px solid ${item.accent}40` }}>
+                          <span className="uppercase tracking-[0.1em]" style={{ fontSize: 10, fontWeight: 700, color: item.accent }}>{item.duration}</span>
+                        </div>
+                        <Clock className="w-3.5 h-3.5" style={{ color: item.accent }} />
+                      </div>
+                      <div className="text-white mb-1.5" style={{ fontSize: "clamp(16px, 1.4vw, 20px)", fontWeight: 700, letterSpacing: "0.03em" }}>
+                        {item.title}
+                      </div>
+                      <p className="text-white/50 leading-relaxed" style={{ fontSize: "clamp(12px, 1vw, 14px)" }}>
+                        {item.desc}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      <div className="text-white/40 uppercase tracking-widest mb-1" style={{ fontSize: 9 }}>цена</div>
+                      <div className="text-white" style={{ fontSize: "clamp(16px, 1.4vw, 20px)", fontWeight: 700 }}>{item.price}</div>
+                      <ArrowRight className="w-4 h-4 text-white/30 mt-2 ml-auto" />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
 
           </div>
