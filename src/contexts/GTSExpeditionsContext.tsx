@@ -632,14 +632,14 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
     const remote = await loadSupabaseExpeditions();
 
     if (remote.status !== "success") {
+      console.log("[GTS] refreshFromSupabase — status:", remote.status);
       return remote;
     }
 
     setExpeditions((prev) => {
-      if (JSON.stringify(prev) === JSON.stringify(remote.data)) {
-        return prev;
-      }
-
+      const changed = JSON.stringify(prev) !== JSON.stringify(remote.data);
+      console.log("[GTS] refreshFromSupabase — loaded", remote.data.length, "expeditions, changed:", changed);
+      if (!changed) return prev;
       return remote.data;
     });
     cacheExpeditions(remote.data);
@@ -684,6 +684,7 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      console.log("[GTS] Polling/visibility sync triggered");
       void refreshFromSupabase();
     };
 
@@ -696,18 +697,21 @@ export function GTSExpeditionsProvider({ children }: { children: ReactNode }) {
         .on(
           "postgres_changes" as any,
           { event: "*", schema: "public", table: SUPABASE_TABLE },
-          () => {
+          (payload: any) => {
+            console.log("[GTS] Realtime event received:", payload.eventType, payload);
             void refreshFromSupabase();
           }
         )
         .subscribe((status: string) => {
+          console.log("[GTS] Realtime subscription status:", status);
           if (status === "SUBSCRIBED") {
+            console.log("[GTS] Realtime SUBSCRIBED — listening for changes on", SUPABASE_TABLE);
             void refreshFromSupabase();
             return;
           }
 
           if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            console.warn(`[GTS] Expeditions realtime status: ${status}`);
+            console.warn(`[GTS] Realtime failed: ${status} — falling back to polling`);
           }
         });
     })();
