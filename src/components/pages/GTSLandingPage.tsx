@@ -28,9 +28,6 @@ const GTSInteractiveMapSection = lazy(() =>
 const GTSUnifiedTestimonialsSection = lazy(() =>
   import("../GTSUnifiedTestimonialsSection").then((module) => ({ default: module.GTSUnifiedTestimonialsSection }))
 );
-const GTSMembershipSection = lazy(() =>
-  import("../GTSMembershipSection").then((module) => ({ default: module.GTSMembershipSection }))
-);
 
 interface GTSLandingPageProps {
   onNavigate: (route: any) => void;
@@ -155,11 +152,6 @@ export function GTSLandingPage({ onNavigate }: GTSLandingPageProps) {
           </LazyLandingSection>
         </section>
 
-        <section id="membership">
-          <LazyLandingSection sectionName="Членство">
-            <GTSMembershipSection />
-          </LazyLandingSection>
-        </section>
       </main>
 
       <GTSFooter />

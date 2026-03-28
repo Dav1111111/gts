@@ -10,6 +10,9 @@ import {
   ChevronLeft,
   ChevronRight,
   GripHorizontal,
+  Sun,
+  Users,
+  Zap,
 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
@@ -22,9 +25,9 @@ const TIMELINE_PADDING_FULL = 160;
 const TIMELINE_PADDING_CONDENSED = 120;
 const TIMELINE_PADDING_COMPACT = 84;
 const MIN_MAP_WIDTH_DESKTOP = 1800;
-const ROUTE_PROFILE_FULL = [268, 182, 318, 356, 204, 326, 196, 334, 202, 322, 226, 302] as const;
-const ROUTE_PROFILE_CONDENSED = [246, 170, 288, 324, 192, 296, 184, 304, 188, 292, 210, 278] as const;
-const ROUTE_PROFILE_COMPACT = [214, 146, 246, 280, 168, 254, 160, 262, 164, 250, 182, 238] as const;
+const ROUTE_PROFILE_FULL = [340, 200, 400, 460, 220, 420, 210, 440, 230, 410, 260, 380] as const;
+const ROUTE_PROFILE_CONDENSED = [300, 175, 350, 400, 195, 370, 185, 390, 200, 360, 230, 340] as const;
+const ROUTE_PROFILE_COMPACT = [250, 145, 290, 330, 160, 300, 155, 320, 165, 295, 190, 275] as const;
 const TIMELINE_MONTHS = [
   "ЯНВАРЬ",
   "ФЕВРАЛЬ",
@@ -769,7 +772,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const isCompactView = timelineView === "compact";
   const isCondensedView = timelineView === "condensed";
   const isNarrowView = timelineView !== "full";
-  const mapHeight = isCompactView ? 320 : isCondensedView ? 390 : 430;
+  const mapHeight = isCompactView ? 420 : isCondensedView ? 520 : 600;
   const routeProfile = timelineView === "compact"
     ? ROUTE_PROFILE_COMPACT
     : timelineView === "condensed"
@@ -1523,34 +1526,36 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         </div>
       </div>
 
-      {/* ═══ Expedition Info Card ═══ */}
+      {/* ═══ Expedition Info + Daily Abkhazia ═══ */}
       <div ref={infoCardRef} className="w-full bg-[#0B0B0C] border-t border-white/8" style={{ scrollMarginTop: 80 }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedId}
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-10"
-          >
-            {/* Expedition Image */}
-            <div className="relative w-full overflow-hidden rounded-lg mb-8" style={{ height: "clamp(180px, 22vw, 280px)" }}>
-              <ImageWithFallback
-                src={selected.image}
-                alt={selected.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-transparent to-transparent" style={{ opacity: 0.7 }} />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0C]/40 to-transparent" />
-              <div className="absolute bottom-4 left-5 flex items-center gap-2">
-                <MapPin className="w-4 h-4" style={{ color: "#91040C" }} />
-                <span className="text-white/90 uppercase tracking-widest" style={{ fontSize: 12 }}>{selected.location}</span>
-              </div>
-            </div>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-10">
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6 xl:gap-8">
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 lg:gap-16">
-              <div>
+            {/* ── Left: Selected Expedition Card ── */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedId}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="min-w-0"
+              >
+                {/* Expedition Image */}
+                <div className="relative w-full overflow-hidden rounded-lg mb-6" style={{ height: "clamp(160px, 18vw, 240px)" }}>
+                  <ImageWithFallback
+                    src={selected.image}
+                    alt={selected.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-transparent to-transparent" style={{ opacity: 0.7 }} />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0C]/40 to-transparent" />
+                  <div className="absolute bottom-4 left-5 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" style={{ color: "#91040C" }} />
+                    <span className="text-white/90 uppercase tracking-widest" style={{ fontSize: 12 }}>{selected.location}</span>
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-3 mb-4">
                   <span className="px-3 py-1 rounded-full text-white/60 border border-white/10 uppercase tracking-widest" style={{ fontSize: 11 }}>
                     {selected.month}
@@ -1573,14 +1578,14 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                   ) : null}
                 </div>
 
-                <h3 className="text-white mb-1" style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: 700, letterSpacing: "0.06em" }}>
+                <h3 className="text-white mb-1" style={{ fontSize: "clamp(22px, 2.5vw, 34px)", fontWeight: 700, letterSpacing: "0.06em" }}>
                   {selected.title}
                 </h3>
-                <p className="mb-5" style={{ color: "#91040C", fontSize: "clamp(13px, 1.3vw, 16px)", letterSpacing: "0.04em" }}>
+                <p className="mb-4" style={{ color: "#91040C", fontSize: "clamp(13px, 1.3vw, 15px)", letterSpacing: "0.04em" }}>
                   {selected.tagline}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="flex flex-wrap items-center gap-3 mb-5">
                   {[
                     { icon: Calendar, text: selected.dateRange },
                     { icon: Clock, text: selected.duration },
@@ -1595,11 +1600,11 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                   ))}
                 </div>
 
-                <p className="text-white/60 leading-relaxed mb-6" style={{ fontSize: "clamp(13px,1.2vw,15px)", maxWidth: 640 }}>
+                <p className="text-white/60 leading-relaxed mb-5" style={{ fontSize: "clamp(13px,1.2vw,15px)", maxWidth: 640 }}>
                   {selected.description}
                 </p>
 
-                <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <div className="flex flex-wrap gap-x-6 gap-y-2 mb-6">
                   {selected.highlights.map((h) => (
                     <div key={h} className="flex items-center gap-2 text-white/65" style={{ fontSize: "clamp(12px,1.1vw,14px)" }}>
                       <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: "#91040C" }} />
@@ -1607,107 +1612,197 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                     </div>
                   ))}
                 </div>
-              </div>
 
-              <div className="flex flex-col items-start lg:items-end justify-between gap-6 lg:min-w-[220px]">
-                <div>
-                  <div className="text-white/40 mb-1 uppercase tracking-widest" style={{ fontSize: 11 }}>стоимость / чел</div>
-                  <div className="text-white leading-none" style={{ fontSize: "clamp(28px,3.5vw,44px)", fontWeight: 700 }}>
-                    {selected.price}
-                    <span className="text-white/50 ml-1" style={{ fontSize: "0.55em" }}>₽</span>
+                {/* Price + spots + CTA row */}
+                <div className="flex flex-wrap items-end gap-6 mb-6">
+                  <div>
+                    <div className="text-white/40 mb-1 uppercase tracking-widest" style={{ fontSize: 11 }}>стоимость / чел</div>
+                    <div className="text-white leading-none" style={{ fontSize: "clamp(26px,3vw,40px)", fontWeight: 700 }}>
+                      {selected.price}
+                      <span className="text-white/50 ml-1" style={{ fontSize: "0.55em" }}>₽</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-white/40 mb-2 uppercase tracking-widest" style={{ fontSize: 11 }}>свободных мест</div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-1">
+                        {Array.from({ length: selected.spots.total }).map((_, i) => (
+                          <div key={i} className="rounded-full" style={{ width: 8, height: 8, background: i < selected.spots.booked ? "#91040C" : "rgba(255,255,255,0.25)" }} />
+                        ))}
+                      </div>
+                      <span className="text-white/50" style={{ fontSize: 13 }}>
+                        {selected.spots.total - selected.spots.booked} из {selected.spots.total}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 ml-auto">
+                    {selected.status === "upcoming" ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-green-500 uppercase tracking-widest" style={{ fontSize: 11 }}>Идёт набор</span>
+                      </div>
+                    ) : selected.status === "completed" ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-white/50" />
+                        <span className="text-white/50 uppercase tracking-widest" style={{ fontSize: 11 }}>Завершена</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-white/30" />
+                        <span className="text-white/30 uppercase tracking-widest" style={{ fontSize: 11 }}>Набор закрыт</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div>
-                  <div className="text-white/40 mb-2 uppercase tracking-widest" style={{ fontSize: 11 }}>свободных мест</div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-1">
-                      {Array.from({ length: selected.spots.total }).map((_, i) => (
-                        <div key={i} className="rounded-full" style={{ width: 8, height: 8, background: i < selected.spots.booked ? "#91040C" : "rgba(255,255,255,0.25)" }} />
-                      ))}
-                    </div>
-                    <span className="text-white/50" style={{ fontSize: 13 }}>
-                      {selected.spots.total - selected.spots.booked} из {selected.spots.total}
-                    </span>
-                  </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <motion.button
+                    className="flex items-center justify-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em] transition-all duration-200"
+                    style={{
+                      fontSize: "clamp(11px,1vw,13px)",
+                      background: selected.status === "upcoming" || selected.status === "completed" ? "#91040C" : "rgba(255,255,255,0.07)",
+                      border: selected.status === "upcoming" || selected.status === "completed" ? "1px solid #91040C" : "1px solid rgba(255,255,255,0.12)",
+                      cursor: selected.status === "closed" ? "default" : "pointer",
+                    }}
+                    whileHover={selected.status === "closed" ? {} : { background: "#6d0309", x: 2 }}
+                    whileTap={selected.status === "closed" ? {} : { scale: 0.97 }}
+                    onClick={() => {
+                      if (selected.status === "completed" && onNavigate) {
+                        onNavigate({ page: "experience-detail", id: selected.id });
+                      }
+                    }}
+                  >
+                    {selected.status === "completed" ? "Посмотреть, как это было" : selected.status === "upcoming" ? "Забронировать" : "Лист ожидания"}
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+
+                  <motion.button
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-none uppercase tracking-[0.12em] transition-all duration-200"
+                    style={{
+                      fontSize: "clamp(11px,1vw,13px)",
+                      background: "rgba(0,0,0,0)",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      cursor: "pointer",
+                      color: "rgba(255,255,255,0.8)",
+                    }}
+                    whileHover={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,1)" }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => onNavigate && onNavigate({ page: "experience-detail", id: selected.id })}
+                  >
+                    Подробнее
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
                 </div>
 
-                <div className="flex flex-col gap-3 w-full lg:w-auto">
-                  {selected.status === "upcoming" ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-green-500 uppercase tracking-widest" style={{ fontSize: 11 }}>Идёт набор</span>
-                    </div>
-                  ) : selected.status === "completed" ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-white/50" />
-                      <span className="text-white/50 uppercase tracking-widest" style={{ fontSize: 11 }}>Экспедиция завершена</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-white/30" />
-                      <span className="text-white/30 uppercase tracking-widest" style={{ fontSize: 11 }}>Набор закрыт</span>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <motion.button
-                      className="flex items-center justify-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em] transition-all duration-200"
+                {/* Dots pagination */}
+                <div className="flex items-center justify-center gap-2 mt-6 pt-5 border-t border-white/8">
+                  {expeditions.map((exp) => (
+                    <button
+                      key={exp.id}
+                      onClick={() => handleSelect(exp.id, true)}
+                      className="transition-all duration-200"
+                      title={exp.title}
                       style={{
-                        fontSize: "clamp(11px,1vw,13px)",
-                        background: selected.status === "upcoming" || selected.status === "completed" ? "#91040C" : "rgba(255,255,255,0.07)",
-                        border: selected.status === "upcoming" || selected.status === "completed" ? "1px solid #91040C" : "1px solid rgba(255,255,255,0.12)",
-                        cursor: selected.status === "closed" ? "default" : "pointer",
+                        width: selectedId === exp.id ? 26 : 6, height: 6, borderRadius: 3,
+                        background: selectedId === exp.id ? "#91040C" : "rgba(255,255,255,0.2)",
                       }}
-                      whileHover={selected.status === "closed" ? {} : { background: "#6d0309", x: 2 }}
-                      whileTap={selected.status === "closed" ? {} : { scale: 0.97 }}
-                      onClick={() => {
-                        if (selected.status === "completed" && onNavigate) {
-                          onNavigate({ page: "experience-detail", id: selected.id });
-                        }
-                      }}
-                    >
-                      {selected.status === "completed" ? "Посмотреть, как это было" : selected.status === "upcoming" ? "Забронировать" : "Лист ожидания"}
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
-                    <motion.button
-                      className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-none uppercase tracking-[0.12em] transition-all duration-200"
-                      style={{
-                        fontSize: "clamp(11px,1vw,13px)",
-                        background: "rgba(0,0,0,0)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        cursor: "pointer",
-                        color: "rgba(255,255,255,0.8)",
-                      }}
-                      whileHover={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,1)" }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => onNavigate && onNavigate({ page: "experience-detail", id: selected.id })}
-                    >
-                      Подробнее
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
+            {/* ── Right: Daily Abkhazia Quick-Entry Card ── */}
+            <div className="flex flex-col">
+              <div
+                className="relative flex-1 rounded-lg overflow-hidden border border-white/10"
+                style={{ background: "linear-gradient(165deg, #141416 0%, #0e1a12 50%, #141416 100%)", minHeight: 420 }}
+              >
+                {/* Background image overlay */}
+                <div className="absolute inset-0">
+                  <ImageWithFallback
+                    src="https://images.unsplash.com/photo-1596394723269-e8037ee1ce92?auto=format&fit=crop&w=800&q=80"
+                    alt="Абхазия"
+                    className="w-full h-full object-cover"
+                    style={{ opacity: 0.2 }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-[#0B0B0C]/60 to-transparent" />
+                </div>
+
+                <div className="relative z-10 flex flex-col h-full p-6">
+                  {/* Badge */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.3)" }}>
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-green-400 uppercase tracking-widest" style={{ fontSize: 10 }}>Ежедневно</span>
+                    </div>
+                    <Sun className="w-4 h-4 text-amber-400" />
                   </div>
+
+                  {/* Title */}
+                  <h3 className="text-white mb-2" style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.04em", lineHeight: 1.2 }}>
+                    Однодневная
+                    <br />
+                    <span style={{ color: "#4ade80" }}>Абхазия</span>
+                  </h3>
+
+                  <p className="text-white/50 mb-6" style={{ fontSize: 13, lineHeight: 1.5 }}>
+                    Выезд из Сочи каждый день. Горы, озёра, водопады и национальная кухня — за один день.
+                  </p>
+
+                  {/* Quick stats */}
+                  <div className="flex flex-col gap-3 mb-auto">
+                    {[
+                      { icon: Clock, label: "Длительность", value: "12-14 часов" },
+                      { icon: Users, label: "Группа", value: "до 6 человек" },
+                      { icon: Truck, label: "Транспорт", value: "Багги / Джип" },
+                      { icon: Zap, label: "Сложность", value: "Лёгкий" },
+                    ].map(({ icon: Icon, label, value }) => (
+                      <div key={label} className="flex items-center gap-3">
+                        <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "#4ade80" }} />
+                        <span className="text-white/40" style={{ fontSize: 12 }}>{label}</span>
+                        <span className="text-white/75 ml-auto" style={{ fontSize: 13 }}>{value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Price */}
+                  <div className="mt-6 mb-5">
+                    <div className="text-white/40 uppercase tracking-widest mb-1" style={{ fontSize: 10 }}>от</div>
+                    <div className="text-white" style={{ fontSize: 32, fontWeight: 700, lineHeight: 1 }}>
+                      7 500
+                      <span className="text-white/50 ml-1" style={{ fontSize: 16 }}>₽</span>
+                      <span className="text-white/30 ml-2" style={{ fontSize: 13, fontWeight: 400 }}>/ чел</span>
+                    </div>
+                  </div>
+
+                  {/* CTA */}
+                  <motion.button
+                    className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-none text-white uppercase tracking-[0.12em]"
+                    style={{
+                      fontSize: 12,
+                      background: "linear-gradient(135deg, #166534 0%, #15803d 100%)",
+                      border: "1px solid rgba(74,222,128,0.3)",
+                    }}
+                    whileHover={{ background: "linear-gradient(135deg, #15803d 0%, #16a34a 100%)", y: -1 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => onNavigate && onNavigate({ page: "experience-detail", id: "daily-abkhazia" })}
+                  >
+                    Записаться на завтра
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+
+                  <p className="text-center text-white/30 mt-3" style={{ fontSize: 11 }}>
+                    Бесплатная отмена за 24 часа
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2 mt-8 pt-6 border-t border-white/8">
-              {expeditions.map((exp) => (
-                <button
-                  key={exp.id}
-                  onClick={() => handleSelect(exp.id, true)}
-                  className="transition-all duration-200"
-                  title={exp.title}
-                  style={{
-                    width: selectedId === exp.id ? 26 : 6, height: 6, borderRadius: 3,
-                    background: selectedId === exp.id ? "#91040C" : "rgba(255,255,255,0.2)",
-                  }}
-                />
-              ))}
-            </div>
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );
