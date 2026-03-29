@@ -1232,8 +1232,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             onClick={goPrev}
             whileHover={{ scale: 1.06, background: "rgba(170,14,21,0.96)" }}
             whileTap={{ scale: 0.95 }}
+            aria-label="Прокрутить влево"
           >
-            <ChevronLeft className="w-5 h-5" strokeWidth={2.6} />
+            <ChevronLeft className="w-5 h-5" strokeWidth={2.6} aria-hidden="true" />
           </motion.button>
         )}
 
@@ -1251,8 +1252,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
             onClick={goNext}
             whileHover={{ scale: 1.06, background: "rgba(170,14,21,0.96)" }}
             whileTap={{ scale: 0.95 }}
+            aria-label="Прокрутить вправо"
           >
-            <ChevronRight className="w-5 h-5" strokeWidth={2.6} />
+            <ChevronRight className="w-5 h-5" strokeWidth={2.6} aria-hidden="true" />
           </motion.button>
         )}
 
@@ -1589,7 +1591,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
                   <div className="mt-auto flex flex-wrap items-center gap-4">
                     <motion.button
-                      className="flex items-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em]"
+                      className="flex items-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em] focus-visible:ring-2 focus-visible:ring-yellow-500"
                       style={{ fontSize: 12, background: "#91040C", border: "1px solid #91040C" }}
                       whileHover={{ background: "#6d0309" }}
                       whileTap={{ scale: 0.97 }}
@@ -1637,7 +1639,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
                 <motion.button
                   key={item.duration}
                   type="button"
-                  className="w-full text-left rounded-[20px] border border-white/8 px-5 py-5 sm:px-6 sm:py-6"
+                  className="w-full text-left rounded-[20px] border border-white/8 px-5 py-5 sm:px-6 sm:py-6 focus-visible:ring-2 focus-visible:ring-yellow-500"
                   style={{
                     background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.018))",
                     boxShadow: "0 18px 36px rgba(0,0,0,0.18)",

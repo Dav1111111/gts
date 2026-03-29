@@ -63,6 +63,8 @@ export function GTSFleetSection() {
                 <ImageWithFallback
                   src={vehicle.image}
                   alt={vehicle.title}
+                  width={400}
+                  height={500}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
@@ -93,7 +95,7 @@ export function GTSFleetSection() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="p-0 h-auto text-black hover:text-[#91040C] transition-colors group/btn"
+                  className="p-0 h-auto text-black hover:text-[#91040C] transition-colors group/btn focus-visible:ring-2 focus-visible:ring-yellow-500"
                 >
                   <span className="text-sm tracking-wide font-medium">ПОДРОБНЕЕ</span>
                   <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />

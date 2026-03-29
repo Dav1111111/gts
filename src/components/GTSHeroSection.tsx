@@ -142,7 +142,7 @@ export function GTSHeroSection() {
               {/* Header */}
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-full bg-[#91040C] flex items-center justify-center">
-                  <Bot className="w-3 h-3 text-white" />
+                  <Bot className="w-3 h-3 text-white" aria-hidden="true" />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-white text-xs tracking-wide">AI Консультант</span>
@@ -158,8 +158,8 @@ export function GTSHeroSection() {
                       <div className={`flex items-start gap-1.5 max-w-[90%] ${message.type === 'user' ? 'flex-row-reverse' : ''}`}>
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${message.type === 'user' ? 'bg-white' : 'bg-[#91040C]'}`}>
                           {message.type === 'user' ? 
-                            <User className="w-2.5 h-2.5 stroke-2 text-black" /> : 
-                            <Bot className="w-2.5 h-2.5 stroke-2 text-white" />
+                            <User className="w-2.5 h-2.5 stroke-2 text-black" aria-hidden="true" /> :
+                            <Bot className="w-2.5 h-2.5 stroke-2 text-white" aria-hidden="true" />
                           }
                         </div>
                         <div 
@@ -211,14 +211,15 @@ export function GTSHeroSection() {
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Задайте вопрос..."
-                  className="flex-1 bg-transparent border-none outline-none text-white text-xs h-7"
+                  className="flex-1 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded text-white text-xs h-7"
                   style={{ color: "rgba(255,255,255,0.9)" }}
                 />
-                <button 
+                <button
                   onClick={handleSendMessage}
-                  className="w-7 h-7 rounded-lg bg-[#91040C] hover:bg-[#a50e16] flex items-center justify-center flex-shrink-0 transition-colors"
+                  className="w-7 h-7 rounded-lg bg-[#91040C] hover:bg-[#a50e16] flex items-center justify-center flex-shrink-0 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500"
+                  aria-label="Отправить сообщение"
                 >
-                  <Send className="w-3 h-3 text-white" />
+                  <Send className="w-3 h-3 text-white" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -261,7 +262,7 @@ export function GTSHeroSection() {
             {/* Header */}
             <div className="flex items-center gap-2 mb-2">
               <div className="w-5 h-5 rounded-full bg-[#91040C] flex items-center justify-center">
-                <Bot className="w-2.5 h-2.5 text-white" />
+                <Bot className="w-2.5 h-2.5 text-white" aria-hidden="true" />
               </div>
               <span className="text-white text-[11px] tracking-wide">AI Консультант</span>
               <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
@@ -289,13 +290,14 @@ export function GTSHeroSection() {
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="Задайте вопрос..."
-                className="flex-1 bg-transparent border-none outline-none text-white text-xs h-7"
+                className="flex-1 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded text-white text-xs h-7"
               />
-              <button 
+              <button
                 onClick={handleSendMessage}
-                className="w-7 h-7 rounded-lg bg-[#91040C] hover:bg-[#a50e16] flex items-center justify-center flex-shrink-0 transition-colors"
+                className="w-7 h-7 rounded-lg bg-[#91040C] hover:bg-[#a50e16] flex items-center justify-center flex-shrink-0 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500"
+                aria-label="Отправить сообщение"
               >
-                <Send className="w-3 h-3 text-white" />
+                <Send className="w-3 h-3 text-white" aria-hidden="true" />
               </button>
             </div>
           </div>

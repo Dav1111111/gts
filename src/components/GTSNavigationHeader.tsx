@@ -218,12 +218,23 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
             {/* Logo */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="cursor-pointer"
+              className="cursor-pointer focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
+              role="button"
+              tabIndex={0}
               onClick={() => {
                 if (onNavigate) {
                   onNavigate({ page: "landing" });
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  if (onNavigate) {
+                    onNavigate({ page: "landing" });
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
               }}
             >
               <GTSLogo size="sm" />
@@ -308,7 +319,8 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-3 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20"
+                    className="flex items-center gap-3 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20 focus-visible:ring-2 focus-visible:ring-yellow-500"
+                    aria-label="Меню пользователя"
                   >
                     <div className="w-8 h-8 rounded-full overflow-hidden">
                       <ImageWithFallback
@@ -387,12 +399,13 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500"
+              aria-label={isMobileMenuOpen ? "Закрыть меню" : "Открыть меню"}
             >
               {isMobileMenuOpen ? (
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6" aria-hidden="true" />
               ) : (
-                <Menu className="w-6 h-6" />
+                <Menu className="w-6 h-6" aria-hidden="true" />
               )}
             </button>
 

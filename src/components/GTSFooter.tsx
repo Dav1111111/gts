@@ -19,14 +19,14 @@ export function GTSFooter() {
               {footer.description}
             </p>
             <div className="flex space-x-4 lg:space-x-6">
-              <a href={footer.contact?.socialLinks?.instagram || '#'} className="text-white/60 hover:text-[#91040C] transition-colors">
-                <Instagram className={GTSStyles.icons.medium} />
+              <a href={footer.contact?.socialLinks?.instagram || '#'} className="text-white/60 hover:text-[#91040C] transition-colors" aria-label="Instagram">
+                <Instagram className={GTSStyles.icons.medium} aria-hidden="true" />
               </a>
-              <a href={footer.contact?.socialLinks?.facebook || '#'} className="text-white/60 hover:text-[#91040C] transition-colors">
-                <Facebook className={GTSStyles.icons.medium} />
+              <a href={footer.contact?.socialLinks?.facebook || '#'} className="text-white/60 hover:text-[#91040C] transition-colors" aria-label="Facebook">
+                <Facebook className={GTSStyles.icons.medium} aria-hidden="true" />
               </a>
-              <a href={footer.contact?.socialLinks?.youtube || '#'} className="text-white/60 hover:text-[#91040C] transition-colors">
-                <Youtube className={GTSStyles.icons.medium} />
+              <a href={footer.contact?.socialLinks?.youtube || '#'} className="text-white/60 hover:text-[#91040C] transition-colors" aria-label="YouTube">
+                <Youtube className={GTSStyles.icons.medium} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -46,7 +46,7 @@ export function GTSFooter() {
             <h4 className="text-white font-medium mb-4 lg:mb-6 tracking-wide text-sm lg:text-base">КОНТАКТЫ</h4>
             <div className="space-y-3 lg:space-y-4 text-white/60">
               <div className="flex items-start">
-                <Phone className={`${GTSStyles.icons.small} mr-2 lg:mr-3 mt-0.5 text-[#91040C] flex-shrink-0`} />
+                <Phone aria-hidden="true" className={`${GTSStyles.icons.small} mr-2 lg:mr-3 mt-0.5 text-[#91040C] flex-shrink-0`} />
                 <div>
                   <div className="text-sm">{footer.contact.phone}</div>
                   <div className="text-xs text-white/40">{footer.contact.phoneNote}</div>
@@ -54,7 +54,7 @@ export function GTSFooter() {
               </div>
               
               <div className="flex items-start">
-                <Mail className={`${GTSStyles.icons.small} mr-2 lg:mr-3 mt-0.5 text-[#91040C] flex-shrink-0`} />
+                <Mail aria-hidden="true" className={`${GTSStyles.icons.small} mr-2 lg:mr-3 mt-0.5 text-[#91040C] flex-shrink-0`} />
                 <div>
                   <div className="text-sm break-all">{footer.contact.email}</div>
                   <div className="text-xs text-white/40">{footer.contact.emailNote}</div>
@@ -62,7 +62,7 @@ export function GTSFooter() {
               </div>
               
               <div className="flex items-start">
-                <MapPin className={`${GTSStyles.icons.small} mr-2 lg:mr-3 mt-0.5 text-[#91040C] flex-shrink-0`} />
+                <MapPin aria-hidden="true" className={`${GTSStyles.icons.small} mr-2 lg:mr-3 mt-0.5 text-[#91040C] flex-shrink-0`} />
                 <div>
                   <div className="text-sm">{footer.contact.address}</div>
                   <div className="text-xs text-white/40">{footer.contact.addressNote}</div>
