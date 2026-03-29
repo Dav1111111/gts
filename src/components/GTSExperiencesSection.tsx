@@ -4,9 +4,9 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { 
-  Ship, Car, Plane, Star, UtensilsCrossed, 
-  Sparkles, Camera, ArrowRight, Users, Clock, MapPin 
+import {
+  Ship, Car, Plane, Star,
+  Sparkles, ArrowRight, Users, Clock, MapPin
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useCMS } from "../cms/CMSProvider";
@@ -114,7 +114,10 @@ export function GTSExperiencesSection() {
                 >
                   <Card
                     onClick={() => handleExperienceClick(exp.id)}
-                    className="group bg-white border-black/10 hover:border-[#91040C]/40 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl h-full flex flex-col"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleExperienceClick(exp.id); } }}
+                    className="group bg-white border-black/10 hover:border-[#91040C]/40 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl h-full flex flex-col focus-visible:ring-2 focus-visible:ring-yellow-500"
                   >
                     {/* Image */}
                     <div className="relative overflow-hidden aspect-[4/3]">
@@ -156,15 +159,15 @@ export function GTSExperiencesSection() {
                       {/* Info */}
                       <div className="grid grid-cols-3 gap-2 mb-4 pt-3 border-t border-black/10 text-xs">
                         <div className="text-center">
-                          <Clock className="w-3 h-3 text-black/40 mx-auto mb-1" />
+                          <Clock className="w-3 h-3 text-black/40 mx-auto mb-1" aria-hidden="true" />
                           <p className="text-black/60">{exp.duration}</p>
                         </div>
                         <div className="text-center">
-                          <Users className="w-3 h-3 text-black/40 mx-auto mb-1" />
+                          <Users className="w-3 h-3 text-black/40 mx-auto mb-1" aria-hidden="true" />
                           <p className="text-black/60">{exp.capacity}</p>
                         </div>
                         <div className="text-center">
-                          <MapPin className="w-3 h-3 text-black/40 mx-auto mb-1" />
+                          <MapPin className="w-3 h-3 text-black/40 mx-auto mb-1" aria-hidden="true" />
                           <p className="text-black/60">{exp.location}</p>
                         </div>
                       </div>

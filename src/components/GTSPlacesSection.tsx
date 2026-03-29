@@ -84,8 +84,8 @@ export function GTSPlacesSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {places.map((place, index) => {
             // Simplified grid layout for better mobile experience
-            const gridSpan = place.size === 'large' && window.innerWidth >= 1024 ? 'lg:col-span-2 lg:row-span-2' : 
-                            place.size === 'medium' && window.innerWidth >= 1024 ? 'lg:row-span-2' : '';
+            const gridSpan = place.size === 'large' ? 'lg:col-span-2 lg:row-span-2' :
+                            place.size === 'medium' ? 'lg:row-span-2' : '';
             
             return (
               <Card 
@@ -94,7 +94,7 @@ export function GTSPlacesSection() {
               >
                 {/* Image */}
                 <div className={`relative overflow-hidden ${
-                  place.size === 'large' && window.innerWidth >= 1024 ? 'aspect-square' : 'aspect-[4/3]'
+                  place.size === 'large' ? 'lg:aspect-square aspect-[4/3]' : 'aspect-[4/3]'
                 }`}>
                   <ImageWithFallback
                     src={place.image}
@@ -105,20 +105,20 @@ export function GTSPlacesSection() {
                   
                   {/* Icon */}
                   <div className="absolute top-3 lg:top-4 right-3 lg:right-4 w-6 h-6 lg:w-8 lg:h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                    <place.icon className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
+                    <place.icon className="w-3 h-3 lg:w-4 lg:h-4 text-white" aria-hidden="true" />
                   </div>
                 </div>
                 
                 {/* Content Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6 text-white">
                   <h3 className={`font-medium mb-2 tracking-wide leading-tight ${
-                    place.size === 'large' && window.innerWidth >= 1024 ? 'text-xl lg:text-2xl' : 'text-base lg:text-lg'
+                    place.size === 'large' ? 'text-xl lg:text-2xl' : 'text-base lg:text-lg'
                   }`}>
                     {place.title}
                   </h3>
                   
                   <p className={`text-white/80 leading-relaxed mb-3 lg:mb-4 line-clamp-2 ${
-                    place.size === 'large' && window.innerWidth >= 1024 ? 'text-sm lg:text-base' : 'text-xs lg:text-sm'
+                    place.size === 'large' ? 'text-sm lg:text-base' : 'text-xs lg:text-sm'
                   }`}>
                     {place.description}
                   </p>
@@ -149,7 +149,7 @@ export function GTSPlacesSection() {
               Получите доступ к персональной карте с GPS-координатами 
               <span className="hidden sm:inline"> всех эксклюзивных локаций</span>
             </p>
-            <button className="w-full bg-white text-black hover:bg-white/90 transition-colors px-6 py-3 text-sm tracking-wider font-medium rounded">
+            <button className="w-full bg-white text-black hover:bg-white/90 transition-colors px-6 py-3 text-sm tracking-wider font-medium rounded focus-visible:ring-2 focus-visible:ring-yellow-500">
               ПОЛУЧИТЬ КАРТУ
             </button>
           </div>

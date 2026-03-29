@@ -98,7 +98,7 @@ export function GTSFleetSection() {
                   className="p-0 h-auto text-black hover:text-[#91040C] transition-colors group/btn focus-visible:ring-2 focus-visible:ring-yellow-500"
                 >
                   <span className="text-sm tracking-wide font-medium">ПОДРОБНЕЕ</span>
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" aria-hidden="true" />
                 </Button>
               </div>
             </Card>

@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import heroImage from "figma:asset/fb8b36291948fa2b0a9811223c10b0ff0cf9d994.png";
 import { Send, Bot, User, ChevronDown } from "lucide-react";
@@ -315,7 +313,7 @@ export function GTSHeroSection() {
           animate={{ y: [0, 5, 0] }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
         >
-          <ChevronDown className="w-4 h-4" style={{ color: "rgba(255,255,255,0.25)" }} />
+          <ChevronDown className="w-4 h-4" style={{ color: "rgba(255,255,255,0.25)" }} aria-hidden="true" />
         </motion.div>
       </motion.div>
     </section>

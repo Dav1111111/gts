@@ -279,10 +279,10 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
                                 <button
                                   key={subItem.href}
                                   onClick={() => handleNavClick(subItem.href)}
-                                  className="w-full flex items-start p-3 rounded-lg hover:bg-white/5 transition-colors text-left group"
+                                  className="w-full flex items-start p-3 rounded-lg hover:bg-white/5 transition-colors text-left group focus-visible:ring-2 focus-visible:ring-yellow-500"
                                 >
                                   <div className="w-10 h-10 bg-[#91040C]/10 rounded-lg flex items-center justify-center flex-shrink-0 mr-3 group-hover:bg-[#91040C]/20 transition-colors">
-                                    <subItem.icon className="w-5 h-5 text-[#91040C]" />
+                                    <subItem.icon className="w-5 h-5 text-[#91040C]" aria-hidden="true" />
                                   </div>
                                   <div>
                                     <div className="text-white text-sm mb-0.5">
@@ -488,7 +488,7 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
                                     <button
                                       key={subItem.href}
                                       onClick={() => handleNavClick(subItem.href)}
-                                      className="w-full flex items-start p-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+                                      className="w-full flex items-start p-3 rounded-lg hover:bg-white/5 transition-colors text-left focus-visible:ring-2 focus-visible:ring-yellow-500"
                                     >
                                       <div className="w-10 h-10 bg-[#91040C]/10 rounded-lg flex items-center justify-center flex-shrink-0 mr-3">
                                         <subItem.icon className="w-5 h-5 text-[#91040C]" />

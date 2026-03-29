@@ -84,7 +84,7 @@ export function GTSAboutSection({ onNavigate }: GTSAboutSectionProps) {
                 return (
                 <div key={feature.id} className="flex items-start space-x-5">
                   <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center flex-shrink-0">
-                    <FeatureIcon className="w-6 h-6 text-[#91040C]" />
+                    <FeatureIcon className="w-6 h-6 text-[#91040C]" aria-hidden="true" />
                   </div>
                   <div>
                     <h4 className="text-black mb-2 tracking-wide text-lg">{feature.title}</h4>

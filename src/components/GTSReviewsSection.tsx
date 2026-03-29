@@ -92,7 +92,7 @@ export function GTSReviewsSection() {
                 {/* Rating */}
                 <div className="flex items-center mb-4 lg:mb-6">
                   {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-[#91040C] text-[#91040C]" />
+                    <Star key={i} className="w-4 h-4 fill-[#91040C] text-[#91040C]" aria-hidden="true" />
                   ))}
                 </div>
 
@@ -106,6 +106,8 @@ export function GTSReviewsSection() {
                   <ImageWithFallback
                     src={review.avatar}
                     alt={review.name}
+                    width={48}
+                    height={48}
                     className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover mr-3 lg:mr-4 flex-shrink-0"
                   />
                   <div className="min-w-0">
@@ -130,9 +132,10 @@ export function GTSReviewsSection() {
               variant="outline"
               size="sm"
               onClick={prevSlide}
-              className="border-black/20 hover:border-black hover:bg-black hover:text-white transition-all w-10 h-10 p-0"
+              className="border-black/20 hover:border-black hover:bg-black hover:text-white transition-all w-10 h-10 p-0 focus-visible:ring-2 focus-visible:ring-yellow-500"
+              aria-label="Предыдущий отзыв"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </Button>
 
             {/* Dots */}
@@ -141,7 +144,8 @@ export function GTSReviewsSection() {
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
+                  aria-label={`Отзыв ${index + 1}`}
+                  className={`w-2 h-2 rounded-full transition-all focus-visible:ring-2 focus-visible:ring-yellow-500 ${
                     index === currentSlide ? 'bg-black' : 'bg-black/20'
                   }`}
                 />
@@ -152,9 +156,10 @@ export function GTSReviewsSection() {
               variant="outline"
               size="sm"
               onClick={nextSlide}
-              className="border-black/20 hover:border-black hover:bg-black hover:text-white transition-all w-10 h-10 p-0"
+              className="border-black/20 hover:border-black hover:bg-black hover:text-white transition-all w-10 h-10 p-0 focus-visible:ring-2 focus-visible:ring-yellow-500"
+              aria-label="Следующий отзыв"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </Button>
           </div>
         </div>
