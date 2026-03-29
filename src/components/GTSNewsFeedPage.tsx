@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -90,22 +90,22 @@ const categories = [
   { value: "Events", label: "События", color: "bg-yellow-100 text-yellow-800" }
 ];
 
+function getCategoryColor(category: string) {
+  const cat = categories.find(c => c.value === category);
+  return cat ? cat.color : "bg-gray-100 text-gray-800";
+}
+
 export function GTSNewsFeedPage({ onBack, onViewArticle }: GTSNewsFeedPageProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredArticles = newsArticles.filter(article => {
+  const filteredArticles = useMemo(() => newsArticles.filter(article => {
     const matchesCategory = selectedCategory === "all" || article.category === selectedCategory;
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
-  });
-
-  const getCategoryColor = (category: string) => {
-    const cat = categories.find(c => c.value === category);
-    return cat ? cat.color : "bg-gray-100 text-gray-800";
-  };
+  }), [selectedCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-white">

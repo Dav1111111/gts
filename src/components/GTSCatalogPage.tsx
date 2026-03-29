@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -224,6 +224,20 @@ const priceRanges = [
   { value: "50000+", label: "От 50,000₽" }
 ];
 
+const ITEMS_PER_PAGE = 6;
+
+const allFeatures = Array.from(new Set(extendedVehicles.flatMap(v => v.features)));
+
+function getCategoryColor(category: string) {
+  switch (category) {
+    case "boats": return "bg-blue-100 text-blue-800";
+    case "buggies": return "bg-orange-100 text-orange-800";
+    case "slingshot": return "bg-purple-100 text-purple-800";
+    case "helicopters": return "bg-green-100 text-green-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+}
+
 interface GTSCatalogPageProps {
   onBackToHome: () => void;
 }
@@ -240,14 +254,9 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  const itemsPerPage = 6;
-
-  // Get all unique features for filter
-  const allFeatures = Array.from(new Set(extendedVehicles.flatMap(v => v.features)));
-
-  const filteredVehicles = extendedVehicles.filter(vehicle => {
+  const filteredVehicles = useMemo(() => extendedVehicles.filter(vehicle => {
     if (selectedCategory !== "all" && vehicle.category !== selectedCategory) return false;
-    
+
     if (selectedPriceRange !== "all") {
       const price = vehicle.price.amount;
       switch (selectedPriceRange) {
@@ -259,7 +268,7 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
     }
 
     if (selectedFeatures.length > 0) {
-      const hasFeatures = selectedFeatures.every(feature => 
+      const hasFeatures = selectedFeatures.every(feature =>
         vehicle.features.includes(feature)
       );
       if (!hasFeatures) return false;
@@ -273,10 +282,9 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
     }
 
     return true;
-  });
+  }), [selectedCategory, selectedPriceRange, selectedFeatures, searchQuery]);
 
-  // Sort vehicles
-  const sortedVehicles = [...filteredVehicles].sort((a, b) => {
+  const sortedVehicles = useMemo(() => [...filteredVehicles].sort((a, b) => {
     switch (selectedSort) {
       case "price-asc": return a.price.amount - b.price.amount;
       case "price-desc": return b.price.amount - a.price.amount;
@@ -285,32 +293,22 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
       case "newest": return parseInt(b.specs.year) - parseInt(a.specs.year);
       default: return 0;
     }
-  });
+  }), [filteredVehicles, selectedSort]);
 
-  // Pagination
-  const totalPages = Math.ceil(sortedVehicles.length / itemsPerPage);
-  const paginatedVehicles = sortedVehicles.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = useMemo(() => Math.ceil(sortedVehicles.length / ITEMS_PER_PAGE), [sortedVehicles]);
 
-  const toggleFavorite = (vehicleId: string) => {
-    setFavorites(prev => 
+  const paginatedVehicles = useMemo(() => sortedVehicles.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  ), [sortedVehicles, currentPage]);
+
+  const toggleFavorite = useCallback((vehicleId: string) => {
+    setFavorites(prev =>
       prev.includes(vehicleId)
         ? prev.filter(id => id !== vehicleId)
         : [...prev, vehicleId]
     );
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "boats": return "bg-blue-100 text-blue-800";
-      case "buggies": return "bg-orange-100 text-orange-800";
-      case "slingshot": return "bg-purple-100 text-purple-800";
-      case "helicopters": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
