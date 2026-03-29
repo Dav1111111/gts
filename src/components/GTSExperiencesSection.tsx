@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { Card } from "./ui/card";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -36,14 +36,14 @@ export function GTSExperiencesSection() {
   const headerY = useTransform(scrollYProgress, [0, 0.2], [50, 0]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
 
-  const filteredExperiences = activeCategory === "all" 
-    ? experiences 
-    : experiences.filter(exp => exp.category === activeCategory);
+  const filteredExperiences = useMemo(
+    () => activeCategory === "all" ? experiences : experiences.filter(exp => exp.category === activeCategory),
+    [activeCategory, experiences]
+  );
 
-  const handleExperienceClick = (id: string) => {
-    console.log(`Opening experience: ${id}`);
+  const handleExperienceClick = useCallback((id: string) => {
     window.location.hash = `/experience/${id}`;
-  };
+  }, []);
 
   return (
     <section ref={containerRef} className="py-20 lg:py-28 bg-white overflow-hidden">

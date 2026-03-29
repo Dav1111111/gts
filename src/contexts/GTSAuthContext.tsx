@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 
 export type UserRole = "guest" | "member" | "staff" | "partner" | "executive";
 
@@ -415,13 +415,13 @@ export function GTSAuthProvider({ children }: { children: ReactNode }) {
     persistAuthUser(null);
   };
 
-  const updateUser = (updates: Partial<GTSUser>) => {
+  const updateUser = useCallback((updates: Partial<GTSUser>) => {
     if (user) {
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
       persistAuthUser(updatedUser);
     }
-  };
+  }, [user]);
 
   return (
     <GTSAuthContext.Provider

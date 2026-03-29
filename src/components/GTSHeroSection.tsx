@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import heroImage from "figma:asset/fb8b36291948fa2b0a9811223c10b0ff0cf9d994.png";
 import { Send, Bot, User, ChevronDown } from "lucide-react";
@@ -28,18 +28,18 @@ export function GTSHeroSection() {
     }
   ]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     if (!chatInput.trim()) return;
-    
+
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       type: "user",
       text: chatInput
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setChatInput("");
-    
+
     setTimeout(() => {
       const botResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -54,7 +54,7 @@ export function GTSHeroSection() {
       };
       setMessages(prev => [...prev, botResponse]);
     }, 1000);
-  };
+  }, [chatInput]);
 
   return (
     <section className="relative h-screen overflow-hidden bg-black">

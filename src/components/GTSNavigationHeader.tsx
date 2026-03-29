@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Route } from "./GTSRouter";
@@ -140,15 +140,15 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
     };
   }, [isMobileMenuOpen]);
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = useCallback((href: string) => {
     setIsMobileMenuOpen(false);
     setActiveSubmenu(null);
-    
+
     if (onNavigate) {
       // Используем роутер если есть функция навигации
       // Убираем # если он есть
       const cleanHref = href.startsWith('#') ? href.substring(1) : href;
-      
+
       if (cleanHref === "landing" || cleanHref === "") {
         onNavigate({ page: "landing" });
       } else if (cleanHref === "about") {
@@ -178,9 +178,9 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-  };
+  }, [onNavigate]);
 
-  const handleProfileNavigation = () => {
+  const handleProfileNavigation = useCallback(() => {
     if (!onNavigate || !user) {
       return;
     }
@@ -196,7 +196,7 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
     }
 
     onNavigate({ page: "member-portal" });
-  };
+  }, [onNavigate, user]);
 
   return (
     <>

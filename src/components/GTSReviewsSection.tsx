@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -46,24 +46,18 @@ const reviews = [
 export function GTSReviewsSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % reviews.length);
-  };
+  }, []);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + reviews.length) % reviews.length);
-  };
+  }, []);
 
-  const getVisibleReviews = () => {
-    const visible = [];
-    const itemsToShow = window.innerWidth >= 768 ? 3 : 1; // Show 1 on mobile, 3 on desktop
-    
-    for (let i = 0; i < itemsToShow; i++) {
-      const index = (currentSlide + i) % reviews.length;
-      visible.push(reviews[index]);
-    }
-    return visible;
-  };
+  // Show all reviews — CSS grid handles 1 col on mobile, 3 on desktop
+  const visibleReviews = useMemo(() => {
+    return [0, 1, 2].map((i) => reviews[(currentSlide + i) % reviews.length]);
+  }, [currentSlide]);
 
   return (
     <section className="py-16 lg:py-32 bg-white">
@@ -82,11 +76,11 @@ export function GTSReviewsSection() {
         {/* Reviews Slider */}
         <div className="relative max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {getVisibleReviews().map((review, index) => (
+            {visibleReviews.map((review, index) => (
               <Card 
                 key={`${review.id}-${currentSlide}`} 
                 className={`border-0 shadow-sm bg-white p-6 lg:p-8 transition-all duration-500 ${
-                  index === 1 && window.innerWidth >= 768 ? 'md:scale-105 md:shadow-lg' : ''
+                  index === 1 ? 'md:scale-105 md:shadow-lg' : ''
                 }`}
               >
                 {/* Rating */}
