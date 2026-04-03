@@ -112,15 +112,15 @@ export function GTSFlashOffersSection() {
           {offers.map((offer) => (
             <div
               key={offer.id}
-              className={`relative bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-300 hover:-translate-y-1 ${
+              className={`relative bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 ${
                 offer.urgent ? 'border-accent shadow-accent/10' : 'border-gray-100'
               }`}
             >
               {/* Urgent badge */}
               {offer.urgent && (
                 <div className="absolute top-4 left-4 z-10">
-                  <Badge className="bg-accent text-white border-accent animate-pulse">
-                    <Zap className="h-3 w-3 mr-1" />
+                  <Badge className="bg-accent text-white border-accent motion-safe:animate-pulse">
+                    <Zap className="h-3 w-3 mr-1" aria-hidden="true" />
                     Срочно!
                   </Badge>
                 </div>
@@ -129,7 +129,7 @@ export function GTSFlashOffersSection() {
               {/* Time left badge */}
               <div className="absolute top-4 right-4 z-10">
                 <Badge variant="secondary" className="bg-black/70 text-white border-0 backdrop-blur-sm">
-                  <Clock className="h-3 w-3 mr-1" />
+                  <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                   {formatTime(offer.timeLeft)}
                 </Badge>
               </div>
@@ -164,15 +164,15 @@ export function GTSFlashOffersSection() {
                 {/* Details */}
                 <div className="space-y-2 mb-6">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
+                    <MapPin className="h-4 w-4" aria-hidden="true" />
                     {offer.location}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-4 w-4" aria-hidden="true" />
                     Длительность: {offer.duration}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
+                    <Users className="h-4 w-4" aria-hidden="true" />
                     Осталось мест: {offer.slotsLeft}
                   </div>
                 </div>
@@ -180,7 +180,7 @@ export function GTSFlashOffersSection() {
                 <Button 
                   className={`w-full ${
                     offer.urgent 
-                      ? 'bg-accent hover:bg-accent/90 text-white animate-pulse' 
+                      ? 'bg-accent hover:bg-accent/90 text-white motion-safe:animate-pulse'
                       : 'bg-black hover:bg-gray-800 text-white'
                   }`}
                 >

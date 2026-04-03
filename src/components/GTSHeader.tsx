@@ -101,54 +101,54 @@ export function GTSHeader({ onNavigateToCatalog, onNavigateToMembership, onNavig
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-12">
-            <a href="#about" className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide">
+            <a href="#about" className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded">
               О КЛУБЕ
             </a>
             <button 
               onClick={handleMembershipClick}
-              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide"
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
             >
               ЧЛЕНСТВО
             </button>
             <button 
               onClick={handleCatalogClick}
-              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide"
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
             >
               ТЕХНИКА
             </button>
-            <a href="#expeditions" className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide">
+            <a href="#expeditions" className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded">
               ЭКСПЕДИЦИИ
             </a>
-            <a href="#contact" className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide">
+            <a href="#contact" className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded">
               КОНТАКТЫ
             </a>
             <button 
               onClick={handleSharedModulesClick}
-              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide"
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
             >
               МОДУЛИ
             </button>
             <button 
               onClick={handlePartnerCreationClick}
-              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide"
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
             >
               ПАРТНЁРЫ
             </button>
             <button 
               onClick={handleExtendedAdminClick}
-              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide"
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
             >
               АДМИН+
             </button>
             <button 
               onClick={handleUnifiedAdminClick}
-              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide"
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
             >
               UNIFIED
             </button>
             <button 
               onClick={() => {/* Add navigation to new system */}}
-              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide"
+              className="text-white/80 hover:text-white transition-colors duration-300 text-sm tracking-wide focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
             >
               СИСТЕМА
             </button>
@@ -157,7 +157,7 @@ export function GTSHeader({ onNavigateToCatalog, onNavigateToMembership, onNavig
           {/* Phone and CTA - Desktop only */}
           <div className="hidden lg:flex items-center space-x-6">
             <div className="flex items-center text-white/80 text-sm">
-              <Phone className="w-4 h-4 mr-2" />
+              <Phone className="w-4 h-4 mr-2" aria-hidden="true" />
               <span>+7 (862) 555-0123</span>
             </div>
             <Button 
@@ -179,10 +179,11 @@ export function GTSHeader({ onNavigateToCatalog, onNavigateToMembership, onNavig
               КАБИНЕТ
             </Button>
             <button
-              className="text-white p-2"
+              className="text-white p-2 focus-visible:ring-2 focus-visible:ring-yellow-500 rounded"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
             >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
             </button>
           </div>
         </div>
@@ -262,7 +263,7 @@ export function GTSHeader({ onNavigateToCatalog, onNavigateToMembership, onNavig
               </button>
               <div className="px-4 py-3 border-t border-white/10 mt-2">
                 <div className="flex items-center text-white/80 mb-3 text-sm">
-                  <Phone className="w-4 h-4 mr-2" />
+                  <Phone className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span>+7 (862) 555-0123</span>
                 </div>
               </div>

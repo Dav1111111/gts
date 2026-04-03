@@ -272,17 +272,17 @@ export function GTSPortalSidebar({
               } ${isCollapsed ? 'px-2' : ''}`}
               style={{ color: isActive ? '#FFFFFF' : '#A6A7AA' }}
             >
-              <IconComponent className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3'}`} />
+              <IconComponent className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3'}`} aria-hidden="true" />
               {!isCollapsed && (
                 <>
-                  <span 
+                  <span
                     className="flex-1 text-left text-sm font-medium"
                     style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}
                   >
                     {item.label}
                   </span>
                   {item.badge && (
-                    <Badge 
+                    <Badge
                       className={`ml-2 text-xs px-2 py-0.5 ${getBadgeVariant(item.badge.variant)}`}
                       style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}
                     >
@@ -290,9 +290,9 @@ export function GTSPortalSidebar({
                     </Badge>
                   )}
                   {isExpanded ? (
-                    <ChevronDown className="w-4 h-4 ml-2" />
+                    <ChevronDown className="w-4 h-4 ml-2" aria-hidden="true" />
                   ) : (
-                    <ChevronRight className="w-4 h-4 ml-2" />
+                    <ChevronRight className="w-4 h-4 ml-2" aria-hidden="true" />
                   )}
                 </>
               )}
@@ -319,17 +319,17 @@ export function GTSPortalSidebar({
         } ${isCollapsed ? 'px-2' : ''}`}
         style={{ color: isActive ? '#FFFFFF' : '#A6A7AA' }}
       >
-        <IconComponent className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3'}`} />
+        <IconComponent className={`flex-shrink-0 ${isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3'}`} aria-hidden="true" />
         {!isCollapsed && (
           <>
-            <span 
+            <span
               className="flex-1 text-left text-sm font-medium"
               style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}
             >
               {item.label}
             </span>
             {item.badge && (
-              <Badge 
+              <Badge
                 className={`ml-2 text-xs px-2 py-0.5 ${getBadgeVariant(item.badge.variant)}`}
                 style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}
               >
@@ -385,10 +385,11 @@ export function GTSPortalSidebar({
           onClick={onToggleCollapse}
           className={`${isCollapsed ? 'w-full' : ''}`}
           style={{ color: '#A6A7AA' }}
+          aria-label={isCollapsed ? "Развернуть меню" : "Свернуть меню"}
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="w-4 h-4" aria-hidden="true" />
           {!isCollapsed && (
-            <span 
+            <span
               className="ml-2 text-sm"
               style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}
             >

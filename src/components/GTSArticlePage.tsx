@@ -330,7 +330,7 @@ export function GTSArticlePage({ articleId, onBack }: GTSArticlePageProps) {
             
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-4 h-4" aria-hidden="true" />
                 Поделиться
               </Button>
             </div>
@@ -364,11 +364,11 @@ export function GTSArticlePage({ articleId, onBack }: GTSArticlePageProps) {
             </Badge>
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4" aria-hidden="true" />
                 {sampleArticle.date}
               </div>
               <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
+                <Clock className="w-4 h-4" aria-hidden="true" />
                 {sampleArticle.readTime}
               </div>
             </div>
@@ -400,15 +400,17 @@ export function GTSArticlePage({ articleId, onBack }: GTSArticlePageProps) {
 
             <div className="flex items-center gap-6 text-sm text-gray-500">
               <span>{sampleArticle.stats.views} просмотров</span>
-              <button 
+              <button
                 onClick={() => setArticleLiked(!articleLiked)}
-                className={`flex items-center gap-1 hover:text-red-500 transition-colors ${articleLiked ? 'text-red-500' : ''}`}
+                aria-label={articleLiked ? "Убрать лайк" : "Поставить лайк"}
+                aria-pressed={articleLiked}
+                className={`flex items-center gap-1 hover:text-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${articleLiked ? 'text-red-500' : ''}`}
               >
-                <Heart className={`w-4 h-4 ${articleLiked ? 'fill-current' : ''}`} />
+                <Heart className={`w-4 h-4 ${articleLiked ? 'fill-current' : ''}`} aria-hidden="true" />
                 {sampleArticle.stats.likes}
               </button>
               <div className="flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4" aria-hidden="true" />
                 {sampleArticle.stats.comments}
               </div>
             </div>
@@ -442,7 +444,9 @@ export function GTSArticlePage({ articleId, onBack }: GTSArticlePageProps) {
             <div className="flex gap-4">
               <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0"></div>
               <div className="flex-1">
+                <label htmlFor="new-comment" className="sr-only">Ваш комментарий</label>
                 <Textarea
+                  id="new-comment"
                   placeholder="Поделитесь своим мнением..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
@@ -481,8 +485,8 @@ export function GTSArticlePage({ articleId, onBack }: GTSArticlePageProps) {
                   </div>
                   
                   <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                    <button className={`flex items-center gap-1 hover:text-red-500 transition-colors ${comment.liked ? 'text-red-500' : ''}`}>
-                      <ThumbsUp className={`w-4 h-4 ${comment.liked ? 'fill-current' : ''}`} />
+                    <button className={`flex items-center gap-1 hover:text-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${comment.liked ? 'text-red-500' : ''}`} aria-label="Лайк" aria-pressed={comment.liked}>
+                      <ThumbsUp className={`w-4 h-4 ${comment.liked ? 'fill-current' : ''}`} aria-hidden="true" />
                       {comment.likes}
                     </button>
                     <button className="hover:text-gray-700 transition-colors">

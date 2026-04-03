@@ -158,7 +158,7 @@ export function GTSAboutPage({ onNavigate }: GTSAboutPageProps) {
         >
           <ImageWithFallback
             src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb3VudGFpbiUyMGNhbnlvbiUyMHdhdGVyZmFsbHxlbnwxfHx8fDE3NjE1MDQ1NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-            alt="Grand Tour Sochi"
+            alt="Grand Tour Spirit"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
@@ -177,7 +177,7 @@ export function GTSAboutPage({ onNavigate }: GTSAboutPageProps) {
             
             <h1 className="text-5xl lg:text-7xl xl:text-8xl mb-6 tracking-wider">
               GRAND TOUR
-              <span className="block text-[#91040C] mt-2">SOCHI</span>
+              <span className="block text-[#91040C] mt-2">SPIRIT</span>
             </h1>
             
             <p className="text-xl lg:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
@@ -197,7 +197,7 @@ export function GTSAboutPage({ onNavigate }: GTSAboutPageProps) {
                 <span className="block text-[#91040C] mt-2">ВО ЧТО ВЕРИМ</span>
               </h2>
               <p className="text-xl text-black/70 max-w-3xl mx-auto">
-                Grand Tour Sochi — это больше, чем клуб. Это сообщество людей, объединенных страстью к приключениям и стремлением к качеству
+                Grand Tour Spirit — это больше, чем клуб. Это сообщество людей, объединенных страстью к приключениям и стремлением к качеству
               </p>
             </div>
 
@@ -361,7 +361,7 @@ export function GTSAboutPage({ onNavigate }: GTSAboutPageProps) {
                 и хотят исследовать мир без компромиссов»
               </blockquote>
               <div className="text-lg text-black/70">
-                — Александр Морозов, основатель Grand Tour Sochi
+                — Александр Морозов, основатель Grand Tour Spirit
               </div>
             </motion.div>
           </div>

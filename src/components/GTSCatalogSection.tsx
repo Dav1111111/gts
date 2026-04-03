@@ -187,18 +187,18 @@ export function GTSCatalogSection({ onViewFullCatalog }: GTSCatalogSectionProps)
                 {/* Specs */}
                 <div className="grid grid-cols-3 gap-4 mb-4 py-4 border-t border-b border-gray-100">
                   <div className="text-center">
-                    <Power className="w-4 h-4 text-[#91040C] mx-auto mb-1" />
+                    <Power className="w-4 h-4 text-[#91040C] mx-auto mb-1" aria-hidden="true" />
                     <div className="text-xs text-black/60 mb-1">Мощность</div>
                     <div className="text-sm font-medium text-black">{vehicle.specs.power}</div>
                   </div>
                   <div className="text-center">
-                    <Users className="w-4 h-4 text-[#91040C] mx-auto mb-1" />
+                    <Users className="w-4 h-4 text-[#91040C] mx-auto mb-1" aria-hidden="true" />
                     <div className="text-xs text-black/60 mb-1">Вместимость</div>
                     <div className="text-sm font-medium text-black">{vehicle.specs.capacity}</div>
                   </div>
                   {vehicle.specs.duration && (
                     <div className="text-center">
-                      <Clock className="w-4 h-4 text-[#91040C] mx-auto mb-1" />
+                      <Clock className="w-4 h-4 text-[#91040C] mx-auto mb-1" aria-hidden="true" />
                       <div className="text-xs text-black/60 mb-1">Длительность</div>
                       <div className="text-sm font-medium text-black">{vehicle.specs.duration}</div>
                     </div>

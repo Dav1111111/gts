@@ -3,7 +3,7 @@ import type { CMSData } from "./cmsTypes";
 export const cmsDefaults: CMSData = {
   hero: {
     title: "GRAND TOUR",
-    titleAccent: "СОЧИ",
+    titleAccent: "SPIRIT",
     subtitle: "Премиальный клуб активного отдыха.\nАренда техники, экспедиции и\u00a0маршруты.",
     chatBotGreeting: "Добро пожаловать в GTS! Чем могу помочь?"
   },
@@ -11,7 +11,7 @@ export const cmsDefaults: CMSData = {
   about: {
     badge: "О КЛУБЕ",
     title: "GRAND TOUR",
-    titleAccent: "SOCHI CLUB",
+    titleAccent: "SPIRIT",
     description: "Эксклюзивный клуб для тех, кто ценит качество, комфорт и неординарные впечатления. Мы создаем уникальные приключения на премиальной технике в самых живописных локациях Сочи и Краснодарского края.",
     subdescription: "Каждое путешествие с GTS — это не просто аренда техники, а тщательно продуманный опыт с персональным сервисом, который соответствует статусу наших членов.",
     stats: {
@@ -373,7 +373,7 @@ export const cmsDefaults: CMSData = {
       addressNote: "Адлерский район",
       socialLinks: { instagram: "#", facebook: "#", youtube: "#" }
     },
-    copyright: "© 2024 Grand Tour Sochi. Все права защищены.",
+    copyright: "© 2024 Grand Tour Spirit. Все права защищены.",
     membershipCTA: {
       title: "ПРЕМИАЛЬНОЕ ЧЛЕНСТВО",
       description: "Получите доступ к эксклюзивным мероприятиям, приоритетному бронированию и персональному консьерж-сервису",

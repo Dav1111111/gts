@@ -341,16 +341,20 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
                   size="sm"
                   onClick={() => setViewMode("grid")}
                   className={viewMode === "grid" ? "bg-gray-100" : ""}
+                  aria-label="Сетка"
+                  aria-pressed={viewMode === "grid"}
                 >
-                  <Grid3X3 className="w-4 h-4" />
+                  <Grid3X3 className="w-4 h-4" aria-hidden="true" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setViewMode("list")}
                   className={viewMode === "list" ? "bg-gray-100" : ""}
+                  aria-label="Список"
+                  aria-pressed={viewMode === "list"}
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-4 h-4" aria-hidden="true" />
                 </Button>
               </div>
             </div>
@@ -489,7 +493,7 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
                 : "grid-cols-1"
             }`}>
               {paginatedVehicles.map((vehicle) => (
-                <Card key={vehicle.id} className="group border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <Card key={vehicle.id} className="group border-gray-200 shadow-sm hover:shadow-lg transition-[box-shadow,transform] duration-300 overflow-hidden">
                   {/* Image */}
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <ImageWithFallback
@@ -507,8 +511,10 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
                           favorites.includes(vehicle.id) ? "text-red-500" : "text-gray-600"
                         }`}
                         onClick={() => toggleFavorite(vehicle.id)}
+                        aria-label={favorites.includes(vehicle.id) ? "Убрать из избранного" : "Добавить в избранное"}
+                        aria-pressed={favorites.includes(vehicle.id)}
                       >
-                        <Heart className={`w-4 h-4 ${favorites.includes(vehicle.id) ? "fill-current" : ""}`} />
+                        <Heart className={`w-4 h-4 ${favorites.includes(vehicle.id) ? "fill-current" : ""}`} aria-hidden="true" />
                       </Button>
                       <Dialog>
                         <DialogTrigger asChild>
@@ -517,8 +523,9 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
                             variant="ghost"
                             className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-600"
                             onClick={() => setSelectedVehicle(vehicle)}
+                            aria-label="Быстрый просмотр"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-4 h-4" aria-hidden="true" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -644,15 +651,15 @@ export function GTSCatalogPage({ onBackToHome }: GTSCatalogPageProps) {
                     {/* Specs */}
                     <div className="grid grid-cols-3 gap-2 mb-4 py-3 border-t border-b border-gray-100">
                       <div className="text-center">
-                        <Power className="w-4 h-4 text-[#91040C] mx-auto mb-1" />
+                        <Power className="w-4 h-4 text-[#91040C] mx-auto mb-1" aria-hidden="true" />
                         <div className="text-xs text-gray-600">{vehicle.specs.power}</div>
                       </div>
                       <div className="text-center">
-                        <Users className="w-4 h-4 text-[#91040C] mx-auto mb-1" />
+                        <Users className="w-4 h-4 text-[#91040C] mx-auto mb-1" aria-hidden="true" />
                         <div className="text-xs text-gray-600">{vehicle.specs.capacity}</div>
                       </div>
                       <div className="text-center">
-                        <MapPin className="w-4 h-4 text-[#91040C] mx-auto mb-1" />
+                        <MapPin className="w-4 h-4 text-[#91040C] mx-auto mb-1" aria-hidden="true" />
                         <div className="text-xs text-gray-600">{vehicle.location}</div>
                       </div>
                     </div>

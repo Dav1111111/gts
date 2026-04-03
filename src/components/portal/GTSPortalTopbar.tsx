@@ -125,8 +125,9 @@ export function GTSPortalTopbar({
             size="sm"
             onClick={onToggleSidebar}
             className="lg:hidden text-gray-400 hover:text-white"
+            aria-label="Открыть меню"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           </Button>
 
           {/* Logo */}
@@ -198,12 +199,13 @@ export function GTSPortalTopbar({
           {/* Notifications */}
           <DropdownMenu open={notificationsOpen} onOpenChange={setNotificationsOpen}>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="relative text-gray-400 hover:text-white"
+                aria-label={unreadCount > 0 ? `Уведомления: ${unreadCount} новых` : "Уведомления"}
               >
-                <Bell className="w-5 h-5" />
+                <Bell className="w-5 h-5" aria-hidden="true" />
                 {unreadCount > 0 && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-medium flex items-center justify-center bg-[#91040C] text-white">
                     {unreadCount > 9 ? '9+' : unreadCount}
@@ -300,7 +302,7 @@ export function GTSPortalTopbar({
                     {user?.email || userRole}
                   </p>
                 </div>
-                <ChevronDown className="w-4 h-4" style={{ color: '#A6A7AA' }} />
+                <ChevronDown className="w-4 h-4" style={{ color: '#A6A7AA' }} aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent 
@@ -347,7 +349,7 @@ export function GTSPortalTopbar({
                   className="cursor-pointer"
                   style={{ color: '#FFFFFF' }}
                 >
-                  <User className="w-4 h-4 mr-2" />
+                  <User className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}>
                     Профиль
                   </span>
@@ -360,7 +362,7 @@ export function GTSPortalTopbar({
                   className="cursor-pointer"
                   style={{ color: '#FFFFFF' }}
                 >
-                  <FileText className="w-4 h-4 mr-2" />
+                  <FileText className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}>
                     Документы
                   </span>
@@ -373,7 +375,7 @@ export function GTSPortalTopbar({
                   className="cursor-pointer"
                   style={{ color: '#FFFFFF' }}
                 >
-                  <Shield className="w-4 h-4 mr-2" />
+                  <Shield className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}>
                     Безопасность
                   </span>
@@ -386,7 +388,7 @@ export function GTSPortalTopbar({
                   className="cursor-pointer"
                   style={{ color: '#FFFFFF' }}
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}>
                     Сменить роль
                   </span>
@@ -399,7 +401,7 @@ export function GTSPortalTopbar({
                   className="cursor-pointer"
                   style={{ color: '#FFFFFF' }}
                 >
-                  <Home className="w-4 h-4 mr-2" />
+                  <Home className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}>
                     Панель управления
                   </span>
@@ -414,7 +416,7 @@ export function GTSPortalTopbar({
                   className="cursor-pointer"
                   style={{ color: '#E5484D' }}
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-4 h-4 mr-2" aria-hidden="true" />
                   <span style={{ fontFamily: 'Gilroy, Inter, sans-serif' }}>
                     Выйти
                   </span>

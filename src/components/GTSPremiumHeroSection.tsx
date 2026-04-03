@@ -130,7 +130,7 @@ export function GTSPremiumHeroSection() {
                 fontSize: 'clamp(3rem, 8vw, 6rem)' 
               }}
             >
-              Grand Tour Sochi
+              Grand Tour Spirit
             </h1>
             <p className="text-white/90 text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed">
               Премиальные приключения на воде, земле и в воздухе.<br />
