@@ -1,356 +1,547 @@
-import { useState, useMemo } from "react";
-import { Card } from "../ui/card";
-import { ImageWithFallback } from "../figma/ImageWithFallback";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { ArrowRight, Phone, ChevronDown } from "lucide-react";
 import { GTSNavigationHeader } from "../GTSNavigationHeader";
 import { GTSFooter } from "../GTSFooter";
 import { Route } from "../GTSRouter";
-import { 
-  Ship, Car, Plane, Sparkles, Clock, Users, MapPin,
-  ArrowRight, Filter, SlidersHorizontal
-} from "lucide-react";
-import { motion } from "motion/react";
-import { useGTSExpeditions } from "../../contexts/GTSExpeditionsContext";
 
 interface GTSExperiencesPageProps {
   onNavigate: (route: Route) => void;
-  initialCategory?: string;
 }
 
-interface Experience {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  price: string;
-  duration: string;
-  capacity: string;
-  location: string;
-  category: string;
-  isNew?: boolean;
-  isPopular?: boolean;
-  type?: 'expedition' | 'experience';
-}
+/* ─── Data ─── */
 
-const Compass = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10" />
-    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-  </svg>
-);
-
-const STATIC_EXPERIENCES: Experience[] = [
+const SERVICES = [
   {
-    id: "yacht-cruise",
-    title: "Яхта Premium",
-    subtitle: "Морские прогулки",
-    description: "Элитная яхта с полным сервисом для незабываемых морских путешествий по побережью Сочи",
-    image: "https://images.unsplash.com/photo-1612764324168-7a3a318e0cbb?auto=format&fit=crop&q=80&w=1200",
-    price: "450 000",
-    duration: "4-8 часов",
-    capacity: "До 8 чел",
-    location: "Сочи",
-    category: "water",
-    isPopular: true
+    id: "yachts",
+    index: "01",
+    category: "Водные",
+    title: "Яхты",
+    headline: "Открытое море\nна своих условиях",
+    description:
+      "Частные прогулки на яхтах и катерах вдоль черноморского побережья Сочи. Закатные круизы, дневные выходы в открытое море, романтические вечера на воде — мы подбираем судно и маршрут под ваш запрос.",
+    points: [
+      "Флот от 30 до 50+ футов",
+      "Опытные капитаны и экипаж",
+      "Питание и напитки на борту",
+      "Маршруты: Сочи — Абхазия, острова, открытое море",
+    ],
+    image: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&q=80&w=1400",
+    tag: "С экипажем",
   },
   {
-    id: "wakesurf",
-    title: "Вейксёрф & Вейкборд",
-    subtitle: "Водные виды спорта",
-    description: "Катер с профессиональным инструктором для занятий вейксёрфингом и вейкбордингом",
-    image: "https://images.unsplash.com/photo-1632192661928-d26125608355?auto=format&fit=crop&q=80&w=1200",
-    price: "35 000",
-    duration: "1-2 часа",
-    capacity: "До 4 чел",
-    location: "Сочи",
-    category: "water",
-    isNew: true
+    id: "helicopters",
+    index: "02",
+    category: "Воздушные",
+    title: "Вертолёты",
+    headline: "Сочи\nс высоты полёта",
+    description:
+      "Панорамные вертолётные туры над Кавказским хребтом, трансфер в горные районы и посадки на вершинах. Вид, который невозможно забыть — и который невозможно получить иначе.",
+    points: [
+      "Туры от 20 минут до нескольких часов",
+      "Посадки на горных площадках",
+      "Трансфер Сочи — Красная Поляна",
+      "Частные рейсы и корпоративные маршруты",
+    ],
+    image: "https://images.unsplash.com/photo-1579829366248-204fe8413f31?auto=format&fit=crop&q=80&w=1400",
+    tag: "Панорамные туры",
   },
   {
-    id: "helicopter-tour",
-    title: "Вертолетный тур",
-    subtitle: "Панорамные полеты",
-    description: "Эксклюзивные полеты над Кавказскими горами с посадкой на вершине",
-    image: "https://images.unsplash.com/photo-1630866217872-764be80838fa?auto=format&fit=crop&q=80&w=1200",
-    price: "850 000",
-    duration: "1-3 часа",
-    capacity: "До 4 чел",
-    location: "Красная Поляна",
-    category: "air",
-    isPopular: true
-  },
-  {
-    id: "catering",
-    title: "Premium Кейтеринг",
-    subtitle: "Авторская кухня",
-    description: "Шеф-повар и команда для организации ужина в любой точке региона",
-    image: "https://images.unsplash.com/photo-1719786625035-71f46082e385?auto=format&fit=crop&q=80&w=1200",
-    price: "150 000",
-    duration: "По договору",
-    capacity: "До 20 чел",
-    location: "Любая",
-    category: "services"
+    id: "hotels",
+    index: "03",
+    category: "Размещение",
+    title: "Отели",
+    headline: "Лучшие адреса\nуже отобраны",
+    description:
+      "Мы работаем только с проверенными отелями Сочи и Красной Поляны. Специальные условия для клиентов GTS: приоритетное бронирование, апгрейды номеров и персональное сопровождение при заезде.",
+    points: [
+      "5★ и boutique-отели региона",
+      "Переговоры с отелями — берём на себя",
+      "Апгрейды и комплименты от партнёров",
+      "Групповые блоки под мероприятия",
+    ],
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1400",
+    tag: "5★ партнёры",
   },
   {
     id: "concierge",
-    title: "Консьерж-сервис 24/7",
-    subtitle: "Персональный помощник",
-    description: "Полное сопровождение и организация любых пожеланий круглосуточно",
-    image: "https://images.unsplash.com/photo-1587567818566-3272be7d64c9?auto=format&fit=crop&q=80&w=1200",
-    price: "50 000/день",
-    duration: "24/7",
-    capacity: "VIP",
-    location: "Сочи, КП",
-    category: "services",
-    isNew: true
-  }
+    index: "04",
+    category: "Сервис",
+    title: "Консьерж",
+    headline: "Один звонок —\nвсё решено",
+    description:
+      "Персональный консьерж GTS берёт на себя организацию любого запроса: от столика в ресторане до частного острова. Мы работаем 24/7 и решаем задачи любой сложности — быстро и без лишних слов.",
+    points: [
+      "Бронирование ресторанов и мест",
+      "Организация трансферов и маршрутов",
+      "Поиск редких товаров и услуг",
+      "Решение нестандартных задач 24/7",
+    ],
+    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=1400",
+    tag: "24 / 7",
+  },
+  {
+    id: "events",
+    index: "05",
+    category: "События",
+    title: "Мероприятия",
+    headline: "Корпоративы, праздники,\nзакрытые вечера",
+    description:
+      "Полный цикл организации частных и корпоративных событий в Сочи. Тимбилдинги на багги в горах Абхазии, закрытые вечеринки на яхте, деловые завтраки с панорамным видом — мы делаем события, которые запоминаются.",
+    points: [
+      "Тимбилдинги и корпоративные выезды",
+      "Закрытые частные события",
+      "Подбор площадки, декор, кейтеринг",
+      "Группы от 10 до 500+ человек",
+    ],
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1400",
+    tag: "Under the key",
+  },
+  {
+    id: "catering",
+    index: "06",
+    category: "Гастрономия",
+    title: "Кейтеринг",
+    headline: "Шеф-повар\nв любой точке",
+    description:
+      "Премиальный кейтеринг от партнёрских ресторанов: пикники на вершинах, ужины на берегу моря, фуршеты на борту яхты. Меню разрабатывается под формат события и вкусовые предпочтения гостей.",
+    points: [
+      "Шеф-повара ресторанного уровня",
+      "Доставка в горы, на воду, на природу",
+      "Авторские меню под событие",
+      "Алкогольное и безалкогольное сопровождение",
+    ],
+    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&q=80&w=1400",
+    tag: "Premium food",
+  },
+  {
+    id: "transfer",
+    index: "07",
+    category: "Логистика",
+    title: "VIP-трансфер",
+    headline: "Встреча и доставка\nкласса люкс",
+    description:
+      "Трансфер на автомобилях бизнес и первого класса: аэропорт, вокзал, отель, мероприятие. Встреча с табличкой, помощь с багажом, тихий профессиональный водитель — без лишних слов.",
+    points: [
+      "Mercedes S-class, BMW 7, Lexus LX",
+      "Аэропорт, вокзал, отель — любая точка",
+      "Почасовая аренда и разовые трансферы",
+      "Группы: минивэны и микроавтобусы",
+    ],
+    image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=1400",
+    tag: "Бизнес-класс",
+  },
+  {
+    id: "guides",
+    index: "08",
+    category: "Экспертиза",
+    title: "Частные гиды",
+    headline: "Знание региона\nизнутри",
+    description:
+      "Персональные гиды GTS знают Сочи и Кавказ так, как не знает ни одна экскурсионная программа. Авторские маршруты, нетуристические места, история и культура — в живом разговоре, а не из микрофона.",
+    points: [
+      "Авторские пешие и автомобильные маршруты",
+      "Гиды — жители и эксперты региона",
+      "Нетуристические локации",
+      "Языки: русский, английский, другие по запросу",
+    ],
+    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=1400",
+    tag: "Авторские маршруты",
+  },
 ];
 
-const categories = [
-  { id: "all", name: "Все", icon: Sparkles },
-  { id: "expedition", name: "Экспедиции", icon: Compass },
-  { id: "water", name: "Водные", icon: Ship },
-  { id: "ground", name: "Наземные", icon: Car },
-  { id: "air", name: "Воздушные", icon: Plane },
-  { id: "services", name: "Услуги", icon: Sparkles }
-];
+/* ─── Helpers ─── */
 
-export function GTSExperiencesPage({ onNavigate, initialCategory = "all" }: GTSExperiencesPageProps) {
-  const { expeditions } = useGTSExpeditions();
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
+const grainStyle: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  opacity: 0.04,
+  position: "absolute",
+  inset: 0,
+  pointerEvents: "none",
+};
 
-  const allExperiences = useMemo(() => {
-    const expeditionExperiences: Experience[] = expeditions.map(exp => ({
-      id: exp.id,
-      title: exp.title,
-      subtitle: exp.tagline,
-      description: exp.description,
-      image: exp.heroImage,
-      price: exp.price,
-      duration: `${exp.totalDays} дней`,
-      capacity: `Группа ${exp.groupSize}`,
-      location: exp.region,
-      category: "expedition",
-      isPopular: exp.isFeatured,
-      type: 'expedition'
-    }));
+/* ─── Page ─── */
 
-    return [...expeditionExperiences, ...STATIC_EXPERIENCES];
-  }, [expeditions]);
-
-  const filteredExperiences = useMemo(() => {
-    if (activeCategory === "all") return allExperiences;
-    return allExperiences.filter(exp => 
-      exp.category === activeCategory || 
-      (activeCategory === 'ground' && exp.type === 'expedition')
-    );
-  }, [allExperiences, activeCategory]);
-
-  const hotOffers = useMemo(() => allExperiences.filter(e => e.isPopular).slice(0, 2), [allExperiences]);
-
+export function GTSExperiencesPage({ onNavigate }: GTSExperiencesPageProps) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0B0B0C] text-white">
       <GTSNavigationHeader onNavigate={onNavigate} />
-
-      {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-black pt-24">
-        <div className="absolute inset-0">
-          <ImageWithFallback
-            src="https://images.unsplash.com/photo-1602574763108-7c4434fea82d?auto=format&fit=crop&q=80&w=1920"
-            alt="Experiences"
-            className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-white" />
-        </div>
-
-        <div className="relative z-10 container mx-auto px-4 lg:px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-          >
-            <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full mb-8">
-              <Sparkles className="w-4 h-4 text-[#91040C] mr-2" />
-              <span className="text-white text-xs tracking-[0.2em] uppercase font-bold">Каталог впечатлений GTS</span>
-            </div>
-            
-            <h1 className="text-5xl lg:text-8xl mb-8 tracking-[0.15em] text-white font-bold uppercase leading-tight">
-              МИР
-              <span className="block text-[#91040C]">ЭМОЦИЙ</span>
-            </h1>
-            
-            <p className="text-xl lg:text-2xl text-white/70 max-w-2xl mx-auto font-light leading-relaxed">
-              От глубоководных погружений до высокогорных экспедиций. Ваше идеальное приключение начинается здесь.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <main className="py-20 lg:py-32 bg-white">
-        <div className="container mx-auto px-4 lg:px-20">
-          
-          {/* Hot Offers Section */}
-          {activeCategory === "all" && hotOffers.length > 0 && (
-            <div className="mb-24">
-              <div className="flex items-center justify-between mb-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-px bg-[#91040C]" />
-                  <h2 className="text-3xl lg:text-4xl text-black tracking-widest uppercase font-bold">
-                    HOT OFFERS
-                  </h2>
-                </div>
-                <Badge className="bg-[#91040C] text-white border-0 py-2 px-4 rounded-none tracking-widest text-[10px] uppercase font-bold">
-                  LIMITED TIME
-                </Badge>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12">
-                {hotOffers.map((offer, index) => (
-                  <motion.div
-                    key={`hot-${offer.id}`}
-                    initial={{ opacity: 0, x: index === 0 ? -30 : 30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8 }}
-                    viewport={{ once: true }}
-                  >
-                    <div
-                      onClick={() => onNavigate({ page: 'experience-detail', id: offer.id })}
-                      className="group relative bg-white overflow-hidden cursor-pointer h-[500px]"
-                    >
-                      <ImageWithFallback
-                        src={offer.image}
-                        alt={offer.title}
-                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                      
-                      {/* Content */}
-                      <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
-                        <p className="text-[#91040C] text-xs tracking-[0.3em] uppercase mb-4 font-bold">
-                          {offer.subtitle}
-                        </p>
-                        <h3 className="text-white text-3xl lg:text-4xl mb-6 font-bold uppercase tracking-wider">
-                          {offer.title}
-                        </h3>
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Стоимость</span>
-                            <span className="text-white text-2xl font-light">{offer.price} ₽</span>
-                          </div>
-                          <div className="w-14 h-14 bg-[#91040C] flex items-center justify-center transition-transform duration-500 group-hover:rotate-45">
-                            <ArrowRight className="w-6 h-6 text-white -rotate-45" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Filters */}
-          <div className="flex flex-wrap justify-center gap-2 lg:gap-4 mb-20">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`
-                  ${activeCategory === cat.id 
-                    ? "bg-[#91040C] text-white border-[#91040C]" 
-                    : "bg-white border-black/10 text-black/40 hover:border-black/30 hover:text-black"
-                  }
-                  px-8 py-4 uppercase tracking-[0.2em] text-[10px] font-bold border transition-all duration-300
-                `}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Experiences Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-            {filteredExperiences.map((exp, index) => (
-              <motion.div
-                key={exp.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: (index % 3) * 0.1, duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <div
-                  onClick={() => onNavigate({ page: 'experience-detail', id: exp.id })}
-                  className="group relative bg-[#F8F8F8] overflow-hidden cursor-pointer h-[550px] flex flex-col"
-                >
-                  {/* Image Container */}
-                  <div className="relative aspect-[4/5] overflow-hidden bg-black">
-                    <ImageWithFallback
-                      src={exp.image}
-                      alt={exp.title}
-                      className="w-full h-full object-cover grayscale opacity-80 transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0 group-hover:opacity-100"
-                    />
-                    
-                    {/* Badges */}
-                    <div className="absolute top-6 left-6 flex gap-2">
-                      {exp.isNew && (
-                        <div className="bg-[#91040C] text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
-                          NEW
-                        </div>
-                      )}
-                      {exp.isPopular && (
-                        <div className="bg-white text-black text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
-                          TRENDING
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-8 flex flex-col flex-grow bg-white border border-black/5 border-t-0">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[#91040C] text-[9px] font-bold uppercase tracking-[0.3em]">
-                        {exp.category}
-                      </span>
-                      <div className="w-6 h-[1px] bg-black/10" />
-                    </div>
-                    
-                    <h3 className="text-black text-xl mb-4 font-bold uppercase tracking-wider group-hover:text-[#91040C] transition-colors">
-                      {exp.title}
-                    </h3>
-                    
-                    <p className="text-black/40 text-sm mb-8 line-clamp-2 leading-relaxed font-light italic">
-                      {exp.description}
-                    </p>
-
-                    {/* Stats */}
-                    <div className="mt-auto grid grid-cols-3 gap-4 border-t border-black/5 pt-6 text-[10px] uppercase tracking-widest text-black/30 font-bold">
-                      <div className="flex flex-col gap-1">
-                        <Clock className="w-3.5 h-3.5 mb-1" />
-                        <span>{exp.duration}</span>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Users className="w-3.5 h-3.5 mb-1" />
-                        <span>{exp.capacity}</span>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <MapPin className="w-3.5 h-3.5 mb-1" />
-                        <span className="truncate">{exp.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Hover Overlay Price */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#91040C] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-        </div>
-      </main>
-
+      <ExperiencesHero />
+      <ServicesIndex onNavigate={onNavigate} />
+      {SERVICES.map((svc, i) => (
+        <ServiceSection key={svc.id} svc={svc} index={i} onNavigate={onNavigate} />
+      ))}
+      <ContactSection onNavigate={onNavigate} />
       <GTSFooter />
     </div>
+  );
+}
+
+/* ─── Hero ─── */
+
+function ExperiencesHero() {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  return (
+    <section ref={ref} className="relative min-h-[70vh] flex items-end overflow-hidden"
+      style={{ paddingBottom: "10vh" }}>
+      <div style={grainStyle} />
+
+      <motion.div className="absolute inset-0" style={{ y: imgY }}>
+        <img
+          src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80&w=1920"
+          alt="GTS Premium Experiences Сочи"
+          className="w-full h-full object-cover"
+          style={{ filter: "brightness(0.3)" }}
+        />
+      </motion.div>
+
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-transparent to-transparent" />
+
+      <motion.div
+        className="relative z-10 px-6 md:px-12 max-w-[1600px] mx-auto w-full"
+        style={{ opacity }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex items-center gap-3 mb-6"
+        >
+          <div className="w-8 h-px" style={{ background: "#91040C" }} />
+          <span className="text-[10px] uppercase tracking-[0.4em] font-semibold" style={{ color: "#91040C" }}>
+            Премиальные услуги · Сочи
+          </span>
+        </motion.div>
+
+        <div className="overflow-hidden mb-6">
+          <motion.h1
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            className="font-black uppercase leading-none text-white"
+            style={{ fontSize: "clamp(44px, 7vw, 110px)", letterSpacing: "-0.025em" }}
+          >
+            Всё лучшее
+            <br />
+            <span style={{ color: "#91040C" }}>в Сочи</span>
+          </motion.h1>
+        </div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.35 }}
+          className="text-white/40 max-w-lg leading-relaxed"
+          style={{ fontSize: 15 }}
+        >
+          GTS — агрегатор премиальных впечатлений. Мы отобрали лучших партнёров
+          в каждой категории и несём ответственность за качество каждой услуги.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9 }}
+          className="mt-10"
+          style={{ color: "rgba(255,255,255,0.2)" }}
+        >
+          <ChevronDown size={20} className="animate-bounce" />
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ─── Sticky nav index ─── */
+
+function ServicesIndex({ onNavigate }: { onNavigate: (r: Route) => void }) {
+  return (
+    <nav
+      className="sticky top-[72px] z-40 px-6 md:px-12 py-4 hidden lg:block"
+      style={{
+        background: "rgba(11,11,12,0.92)",
+        backdropFilter: "blur(16px)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <div className="max-w-[1600px] mx-auto flex items-center gap-8 overflow-x-auto">
+        {SERVICES.map((svc) => (
+          <a
+            key={svc.id}
+            href={`#${svc.id}`}
+            className="flex-shrink-0 text-[10px] uppercase tracking-[0.3em] text-white/30 hover:text-white/80 transition-colors duration-200 font-semibold"
+          >
+            {svc.title}
+          </a>
+        ))}
+        <button
+          onClick={() => onNavigate({ page: "contacts" })}
+          className="flex-shrink-0 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.3em] font-semibold ml-auto"
+          style={{ color: "#91040C" }}
+        >
+          Связаться <ArrowRight size={10} />
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+/* ─── Individual service section ─── */
+
+function ServiceSection({
+  svc,
+  index,
+  onNavigate,
+}: {
+  svc: typeof SERVICES[number];
+  index: number;
+  onNavigate: (r: Route) => void;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const imgScale = useTransform(scrollYProgress, [0, 1], [1.06, 1.0]);
+  const isEven = index % 2 === 0;
+
+  return (
+    <section
+      id={svc.id}
+      ref={ref}
+      className="relative overflow-hidden"
+      style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+    >
+      <div style={grainStyle} />
+
+      <div className={`flex flex-col ${isEven ? "lg:flex-row" : "lg:flex-row-reverse"} min-h-[580px]`}>
+
+        {/* Image */}
+        <div className="relative lg:w-[48%] overflow-hidden" style={{ minHeight: 320 }}>
+          <motion.img
+            src={svc.image}
+            alt={`${svc.title} в Сочи — GTS`}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ scale: imgScale, filter: "brightness(0.6)" }}
+          />
+          <div className={`absolute inset-0 ${isEven
+            ? "bg-gradient-to-r from-transparent to-[#0B0B0C]"
+            : "bg-gradient-to-l from-transparent to-[#0B0B0C]"}`}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,11,12,0.5)] via-transparent to-transparent" />
+
+          {/* Big index watermark */}
+          <div
+            className="absolute font-black text-white select-none pointer-events-none leading-none"
+            style={{
+              fontSize: "clamp(100px, 14vw, 180px)",
+              opacity: 0.06,
+              bottom: -10,
+              [isEven ? "right" : "left"]: -8,
+            }}
+          >
+            {svc.index}
+          </div>
+
+          {/* Tag */}
+          <div className="absolute top-6 left-6">
+            <span
+              className="px-3 py-1.5 text-[9px] uppercase tracking-[0.3em] font-bold text-white/80"
+              style={{
+                background: "rgba(11,11,12,0.75)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                backdropFilter: "blur(8px)",
+                borderRadius: 6,
+              }}
+            >
+              {svc.tag}
+            </span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 lg:w-[52%] flex flex-col justify-center px-8 md:px-14 lg:px-16 py-16 lg:py-20">
+
+          <motion.div
+            initial={{ opacity: 0, x: isEven ? -16 : 16 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center gap-3 mb-5"
+          >
+            <span className="text-[9px] uppercase tracking-[0.4em] font-semibold" style={{ color: "#91040C" }}>
+              {svc.index}
+            </span>
+            <div className="w-6 h-px" style={{ background: "rgba(145,4,12,0.5)" }} />
+            <span className="text-[9px] uppercase tracking-[0.3em] text-white/25 font-semibold">
+              {svc.category}
+            </span>
+          </motion.div>
+
+          <div className="overflow-hidden mb-5">
+            <motion.h2
+              initial={{ y: "100%" }}
+              whileInView={{ y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+              className="font-black uppercase leading-tight text-white"
+              style={{ fontSize: "clamp(28px, 3.2vw, 50px)", letterSpacing: "-0.02em", whiteSpace: "pre-line" }}
+            >
+              {svc.headline}
+            </motion.h2>
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.18 }}
+            className="text-white/40 leading-relaxed mb-7"
+            style={{ fontSize: 14, maxWidth: 460 }}
+          >
+            {svc.description}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="flex flex-col gap-2.5 mb-9"
+          >
+            {svc.points.map((pt, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="w-1 h-1 rounded-full shrink-0 mt-[7px]" style={{ background: "#91040C" }} />
+                <span className="text-white/45 leading-relaxed" style={{ fontSize: 13 }}>{pt}</span>
+              </div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.32 }}
+          >
+            <motion.button
+              onClick={() => onNavigate({ page: "contacts" })}
+              className="inline-flex items-center gap-3 py-3.5 px-7 text-white text-xs uppercase tracking-widest font-bold relative overflow-hidden"
+              style={{ background: "#91040C", borderRadius: 10 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <motion.span
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)" }}
+                initial={{ x: "-100%" }}
+                whileHover={{ x: "100%" }}
+                transition={{ duration: 0.5 }}
+              />
+              <span className="relative">Узнать цену</span>
+              <ArrowRight size={13} className="relative" />
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Bottom contact section ─── */
+
+function ContactSection({ onNavigate }: { onNavigate: (r: Route) => void }) {
+  const ref = useRef<HTMLElement>(null);
+
+  return (
+    <section
+      ref={ref}
+      className="relative overflow-hidden py-28 md:py-40 px-6 md:px-12"
+      style={{ background: "#0B0B0C", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+    >
+      <div style={grainStyle} />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 60% 60% at 50% 100%, rgba(145,4,12,0.07), transparent)" }}
+      />
+
+      <div className="max-w-[900px] mx-auto relative z-10 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-center gap-3 mb-6"
+        >
+          <div className="w-8 h-px" style={{ background: "#91040C" }} />
+          <span className="text-[10px] uppercase tracking-[0.4em] font-semibold" style={{ color: "#91040C" }}>
+            Не нашли нужное
+          </span>
+          <div className="w-8 h-px" style={{ background: "#91040C" }} />
+        </motion.div>
+
+        <div className="overflow-hidden mb-5">
+          <motion.h2
+            initial={{ y: "100%" }}
+            whileInView={{ y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="font-black uppercase leading-tight text-white"
+            style={{ fontSize: "clamp(34px, 5vw, 68px)", letterSpacing: "-0.02em" }}
+          >
+            Расскажите нам
+            <br />
+            <span style={{ color: "#91040C" }}>о вашем запросе</span>
+          </motion.h2>
+        </div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.18 }}
+          className="text-white/35 leading-relaxed mb-12 max-w-md mx-auto"
+          style={{ fontSize: 14 }}
+        >
+          Мы работаем с нестандартными запросами. Если нужной услуги нет в списке —
+          напишите нам, мы найдём решение.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.26 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <motion.button
+            onClick={() => onNavigate({ page: "contacts" })}
+            className="inline-flex items-center gap-3 py-4 px-10 text-white text-xs uppercase tracking-widest font-bold relative overflow-hidden"
+            style={{ background: "#91040C", borderRadius: 12 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <motion.span
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)" }}
+              initial={{ x: "-100%" }}
+              whileHover={{ x: "100%" }}
+              transition={{ duration: 0.5 }}
+            />
+            <span className="relative">Написать нам</span>
+            <ArrowRight size={13} className="relative" />
+          </motion.button>
+
+          <a
+            href="tel:+78625550123"
+            className="inline-flex items-center gap-2.5 py-4 px-8 text-white/45 hover:text-white/70 transition-colors text-xs uppercase tracking-[0.25em] font-semibold"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12 }}
+          >
+            <Phone size={13} />
+            +7 (862) 555-0123
+          </a>
+        </motion.div>
+      </div>
+    </section>
   );
 }

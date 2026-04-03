@@ -648,6 +648,37 @@ function ExpeditionEditor({
                 </label>
               </div>
 
+              {/* Display block selector */}
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-white/30 mb-3">Блок отображения</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { value: "calendar", label: "Карта экспедиций", desc: "Показывать на временно́й шкале" },
+                    { value: "abkhazia", label: "Экспедиции Абхазии", desc: "Показывать в каталоге Абхазии" },
+                    { value: "both",     label: "Оба блока",          desc: "На карте и в каталоге Абхазии" },
+                  ] as const).map(opt => {
+                    const active = (draft.displayBlock ?? "calendar") === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => update("displayBlock", opt.value)}
+                        className="flex flex-col items-start gap-1 p-3 rounded-lg text-left transition-all"
+                        style={{
+                          background: active ? "rgba(145,4,12,0.15)" : "rgba(255,255,255,0.03)",
+                          border: active ? "1px solid rgba(145,4,12,0.5)" : "1px solid rgba(255,255,255,0.08)",
+                        }}
+                      >
+                        <span className="text-[11px] font-bold" style={{ color: active ? "#ff6b6b" : "rgba(255,255,255,0.6)" }}>{opt.label}</span>
+                        <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.28)" }}>{opt.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <AdminInput label="Высота маршрута (для каталога Абхазии)" value={draft.elevation ?? ""} onChange={(v) => update("elevation", v)} placeholder="до 2400 м" />
+
               <EditableList label="Хайлайты (карточка)" items={draft.highlights} onChange={(v) => update("highlights", v)} />
             </motion.div>
           )}
