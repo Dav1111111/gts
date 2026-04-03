@@ -10,12 +10,6 @@ const GTSAboutPage = lazy(() =>
 const GTSExperiencesPage = lazy(() =>
   import("./pages/GTSExperiencesPage").then((module) => ({ default: module.GTSExperiencesPage }))
 );
-const GTSAuthExperiencesPage = lazy(() =>
-  import("./pages/GTSAuthExperiencesPage").then((module) => ({ default: module.GTSAuthExperiencesPage }))
-);
-const GTSExperienceDetailPage = lazy(() =>
-  import("./pages/GTSExperienceDetailPage").then((module) => ({ default: module.GTSExperienceDetailPage }))
-);
 const GTSStoriesPage = lazy(() =>
   import("./pages/GTSStoriesPage").then((module) => ({ default: module.GTSStoriesPage }))
 );
@@ -49,9 +43,13 @@ const GTSExpeditionsAdmin = lazy(() =>
 const GTSContentAdmin = lazy(() =>
   import("./admin/GTSContentAdmin").then((module) => ({ default: module.GTSContentAdmin }))
 );
+const GTSAbkhaziaPage = lazy(() =>
+  import("./pages/GTSAbkhaziaPage").then((module) => ({ default: module.GTSAbkhaziaPage }))
+);
 
-export type Route = 
+export type Route =
   | { page: "landing" }
+  | { page: "abkhazia" }
   | { page: "about" }
   | { page: "experiences"; category?: string }
   | { page: "experience-detail"; id: string }
@@ -74,7 +72,7 @@ function RouteLoader() {
   return (
     <div className="min-h-screen bg-[#0B0B0C] text-white flex items-center justify-center px-6">
       <div className="text-center">
-        <div className="text-2xl tracking-wide mb-3">GRAND TOUR SOCHI</div>
+        <div className="text-2xl tracking-wide mb-3">GRAND TOUR SPIRIT</div>
         <div className="text-white/60">Загрузка страницы...</div>
       </div>
     </div>
@@ -207,29 +205,18 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
     switch (currentRoute.page) {
       case "landing":
         return <GTSLandingPage onNavigate={navigate} />;
-      
+
+      case "abkhazia":
+        return <GTSAbkhaziaPage onNavigate={navigate} />;
+
       case "about":
         return <GTSAboutPage onNavigate={navigate} />;
       
       case "experiences":
-        // Show authenticated version if user is logged in
-        return isAuthenticated ? (
-          <GTSAuthExperiencesPage 
-            onNavigate={navigate} 
-            initialCategory={currentRoute.category} 
-          />
-        ) : (
-          <GTSExperiencesPage 
-            onNavigate={navigate} 
-            initialCategory={currentRoute.category} 
-          />
-        );
-      
+        return <GTSExperiencesPage onNavigate={navigate} />;
+
       case "experience-detail":
-        return <GTSExperienceDetailPage 
-          experienceId={currentRoute.id} 
-          onNavigate={navigate} 
-        />;
+        return <GTSExperiencesPage onNavigate={navigate} />;
       
       case "stories":
         // Show authenticated version if user is logged in

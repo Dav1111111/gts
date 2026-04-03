@@ -1,14 +1,8 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  MapPin,
-  Clock,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { motion } from "motion/react";
+import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { useExpeditions } from "../contexts/GTSExpeditionsContext";
+import { GTSExpeditionPopup } from "./GTSExpeditionPopup";
 
 /* ─── Constants ─── */
 const MONTH_TRACK_WIDTH_FULL = 380;
@@ -83,196 +77,7 @@ interface Decoration {
   viewBox: string;
 }
 
-/* ─── Expedition Data ─── */
-const expeditions = [
-  {
-    id: "exp-1",
-    title: "КРЫМ",
-    tagline: "Горы · Перевалы · Побережье",
-    dateRange: "13 — 19 апреля",
-    month: "АПРЕЛЬ",
-    duration: "7 дней",
-    location: "Крымский полуостров",
-    transport: "Land Cruiser 300",
-    price: "52 000",
-    difficulty: "Средний",
-    spots: { total: 8, booked: 6 },
-    description:
-      "Внедорожная экспедиция по горным дорогам и перевалам Крыма. Покоряем скрытые ущелья, находим тайные водопады и добираемся до живописных бухт черноморского побережья.",
-    highlights: ["Горные перевалы", "Черноморские бухты", "Отели уровня 4★", "Питание включено"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1599758417353-3b66f35e5d79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxDcmltZWElMjBtb3VudGFpbnMlMjBjb2FzdGxpbmUlMjBzY2VuaWN8ZW58MXx8fHwxNzcxOTM3NDY5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 200, y: 195, labelAbove: true,
-  },
-  {
-    id: "exp-2",
-    title: "КРЫМ",
-    tagline: "Каньоны · Водопады · Море",
-    dateRange: "20 — 26 апреля",
-    month: "АПРЕЛЬ",
-    duration: "7 дней",
-    location: "Южное побережье Крыма",
-    transport: "Toyota Hilux",
-    price: "48 000",
-    difficulty: "Лёгкий",
-    spots: { total: 10, booked: 4 },
-    description:
-      "Второй заезд по Крыму — более пологие маршруты, больше времени у моря. Идеально для тех, кто едет впервые или предпочитает умеренный темп.",
-    highlights: ["Прибрежные маршруты", "Каньоны Большого Крыма", "Снорклинг и рыбалка", "Кемпинг у моря"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1632724236478-ef803af57445?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxDcmltZWElMjBCbGFjayUyMFNlYSUyMGJheSUyMGJlYXV0aWZ1bHxlbnwxfHx8fDE3NzE5Mzc0Njl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 410, y: 345, labelAbove: false,
-  },
-  {
-    id: "exp-3",
-    title: "ДАГЕСТАН",
-    tagline: "Аулы · Каньоны · Каспий",
-    dateRange: "30 апр — 05 мая",
-    month: "МАЙ",
-    duration: "6 дней",
-    location: "Сулакский каньон, Дагестан",
-    transport: "Range Rover Defender",
-    price: "58 000",
-    difficulty: "Средний",
-    spots: { total: 8, booked: 5 },
-    description:
-      "Экспедиция по горным аулам и каньонам Дагестана. Один из самых глубоких каньонов Европы, древние горные сёла, Каспийское побережье и традиционная кухня.",
-    highlights: ["Сулакский каньон", "Горные аулы", "Каспийское море", "Местная кухня"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1617573543793-1b13d0a3f75c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxEYWdlc3RhbiUyMFN1bGFrJTIwY2FueW9uJTIwbW91bnRhaW5zfGVufDF8fHx8MTc3MTkzNzQ2OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 630, y: 370, labelAbove: false,
-  },
-  {
-    id: "exp-4",
-    title: "ДАГЕСТАН",
-    tagline: "Перевалы · Аулы · Кавказ",
-    dateRange: "05 — 10 мая",
-    month: "МАЙ",
-    duration: "6 дней",
-    location: "Горный Дагестан",
-    transport: "Land Cruiser 80",
-    price: "55 000",
-    difficulty: "Сложный",
-    spots: { total: 6, booked: 6 },
-    description:
-      "Высокогорные маршруты через перевалы на высоте 3000м, заброшенные крепости, ночёвки под открытым небом. Второй заезд в Дагестан для опытных.",
-    highlights: ["Высокогорные перевалы", "Заброшенные крепости", "Ночёвки в горах", "Экстремальные спуски"],
-    isActive: false, isFeatured: false, image: "https://images.unsplash.com/photo-1673446319197-35ba29be3d22?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxEYWdlc3RhbiUyMG1vdW50YWluJTIwdmlsbGFnZSUyMGF1bCUyMGNhdWNhc3VzfGVufDF8fHx8MTc3MTkzNzQ3MHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 840, y: 175, labelAbove: true,
-  },
-  {
-    id: "exp-5",
-    title: "КАЗАХСТАН",
-    tagline: "Степи · Барханы · Озёра",
-    dateRange: "08 — 11 мая",
-    month: "МАЙ",
-    duration: "4 дня",
-    location: "Алтын-Эмель, Казахстан",
-    transport: "Toyota Hilux",
-    price: "62 000",
-    difficulty: "Средний",
-    spots: { total: 10, booked: 7 },
-    description:
-      "Экспедиция в национальный парк Алтын-Эмель. Знаменитые Поющие барханы, сакские курганы, пустынный пейзаж и потрясающие звёздные ночи.",
-    highlights: ["Поющие барханы", "Сакские курганы", "Пустынные дюны", "Звёздное небо"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1752503392570-cbf042a14645?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxLYXpha2hzdGFuJTIwc3RlcHBlJTIwc2FuZCUyMGR1bmVzJTIwbGFuZHNjYXBlfGVufDF8fHx8MTc3MTkzNzQ3MXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 1050, y: 320, labelAbove: false,
-  },
-  {
-    id: "exp-6",
-    title: "ДАГЕСТАН — ЧЕЧНЯ",
-    tagline: "Два региона · Один маршрут",
-    dateRange: "10 — 16 мая",
-    month: "МАЙ",
-    duration: "7 дней",
-    location: "Северный Кавказ",
-    transport: "Mercedes G-Class",
-    price: "68 000",
-    difficulty: "Сложный",
-    spots: { total: 8, booked: 8 },
-    description:
-      "Флагманская кросс-региональная экспедиция GTS. Маршрут через оба региона: перевал Харами, водопады Аргуна и горные озёра Кезеной-Ам.",
-    highlights: ["Перевал Харами", "Озеро Кезеной-Ам", "Водопады Аргуна", "Всё включено"],
-    isActive: true, isFeatured: true, image: "https://images.unsplash.com/photo-1705588230826-bf91714d80c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxDYXVjYXN1cyUyMG1vdW50YWlucyUyMGRyYW1hdGljJTIwZ29yZ2UlMjByaXZlcnxlbnwxfHx8fDE3NzE5Mzc0NzF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 1250, y: 150, labelAbove: true,
-  },
-  {
-    id: "exp-7",
-    title: "КАЗАХСТАН",
-    tagline: "Горы · Водопады · Альпика",
-    dateRange: "12 — 15 мая",
-    month: "МАЙ",
-    duration: "4 дня",
-    location: "Тургеньское ущелье",
-    transport: "Land Cruiser 200",
-    price: "52 000",
-    difficulty: "Средний",
-    spots: { total: 10, booked: 4 },
-    description:
-      "Маршрут по горному ущелью с каскадными водопадами и альпийскими лугами. Один из самых живописных маршрутов в Заилийском Алатау.",
-    highlights: ["Каскадные водопады", "Альпийские луга", "Горные реки", "Пикники на природе"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1665928089199-5f47949e6517?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb3VudGFpbiUyMHdhdGVyZmFsbCUyMGdyZWVuJTIwdmFsbGV5JTIwc2NlbmljfGVufDF8fHx8MTc3MTkzNzQ4MXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 1450, y: 360, labelAbove: false,
-  },
-  {
-    id: "exp-8",
-    title: "КАЗАХСТАН",
-    tagline: "Чарын · Озёра · Горы",
-    dateRange: "15 — 19 мая",
-    month: "МАЙ",
-    duration: "5 дней",
-    location: "Чарынский каньон",
-    transport: "Jeep Wrangler",
-    price: "55 000",
-    difficulty: "Средний",
-    spots: { total: 8, booked: 3 },
-    description:
-      "Путешествие к «Казахстанскому Гранд-Каньону» — Чарынскому каньону и горным озёрам Кольсай. Уникальные ландшафты, не похожие ни на что другое.",
-    highlights: ["Чарынский каньон", "Озёра Кольсай", "Красные скалы", "Национальная кухня"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1719285662812-e236808a3d97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZWQlMjBjYW55b24lMjBkZXNlcnQlMjBsYW5kc2NhcGUlMjBhZXJpYWx8ZW58MXx8fHwxNzcxOTM3NDc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 1640, y: 200, labelAbove: true,
-  },
-  {
-    id: "exp-9",
-    title: "ALPHA RACE",
-    tagline: "1 этап · Чеченская респ.",
-    dateRange: "21 — 24 мая",
-    month: "МАЙ",
-    duration: "4 дня",
-    location: "Чеченская Республика",
-    transport: "Кубок GTS",
-    price: "45 000",
-    difficulty: "Сложный",
-    spots: { total: 12, booked: 9 },
-    description:
-      "Первый этап внедорожного кубка GTS Alpha Race. Соревновательный формат с отборочными секциями, судейской оценкой и призовым фондом.",
-    highlights: ["Соревновательный формат", "Призовой фонд", "Спецучастки", "Командный зачёт"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1670800811907-69b2c96e374d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvZmZyb2FkJTIwcmFjZSUyMHJhbGx5JTIwbW91bnRhaW5zJTIwY29tcGV0aXRpb258ZW58MXx8fHwxNzcxOTM3NDcyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 1840, y: 175, labelAbove: true,
-  },
-  {
-    id: "exp-10",
-    title: "КАЗАХСТАН",
-    tagline: "Балхаш · Степь · Ветер",
-    dateRange: "22 — 26 мая",
-    month: "МАЙ",
-    duration: "5 дней",
-    location: "Озеро Балхаш",
-    transport: "Toyota Land Cruiser",
-    price: "48 000",
-    difficulty: "Лёгкий",
-    spots: { total: 12, booked: 6 },
-    description:
-      "Водная и внедорожная экспедиция к Балхашу — самому большому озеру Казахстана. Рыбалка, закаты над степью, катание по берегу.",
-    highlights: ["Озеро Балхаш", "Рыбалка", "Степные маршруты", "Пляжный лагерь"],
-    isActive: true, isFeatured: false, image: "https://images.unsplash.com/photo-1760776679643-0e28cbcd4214?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjZW50cmFsJTIwYXNpYSUyMGxha2UlMjBzdGVwcGUlMjBnb2xkZW4lMjBob3VyfGVufDF8fHx8MTc3MTkzNzQ3OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 2030, y: 355, labelAbove: false,
-  },
-  {
-    id: "exp-11",
-    title: "ЭЛЬБРУС — АРХЫЗ",
-    tagline: "Высокогорье · Ледники · Мощь",
-    dateRange: "26 — 30 мая",
-    month: "ИЮНЬ",
-    duration: "5 дней",
-    location: "Приэльбрусье, КЧР",
-    transport: "УАЗ Профи",
-    price: "72 000",
-    difficulty: "Сложный",
-    spots: { total: 8, booked: 7 },
-    description:
-      "Финальная экспедиция сезона — высокогорный маршрут к подножию Эльбруса через перевал Гумбаши и ущелья Архыза. Самые суровые места Кавказа.",
-    highlights: ["Подножие Эльбруса", "Перевал Гумбаши", "Ущелья Архыза", "Горные озёра"],
-    isActive: true, isFeatured: true, image: "https://images.unsplash.com/photo-1759491265387-7b7adfb10647?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxFbGJydXMlMjBtb3VudGFpbiUyMHNub3clMjBwZWFrcyUyMGNhdWNhc3VzfGVufDF8fHx8MTc3MTkzNzQ3M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral", x: 2260, y: 195, labelAbove: true,
-  },
-];
+
 
 /* ─── Decorative illustrations ─── */
 const DECORATIONS: Decoration[] = [
@@ -781,7 +586,9 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   const fadeWidth = isCompactView ? 3.5 : isCondensedView ? 4.25 : 5;
 
   const baseExpeditions: Expedition[] = useMemo(() => {
-    const mapped = ctxExpeditions.map((e) => {
+    const mapped = ctxExpeditions
+      .filter((e) => (e.displayBlock ?? "calendar") !== "abkhazia")
+      .map((e) => {
       const { start, end } = inferExpeditionDates({
         startDate: e.startDate,
         endDate: e.endDate,
@@ -936,6 +743,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   ]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [popupExpId, setPopupExpId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [treadBlocks, setTreadBlocks] = useState<TreadBlock[]>([]);
   const [leftWall, setLeftWall] = useState("");
@@ -1146,14 +954,12 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
   }, []);
 
   const handleSelect = useCallback(
-    (id: string, scrollPageDown = false) => {
+    (id: string, showPopup = false) => {
       setSelectedId(id);
       const exp = expeditions.find((e) => e.id === id);
       if (exp) scrollToExp(exp);
-      if (scrollPageDown) {
-        setTimeout(() => {
-          infoCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 150);
+      if (showPopup) {
+        setPopupExpId(id);
       }
     },
     [expeditions, scrollToExp]
@@ -1509,199 +1315,15 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
         </div>
       </div>
 
-      {/* ═══ Abkhazia Formats Block — full width ═══ */}
-      <div ref={infoCardRef} className="w-full bg-[#0B0B0C] border-t border-white/8" style={{ scrollMarginTop: 80 }}>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] gap-6 lg:gap-7 items-stretch">
+      {/* Abkhazia block moved to standalone GTSAbkhaziaHeroSection */}
+      <div ref={infoCardRef} />
 
-            <div
-              className="rounded-[22px] border border-white/8 overflow-hidden"
-              style={{
-                background: "linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02))",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.28)",
-              }}
-            >
-              <div className="grid h-full lg:grid-rows-[clamp(220px,24vw,300px)_1fr]">
-                <div className="relative overflow-hidden">
-                  <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1560717789-0ac7c58ac90a?auto=format&fit=crop&q=80&w=1400"
-                    alt="Экспедиции по Абхазии"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-[#0B0B0C]/20 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0C]/38 to-transparent" />
-
-                  <div className="absolute top-5 left-5 flex flex-wrap gap-2">
-                    <div className="px-3 py-1.5 rounded-full border border-white/10 bg-black/35 backdrop-blur-sm">
-                      <span className="text-white/78 uppercase tracking-[0.16em]" style={{ fontSize: 10 }}>
-                        Абхазия · Honda Talon
-                      </span>
-                    </div>
-                    <div className="px-3 py-1.5 rounded-full" style={{ background: "rgba(145,4,12,0.92)" }}>
-                      <span className="text-white uppercase tracking-[0.16em]" style={{ fontSize: 10, fontWeight: 700 }}>
-                        Ежедневные маршруты GTS
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-5 py-5 sm:px-7 sm:py-7 lg:px-8 lg:py-8 flex flex-col">
-                  <div className="mb-5">
-                    <p
-                      className="uppercase tracking-[0.28em] mb-3"
-                      style={{ color: "#91040C", fontSize: "clamp(10px, 0.95vw, 12px)" }}
-                    >
-                      Главное летнее направление
-                    </p>
-                    <h3
-                      className="text-white mb-2"
-                      style={{ fontSize: "clamp(28px, 2.9vw, 42px)", fontWeight: 700, letterSpacing: "0.04em", lineHeight: 1.05 }}
-                    >
-                      Экспедиции по Абхазии
-                    </h3>
-                    <p className="text-white/45" style={{ fontSize: "clamp(13px, 1.05vw, 16px)", lineHeight: 1.5 }}>
-                      Ежедневные багги-маршруты по главному летнему направлению GTS
-                    </p>
-                  </div>
-
-                  <p className="text-white/62 leading-relaxed mb-6" style={{ fontSize: "clamp(13px, 1vw, 15px)" }}>
-                    Абхазия — главное ежедневное направление GTS в летний сезон. Однодневные и многодневные
-                    маршруты на Honda Talon проходят по водопадам, перевалам, альпийским лугам, лесным подъёмам
-                    и высокогорным дорогам. Это готовый маршрутный продукт с сопровождением, техникой и
-                    несколькими форматами участия — от пассажирского места до собственного экипажа.
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
-                    {[
-                      "1 / 2 / 3 дня",
-                      "Пассажир / экипаж / своя техника",
-                      "Ежедневные выезды в сезон",
-                    ].map((item) => (
-                      <div
-                        key={item}
-                        className="rounded-[14px] border border-white/8 px-4 py-3.5"
-                        style={{ background: "rgba(255,255,255,0.03)" }}
-                      >
-                        <span className="text-white/78 leading-snug" style={{ fontSize: "clamp(12px, 0.98vw, 14px)" }}>
-                          {item}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto flex flex-wrap items-center gap-4">
-                    <motion.button
-                      className="flex items-center gap-3 px-7 py-3.5 rounded-none text-white uppercase tracking-[0.12em] focus-visible:ring-2 focus-visible:ring-yellow-500"
-                      style={{ fontSize: 12, background: "#91040C", border: "1px solid #91040C" }}
-                      whileHover={{ background: "#6d0309" }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
-                    >
-                      Смотреть маршруты по Абхазии
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
-                    <div className="flex items-center gap-2 text-white/38" style={{ fontSize: 12 }}>
-                      <MapPin className="w-4 h-4" style={{ color: "#91040C" }} />
-                      <span>Сочи → Гагра → высокогорные маршруты</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                {
-                  duration: "1 день",
-                  title: "Однодневные экспедиции",
-                  description:
-                    "Быстрый вход в формат GTS: утренний старт, насыщенный маршрут и возвращение в тот же день. Подходит для первого знакомства с Абхазией.",
-                  details: "Водопады · перевалы · национальная кухня",
-                  price: "от 7 500 ₽",
-                },
-                {
-                  duration: "2 дня",
-                  title: "Двухдневные экспедиции",
-                  description:
-                    "Более глубокий маршрут с ночёвкой и высокогорными локациями. Формат для тех, кто хочет пройти дальше и увидеть больше за один выезд.",
-                  details: "Ночёвка · озёра · альпийские луга",
-                  price: "от 18 000 ₽",
-                },
-                {
-                  duration: "3 дня",
-                  title: "Трёхдневные экспедиции",
-                  description:
-                    "Максимально насыщенный формат: побережье, перевалы, горные дороги и ключевые точки маршрута в одном цельном путешествии.",
-                  details: "Полное погружение · 2 ночёвки · highland route",
-                  price: "от 32 000 ₽",
-                },
-              ].map((item, index) => (
-                <motion.button
-                  key={item.duration}
-                  type="button"
-                  className="w-full text-left rounded-[20px] border border-white/8 px-5 py-5 sm:px-6 sm:py-6 focus-visible:ring-2 focus-visible:ring-yellow-500"
-                  style={{
-                    background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.018))",
-                    boxShadow: "0 18px 36px rgba(0,0,0,0.18)",
-                  }}
-                  whileHover={{
-                    y: -2,
-                    borderColor: "rgba(145,4,12,0.42)",
-                    background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.024))",
-                  }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ duration: 0.22 }}
-                  onClick={() => onNavigate && onNavigate({ page: "experiences", category: "expedition" })}
-                >
-                  <div className="flex items-start justify-between gap-5">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div
-                          className="w-9 h-9 rounded-full flex items-center justify-center border"
-                          style={{ borderColor: "rgba(145,4,12,0.34)", background: "rgba(145,4,12,0.14)" }}
-                        >
-                          <span className="text-white/90" style={{ fontSize: 12, fontWeight: 700 }}>
-                            {index + 1}
-                          </span>
-                        </div>
-                        <div className="px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
-                          <span className="text-white/65 uppercase tracking-[0.14em]" style={{ fontSize: 10 }}>
-                            {item.duration}
-                          </span>
-                        </div>
-                      </div>
-
-                      <h4 className="text-white mb-2" style={{ fontSize: "clamp(18px, 1.45vw, 24px)", fontWeight: 700, letterSpacing: "0.03em" }}>
-                        {item.title}
-                      </h4>
-                      <p className="text-white/55 leading-relaxed mb-3" style={{ fontSize: "clamp(12px, 0.98vw, 14px)" }}>
-                        {item.description}
-                      </p>
-                      <p className="text-white/34 uppercase tracking-[0.18em]" style={{ fontSize: 10 }}>
-                        {item.details}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-4 flex-shrink-0">
-                      <div className="text-right">
-                        <div className="text-white/35 uppercase tracking-[0.16em] mb-1" style={{ fontSize: 10 }}>
-                          Стоимость
-                        </div>
-                        <div className="text-white" style={{ fontSize: "clamp(18px, 1.4vw, 24px)", fontWeight: 700 }}>
-                          {item.price}
-                        </div>
-                      </div>
-                      <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-white/[0.03]">
-                        <ArrowRight className="w-4 h-4 text-white/65" />
-                      </div>
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ── Expedition popup ── */}
+      <GTSExpeditionPopup
+        expedition={popupExpId ? (expeditions.find((e) => e.id === popupExpId) ?? null) : null}
+        onClose={() => setPopupExpId(null)}
+        onNavigate={onNavigate ?? (() => {})}
+      />
     </div>
   );
 }

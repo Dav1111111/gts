@@ -35,46 +35,19 @@ interface GTSNavigationHeaderProps {
 
 const navItems: NavItem[] = [
   {
-    id: "experiences",
-    label: "Впечатления",
-    href: "experiences",
-    hasSubmenu: true,
-    submenu: [
-      {
-        title: "По категориям",
-        items: [
-          {
-            icon: Ship,
-            label: "Водные",
-            description: "Яхты, катера, вейксёрф",
-            href: "experiences?category=water"
-          },
-          {
-            icon: Car,
-            label: "Наземные",
-            description: "Багги, SUV, экспедиции",
-            href: "experiences?category=ground"
-          },
-          {
-            icon: Plane,
-            label: "Воздушные",
-            description: "Вертолёты, панорамные туры",
-            href: "experiences?category=air"
-          },
-          {
-            icon: Sparkles,
-            label: "Premium услуги",
-            description: "Кейтеринг, консьерж, фото",
-            href: "experiences?category=services"
-          }
-        ]
-      }
-    ]
+    id: "expeditions",
+    label: "Экспедиции",
+    href: "expeditions",
   },
   {
-    id: "about",
-    label: "О клубе",
-    href: "about"
+    id: "abkhazia",
+    label: "Абхазия",
+    href: "abkhazia"
+  },
+  {
+    id: "experiences",
+    label: "Услуги",
+    href: "experiences",
   },
   {
     id: "feed",
@@ -106,11 +79,6 @@ const navItems: NavItem[] = [
         ]
       }
     ]
-  },
-  {
-    id: "map",
-    label: "Карта активности",
-    href: "landing"
   },
 ];
 
@@ -151,6 +119,12 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
 
       if (cleanHref === "landing" || cleanHref === "") {
         onNavigate({ page: "landing" });
+      } else if (cleanHref === "expeditions") {
+        onNavigate({ page: "landing" });
+        setTimeout(() => {
+          const el = document.getElementById("expeditions");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 350);
       } else if (cleanHref === "about") {
         onNavigate({ page: "about" });
       } else if (cleanHref === "experiences" || cleanHref.startsWith("experiences")) {
@@ -167,6 +141,8 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
         } else {
           onNavigate({ page: "stories" });
         }
+      } else if (cleanHref === "abkhazia") {
+        onNavigate({ page: "abkhazia" });
       } else if (cleanHref === "contacts") {
         onNavigate({ page: "contacts" });
       }

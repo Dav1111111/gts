@@ -10,20 +10,14 @@ import { Route } from "../GTSRouter";
 const GTSExpeditionsCalendar = lazy(() =>
   import("../GTSExpeditionsCalendar").then((module) => ({ default: module.GTSExpeditionsCalendar }))
 );
-const GTSAboutSection = lazy(() =>
-  import("../GTSAboutSection").then((module) => ({ default: module.GTSAboutSection }))
+const GTSAbkhaziaHeroSection = lazy(() =>
+  import("../GTSAbkhaziaHeroSection").then((module) => ({ default: module.GTSAbkhaziaHeroSection }))
 );
-const GTSTopOffersSection = lazy(() =>
-  import("../GTSTopOffersSection").then((module) => ({ default: module.GTSTopOffersSection }))
-);
-const GTSExperiencesSection = lazy(() =>
-  import("../GTSExperiencesSection").then((module) => ({ default: module.GTSExperiencesSection }))
+const GTSServicesBlock = lazy(() =>
+  import("../GTSServicesBlock").then((module) => ({ default: module.GTSServicesBlock }))
 );
 const GTSLiveFeedSection = lazy(() =>
   import("../GTSLiveFeedSection").then((module) => ({ default: module.GTSLiveFeedSection }))
-);
-const GTSInteractiveMapSection = lazy(() =>
-  import("../GTSInteractiveMapSection").then((module) => ({ default: module.GTSInteractiveMapSection }))
 );
 const GTSUnifiedTestimonialsSection = lazy(() =>
   import("../GTSUnifiedTestimonialsSection").then((module) => ({ default: module.GTSUnifiedTestimonialsSection }))
@@ -116,33 +110,21 @@ export function GTSLandingPage({ onNavigate }: GTSLandingPageProps) {
           </LazyLandingSection>
         </section>
 
-        <section id="about">
-          <LazyLandingSection sectionName="О клубе">
-            <GTSAboutSection onNavigate={onNavigate} />
+        <section id="abkhazia">
+          <LazyLandingSection sectionName="Абхазия">
+            <GTSAbkhaziaHeroSection />
           </LazyLandingSection>
         </section>
 
-        <section id="top-offers">
-          <LazyLandingSection sectionName="Спецпредложения">
-            <GTSTopOffersSection />
-          </LazyLandingSection>
-        </section>
-
-        <section id="experiences">
-          <LazyLandingSection sectionName="Впечатления">
-            <GTSExperiencesSection />
+        <section id="services">
+          <LazyLandingSection sectionName="Сервисы">
+            <GTSServicesBlock onNavigate={onNavigate} />
           </LazyLandingSection>
         </section>
 
         <section id="live-feed">
           <LazyLandingSection sectionName="Лента">
             <GTSLiveFeedSection />
-          </LazyLandingSection>
-        </section>
-
-        <section id="interactive-map">
-          <LazyLandingSection sectionName="Карта">
-            <GTSInteractiveMapSection />
           </LazyLandingSection>
         </section>
 
