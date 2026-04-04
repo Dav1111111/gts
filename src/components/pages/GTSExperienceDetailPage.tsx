@@ -289,7 +289,7 @@ export function GTSExperienceDetailPage({ experienceId, onNavigate }: GTSExperie
                   <ul className="space-y-2">
                     {exp.included.map((item, i) => (
                       <li key={i} className="text-white/40 text-xs leading-relaxed flex items-start gap-2">
-                        <div className="w-1 h-1 rounded-full bg-[#91040C] mt-1.5 flex-shrink-0" />
+                        <div className="w-1 h-1 bg-[#91040C] mt-1.5 flex-shrink-0" />
                         {item}
                       </li>
                     ))}
@@ -301,7 +301,7 @@ export function GTSExperienceDetailPage({ experienceId, onNavigate }: GTSExperie
                   <ul className="space-y-2">
                     {exp.notIncluded.map((item, i) => (
                       <li key={i} className="text-white/40 text-xs leading-relaxed flex items-start gap-2">
-                        <div className="w-1 h-1 rounded-full bg-white/10 mt-1.5 flex-shrink-0" />
+                        <div className="w-1 h-1 bg-white/10 mt-1.5 flex-shrink-0" />
                         {item}
                       </li>
                     ))}
@@ -496,7 +496,7 @@ function VehicleRentalBlock() {
                     { label: "3 дня", price: v.pricePer3Days },
                     { label: "7 дней", price: v.pricePerWeek },
                   ].map((p) => (
-                    <div key={p.label} className="text-center py-5 px-2 rounded-sm" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div key={p.label} className="text-center py-5 px-2" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
                       <div className="text-white/30 uppercase tracking-[0.2em] mb-2 font-medium" style={{ fontSize: 8 }}>{p.label}</div>
                       <div className="text-white font-light" style={{ fontSize: 24, letterSpacing: "-0.02em" }}>{p.price}</div>
                       <div className="text-white/20 uppercase tracking-widest mt-1" style={{ fontSize: 9 }}>руб</div>
@@ -509,8 +509,8 @@ function VehicleRentalBlock() {
                     target="_blank" rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-3 py-5 text-white uppercase tracking-[0.2em] font-bold"
                     style={{ fontSize: 11, background: "#91040C", border: "1px solid #91040C", textDecoration: "none", cursor: "pointer" }}
-                    whileHover={{ background: "#6d0309", scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#6d0309")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#91040C")}
                   >
                     <MessageCircle className="w-4 h-4" />
                     Бронировать
@@ -554,7 +554,7 @@ function VehicleRentalBlock() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                     {v.included.map((item, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(145,4,12,0.15)" }}>
+                        <div className="w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ background: "rgba(145,4,12,0.15)" }}>
                           <Check className="w-3 h-3" style={{ color: "#91040C" }} />
                         </div>
                         <span className="text-white/60 font-light" style={{ fontSize: 13 }}>{item}</span>
@@ -621,7 +621,7 @@ function VehicleRentalBlock() {
               style={{ background: "#121214", border: "1px solid rgba(255,255,255,0.04)" }}
               whileHover={{ y: -5, background: "#17181A", borderColor: "rgba(255,255,255,0.08)" }}
             >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{ background: "rgba(145,4,12,0.12)" }}>
+              <div className="w-12 h-12 flex items-center justify-center mb-6" style={{ background: "rgba(145,4,12,0.12)" }}>
                 <cond.icon className="w-6 h-6" style={{ color: "#91040C" }} />
               </div>
               <div className="text-white/30 uppercase tracking-[0.25em] mb-3 font-bold" style={{ fontSize: 9 }}>{cond.title}</div>

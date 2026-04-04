@@ -147,17 +147,17 @@ const mockPosts: Post[] = [
 
 const postTypeConfig = {
   news: { icon: Newspaper, label: "Новости клуба", color: "bg-[#91040C]" },
-  guide_story: { icon: MapPin, label: "История гида", color: "bg-blue-600" },
-  partner: { icon: Handshake, label: "От партнера", color: "bg-purple-600" },
-  review: { icon: MessageCircle, label: "Отзыв гостя", color: "bg-green-600" },
-  offer: { icon: TrendingUp, label: "Спецпредложение", color: "bg-orange-600" }
+  guide_story: { icon: MapPin, label: "История гида", color: "bg-white/15" },
+  partner: { icon: Handshake, label: "От партнера", color: "bg-white/10" },
+  review: { icon: MessageCircle, label: "Отзыв гостя", color: "bg-white/10" },
+  offer: { icon: TrendingUp, label: "Спецпредложение", color: "bg-[#91040C]" }
 };
 
 const roleConfig = {
   team: { label: "Команда GTS", color: "text-[#91040C]" },
-  guide: { label: "Гид", color: "text-blue-600" },
-  partner: { label: "Партнер", color: "text-purple-600" },
-  guest: { label: "Гость", color: "text-black/60" }
+  guide: { label: "Гид", color: "text-white/60" },
+  partner: { label: "Партнер", color: "text-white/60" },
+  guest: { label: "Гость", color: "text-white/40" }
 };
 
 export function GTSLiveFeedSection() {
@@ -220,7 +220,7 @@ export function GTSLiveFeedSection() {
           style={{ y: headerY, opacity: headerOpacity }}
           className="text-center mb-12 lg:mb-16"
         >
-          <div className="inline-flex items-center px-4 py-2 bg-[#91040C]/10 border border-[#91040C]/20 rounded-full mb-6">
+          <div className="inline-flex items-center px-4 py-2 bg-[#91040C]/10 border border-[#91040C]/20 mb-6">
             <Newspaper className="w-4 h-4 text-[#91040C] mr-2" />
             <span className="text-sm tracking-wider text-white/80 uppercase">Живая лента</span>
           </div>
@@ -332,7 +332,7 @@ export function GTSLiveFeedSection() {
 
                     {/* Post Image */}
                     {post.image && (
-                      <div className="mb-5 rounded-lg overflow-hidden">
+                      <div className="mb-5 overflow-hidden">
                         <ImageWithFallback
                           src={post.image}
                           alt={post.title}
@@ -372,7 +372,7 @@ export function GTSLiveFeedSection() {
                         </div>
                       </div>
 
-                      <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                      <button className="p-2 hover:bg-white/5 transition-colors">
                         <Bookmark className="w-5 h-5 text-white/40 hover:text-white" />
                       </button>
                     </div>

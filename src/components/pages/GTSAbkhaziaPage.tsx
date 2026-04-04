@@ -283,7 +283,7 @@ export function GTSAbkhaziaPage({ onNavigate }: GTSAbkhaziaPageProps) {
                   <textPath href="#cp-abk">ФЛАГМАНСКОЕ · НАПРАВЛЕНИЕ · GTS ·</textPath>
                 </text>
               </svg>
-              <div className="w-5 h-5 rounded-full" style={{ background: "#91040C" }} />
+              <div className="w-5 h-5" style={{ background: "#91040C" }} />
             </div>
           </div>
 
@@ -291,8 +291,8 @@ export function GTSAbkhaziaPage({ onNavigate }: GTSAbkhaziaPageProps) {
           <motion.div className="absolute right-6 md:right-16 bottom-36 z-20 flex flex-col gap-3" style={{ opacity: heroOpacity }}>
             {[{ val: "365", label: "дней в сезоне" }, { val: "1200+", label: "км маршрутов" }, { val: "4.9", label: "рейтинг" }].map((s, i) => (
               <motion.div key={s.val} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.15 }}
-                className="px-4 py-3 rounded-xl text-right"
-                style={{ background: "rgba(255,255,255,0.07)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                className="px-4 py-3 text-right"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}>
                 <div className="text-white font-bold text-xl tracking-tight leading-none">{s.val}</div>
                 <div className="text-white/45 text-[10px] uppercase tracking-widest mt-0.5">{s.label}</div>
               </motion.div>
@@ -302,9 +302,9 @@ export function GTSAbkhaziaPage({ onNavigate }: GTSAbkhaziaPageProps) {
           {/* Hero content */}
           <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-12 pb-20 md:pb-28">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full"
+              className="inline-flex items-center gap-2 mb-6 px-4 py-1.5"
               style={{ background: "rgba(145,4,12,0.15)", border: "1px solid rgba(145,4,12,0.45)" }}>
-              <motion.span className="w-1.5 h-1.5 rounded-full" style={{ background: "#91040C" }}
+              <motion.span className="w-1.5 h-1.5" style={{ background: "#91040C" }}
                 animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 1.8, repeat: Infinity }} />
               <span className="text-[#91040C] uppercase tracking-[0.3em] font-bold text-[10px]">Направление GTS</span>
             </motion.div>
@@ -517,7 +517,7 @@ function TerrainSection() {
               animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.6, delay: 0.04 * i, ease: [0.16, 1, 0.3, 1] }}
               className="relative overflow-hidden group"
-              style={{ aspectRatio: "4/3", borderRadius: 10 }}
+              style={{ aspectRatio: "4/3" }}
             >
               <img src={item.image} alt={item.label}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -525,7 +525,7 @@ function TerrainSection() {
               <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
                 <span className="text-white font-semibold text-[10px] md:text-xs uppercase tracking-wide">{item.label}</span>
               </div>
-              <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{ background: "#91040C" }} />
             </motion.div>
           ))}
@@ -651,10 +651,10 @@ function AbkhaziaExpeditionOverlay({ expedition, onClose, onNavigate }: {
             {/* Close button */}
             <motion.button
               onClick={onClose}
-              className="absolute top-5 right-5 z-30 w-9 h-9 rounded-full flex items-center justify-center"
+              className="absolute top-5 right-5 z-30 w-9 h-9 flex items-center justify-center"
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-              whileHover={{ scale: 1.1, backgroundColor: "rgba(145,4,12,0.4)" }}
-              whileTap={{ scale: 0.95 }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(145,4,12,0.4)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
             >
               <X size={14} className="text-white/60" />
             </motion.button>
@@ -675,8 +675,8 @@ function AbkhaziaExpeditionOverlay({ expedition, onClose, onNavigate }: {
 
               {/* Character badge */}
               <div className="absolute top-6 left-6 z-10">
-                <span className="px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold text-white"
-                  style={{ background: "rgba(145,4,12,0.9)", backdropFilter: "blur(8px)" }}>
+                <span className="px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold text-white"
+                  style={{ background: "rgba(145,4,12,0.9)" }}>
                   {expedition.days}
                 </span>
               </div>
@@ -809,7 +809,7 @@ function AbkhaziaExpeditionOverlay({ expedition, onClose, onNavigate }: {
                     <span key={h} className="flex items-center gap-3">
                       <span className="text-white/50 text-[11px] uppercase tracking-wider font-semibold">{h}</span>
                       {i < expedition.highlights.length - 1 && (
-                        <span className="w-1 h-1 rounded-full shrink-0" style={{ background: "rgba(145,4,12,0.5)" }} />
+                        <span className="w-1 h-1 shrink-0" style={{ background: "rgba(145,4,12,0.5)" }} />
                       )}
                     </span>
                   ))}
@@ -825,8 +825,9 @@ function AbkhaziaExpeditionOverlay({ expedition, onClose, onNavigate }: {
                   <motion.button
                     onClick={() => { onClose(); onNavigate({ page: "contacts" }); }}
                     className="flex-1 flex items-center justify-center gap-2 py-4 text-white uppercase tracking-widest font-bold relative overflow-hidden"
-                    style={{ background: "#91040C", borderRadius: 12, fontSize: 11 }}
-                    whileHover={{ scale: 1.02 }}
+                    style={{ background: "#91040C", fontSize: 11 }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#6d0309")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "#91040C")}
                     whileTap={{ scale: 0.98 }}
                   >
                     <motion.span
@@ -962,7 +963,7 @@ function ExpeditionCard({ exp, index, inView, onSelectExp }: {
       <div className="flex-1 flex flex-col justify-between py-8 px-6 md:px-10 min-w-0">
         {/* Tags row */}
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-[9px] uppercase tracking-[0.35em] font-bold px-2.5 py-1 rounded-full"
+          <span className="text-[9px] uppercase tracking-[0.35em] font-bold px-2.5 py-1"
             style={{ background: "rgba(145,4,12,0.15)", color: "#91040C", border: "1px solid rgba(145,4,12,0.3)" }}>
             {exp.days}
           </span>

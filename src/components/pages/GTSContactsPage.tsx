@@ -1,233 +1,202 @@
 import { useState } from "react";
-import { Card } from "../ui/card";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
 import { GTSNavigationHeader } from "../GTSNavigationHeader";
 import { GTSFooter } from "../GTSFooter";
 import { Route } from "../GTSRouter";
-import { 
-  Phone, Mail, MapPin, Clock, Send,
-  Instagram, Facebook, Youtube
-} from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
 import { motion } from "motion/react";
 
 interface GTSContactsPageProps {
   onNavigate: (route: Route) => void;
 }
 
+const CONTACT_ITEMS = [
+  {
+    icon: Phone,
+    title: "Телефон",
+    primary: "+7 (862) 555-0123",
+    secondary: "Круглосуточно, 7 дней в неделю",
+  },
+  {
+    icon: Mail,
+    title: "Email",
+    primary: "club@grandtoursochi.ru",
+    secondary: "Ответим в течение 1 часа",
+  },
+  {
+    icon: MapPin,
+    title: "Адрес",
+    primary: "Олимпийский парк, Адлерский район",
+    secondary: "Сочи, Краснодарский край, 354340",
+  },
+  {
+    icon: Clock,
+    title: "Часы работы офиса",
+    primary: "Пн–Пт: 09:00–20:00  ·  Сб–Вс: 10:00–18:00",
+    secondary: "Консьерж-сервис: 24/7",
+  },
+];
+
 export function GTSContactsPage({ onNavigate }: GTSContactsPageProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: ""
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" });
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // В реальном приложении - отправка на сервер
+    setSent(true);
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0B0B0C] text-white">
       <GTSNavigationHeader onNavigate={onNavigate} />
 
-      <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4 lg:px-6">
-          
+      <main className="pt-32 pb-24 px-6 md:px-12">
+        <div className="max-w-[1200px] mx-auto">
+
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-16"
+            transition={{ duration: 0.6 }}
+            className="mb-16 lg:mb-20"
           >
-            <h1 className="text-5xl lg:text-7xl text-black mb-6 tracking-wider">
-              СВЯЖИТЕСЬ
-              <span className="block text-[#91040C] mt-2">С НАМИ</span>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-px" style={{ background: "#91040C" }} />
+              <span className="text-[10px] uppercase tracking-[0.4em] font-semibold" style={{ color: "#91040C" }}>
+                Связь с нами
+              </span>
+            </div>
+            <h1
+              className="font-black uppercase leading-none text-white"
+              style={{ fontSize: "clamp(36px, 6vw, 88px)", letterSpacing: "-0.02em" }}
+            >
+              Свяжитесь{" "}
+              <span style={{ color: "#91040C" }}>с нами</span>
             </h1>
-            <p className="text-xl text-black/70 max-w-2xl mx-auto">
+            <p className="text-white/40 mt-4 max-w-xl leading-relaxed" style={{ fontSize: 15 }}>
               Наша команда готова ответить на любые вопросы и помочь организовать незабываемое приключение
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            
-            {/* Contact Info */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+
+            {/* LEFT — Contact info */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="space-y-8"
+              transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <div>
-                <h2 className="text-3xl text-black mb-6">Контактная информация</h2>
-                
-                <div className="space-y-6">
-                  <Card className="bg-white border-black/10 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-[#91040C]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Phone className="w-6 h-6 text-[#91040C]" />
-                      </div>
-                      <div>
-                        <h3 className="text-black mb-2">Телефон</h3>
-                        <p className="text-black/70 text-lg">+7 (862) 555-0123</p>
-                        <p className="text-black/50 text-sm">Круглосуточно, 7 дней в неделю</p>
-                      </div>
+              <div className="space-y-px" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                {CONTACT_ITEMS.map(({ icon: Icon, title, primary, secondary }) => (
+                  <div
+                    key={title}
+                    className="flex items-start gap-5 py-6"
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+                  >
+                    <div
+                      className="w-10 h-10 flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(145,4,12,0.12)", border: "1px solid rgba(145,4,12,0.2)" }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color: "#91040C" }} />
                     </div>
-                  </Card>
-
-                  <Card className="bg-white border-black/10 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-[#91040C]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Mail className="w-6 h-6 text-[#91040C]" />
-                      </div>
-                      <div>
-                        <h3 className="text-black mb-2">Email</h3>
-                        <p className="text-black/70 text-lg">club@grandtoursochi.ru</p>
-                        <p className="text-black/50 text-sm">Ответим в течение 1 часа</p>
-                      </div>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-[0.3em] font-semibold text-white/30 mb-1">{title}</div>
+                      <div className="text-white text-sm font-medium leading-relaxed">{primary}</div>
+                      <div className="text-white/35 text-xs mt-0.5">{secondary}</div>
                     </div>
-                  </Card>
-
-                  <Card className="bg-white border-black/10 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-[#91040C]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-6 h-6 text-[#91040C]" />
-                      </div>
-                      <div>
-                        <h3 className="text-black mb-2">Адрес</h3>
-                        <p className="text-black/70">Олимпийский парк</p>
-                        <p className="text-black/70">Адлерский район, Сочи</p>
-                        <p className="text-black/70">Краснодарский край, 354340</p>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <Card className="bg-white border-black/10 p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-[#91040C]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Clock className="w-6 h-6 text-[#91040C]" />
-                      </div>
-                      <div>
-                        <h3 className="text-black mb-2">Часы работы офиса</h3>
-                        <p className="text-black/70">Пн-Пт: 09:00 - 20:00</p>
-                        <p className="text-black/70">Сб-Вс: 10:00 - 18:00</p>
-                        <p className="text-black/50 text-sm mt-2">Консьерж-сервис: 24/7</p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              </div>
-
-              {/* Social */}
-              <div>
-                <h3 className="text-xl text-black mb-4">Мы в социальных сетях</h3>
-                <div className="flex space-x-4">
-                  <button className="w-12 h-12 bg-black/5 hover:bg-[#91040C]/10 rounded-full flex items-center justify-center transition-colors">
-                    <Instagram className="w-6 h-6 text-black/70" />
-                  </button>
-                  <button className="w-12 h-12 bg-black/5 hover:bg-[#91040C]/10 rounded-full flex items-center justify-center transition-colors">
-                    <Facebook className="w-6 h-6 text-black/70" />
-                  </button>
-                  <button className="w-12 h-12 bg-black/5 hover:bg-[#91040C]/10 rounded-full flex items-center justify-center transition-colors">
-                    <Youtube className="w-6 h-6 text-black/70" />
-                  </button>
-                </div>
+                  </div>
+                ))}
               </div>
             </motion.div>
 
-            {/* Contact Form */}
+            {/* RIGHT — Form */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white border-black/10 p-8">
-                <h2 className="text-2xl text-black mb-6">Напишите нам</h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label className="block text-black/70 mb-2">Ваше имя</label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Иван Иванов"
-                      className="border-black/20"
-                    />
+              <div
+                className="p-8 lg:p-10"
+                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}
+              >
+                <h2 className="text-white font-black uppercase text-xl tracking-wide mb-8" style={{ letterSpacing: "-0.01em" }}>
+                  Напишите нам
+                </h2>
+
+                {sent ? (
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(145,4,12,0.15)", border: "1px solid rgba(145,4,12,0.3)" }}>
+                      <Send className="w-5 h-5" style={{ color: "#91040C" }} />
+                    </div>
+                    <p className="text-white font-semibold mb-2">Сообщение отправлено</p>
+                    <p className="text-white/40 text-sm">Мы ответим в течение 1 часа</p>
                   </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    {[
+                      { key: "name", label: "Ваше имя", placeholder: "Иван Иванов", type: "text" },
+                      { key: "email", label: "Email", placeholder: "ivan@example.com", type: "email" },
+                      { key: "phone", label: "Телефон", placeholder: "+7 (___) ___-__-__", type: "tel" },
+                    ].map(({ key, label, placeholder, type }) => (
+                      <div key={key}>
+                        <label className="block text-white/40 text-[10px] uppercase tracking-[0.3em] mb-2">{label}</label>
+                        <input
+                          type={type}
+                          value={formData[key as keyof typeof formData]}
+                          onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                          placeholder={placeholder}
+                          className="w-full bg-transparent text-white text-sm px-4 py-3 outline-none placeholder:text-white/20 transition-colors"
+                          style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+                          onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(145,4,12,0.5)")}
+                          onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                        />
+                      </div>
+                    ))}
 
-                  <div>
-                    <label className="block text-black/70 mb-2">Email</label>
-                    <Input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="ivan@example.com"
-                      className="border-black/20"
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-white/40 text-[10px] uppercase tracking-[0.3em] mb-2">Сообщение</label>
+                      <textarea
+                        value={formData.message}
+                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                        placeholder="Расскажите, чем мы можем помочь..."
+                        rows={5}
+                        className="w-full bg-transparent text-white text-sm px-4 py-3 outline-none placeholder:text-white/20 transition-colors resize-none"
+                        style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+                        onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(145,4,12,0.5)")}
+                        onBlur={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-black/70 mb-2">Телефон</label>
-                    <Input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+7 (___) ___-__-__"
-                      className="border-black/20"
-                    />
-                  </div>
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center gap-3 py-4 text-white text-xs uppercase tracking-[0.3em] font-bold transition-colors"
+                      style={{ background: "#91040C" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#6d0309")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "#91040C")}
+                    >
+                      <Send className="w-4 h-4" />
+                      Отправить сообщение
+                    </button>
 
-                  <div>
-                    <label className="block text-black/70 mb-2">Сообщение</label>
-                    <Textarea
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Расскажите, чем мы можем помочь..."
-                      rows={6}
-                      className="border-black/20"
-                    />
-                  </div>
-
-                  <Button 
-                    type="submit"
-                    className="w-full bg-[#91040C] hover:bg-[#91040C]/90 text-white py-6"
-                  >
-                    <Send className="w-5 h-5 mr-2" />
-                    Отправить сообщение
-                  </Button>
-
-                  <p className="text-sm text-black/50 text-center">
-                    Отправляя форму, вы соглашаетесь с политикой конфиденциальности
-                  </p>
-                </form>
-              </Card>
+                    <p className="text-white/25 text-[10px] text-center">
+                      Отправляя форму, вы соглашаетесь с{" "}
+                      <button
+                        type="button"
+                        onClick={() => onNavigate({ page: "privacy" })}
+                        className="text-white/40 hover:text-white underline underline-offset-2 transition-colors"
+                      >
+                        политикой конфиденциальности
+                      </button>
+                    </p>
+                  </form>
+                )}
+              </div>
             </motion.div>
 
           </div>
-
-          {/* Map Placeholder */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-16"
-          >
-            <Card className="bg-gray-100 border-black/10 h-96 flex items-center justify-center">
-              <div className="text-center text-black/40">
-                <MapPin className="w-12 h-12 mx-auto mb-4" />
-                <p>Карта расположения</p>
-              </div>
-            </Card>
-          </motion.div>
-
         </div>
       </main>
 
-      <GTSFooter />
+      <GTSFooter onNavigate={onNavigate} />
     </div>
   );
 }

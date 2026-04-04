@@ -70,7 +70,6 @@ export function GTSExpeditionPopup({ expedition, onClose, onNavigate }: GTSExped
                 maxWidth: 700,
                 background: "rgba(11,11,12,0.98)",
                 border: "1px solid rgba(255,255,255,0.07)",
-                borderRadius: 18,
                 boxShadow: "0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(145,4,12,0.15)",
               }}
               initial={{ opacity: 0, scale: 0.9, y: 24 }}
@@ -105,10 +104,10 @@ export function GTSExpeditionPopup({ expedition, onClose, onNavigate }: GTSExped
               {/* close button */}
               <motion.button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center"
+                className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center"
                 style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)" }}
-                whileHover={{ scale: 1.1, backgroundColor: "rgba(145,4,12,0.35)" }}
-                whileTap={{ scale: 0.95 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(145,4,12,0.35)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
                 transition={{ duration: 0.18 }}
               >
                 <X size={13} className="text-white/60" />
@@ -120,7 +119,7 @@ export function GTSExpeditionPopup({ expedition, onClose, onNavigate }: GTSExped
                 {/* LEFT: image */}
                 <div
                   className="relative sm:w-[42%] overflow-hidden"
-                  style={{ minHeight: 240, borderRadius: "18px 0 0 18px" }}
+                  style={{ minHeight: 240 }}
                 >
                   <motion.img
                     src={expedition.image}
@@ -137,10 +136,9 @@ export function GTSExpeditionPopup({ expedition, onClose, onNavigate }: GTSExped
                   {/* status badge */}
                   <div className="absolute top-4 left-4">
                     <span
-                      className="px-2.5 py-1 rounded-full text-[9px] uppercase tracking-widest font-bold text-white"
+                      className="px-2.5 py-1 text-[9px] uppercase tracking-widest font-bold text-white"
                       style={{
                         background: expedition.status === "upcoming" ? "rgba(145,4,12,0.88)" : "rgba(0,0,0,0.65)",
-                        backdropFilter: "blur(8px)",
                       }}
                     >
                       {statusLabel}
@@ -212,7 +210,7 @@ export function GTSExpeditionPopup({ expedition, onClose, onNavigate }: GTSExped
                     ].map(({ icon: Icon, label, val }) => (
                       <div key={label} className="flex items-start gap-2">
                         <div
-                          className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5"
+                          className="w-6 h-6 flex items-center justify-center shrink-0 mt-0.5"
                           style={{ background: "rgba(145,4,12,0.12)" }}
                         >
                           <Icon size={11} style={{ color: "#91040C" }} />
@@ -236,7 +234,7 @@ export function GTSExpeditionPopup({ expedition, onClose, onNavigate }: GTSExped
                       {expedition.highlights.slice(0, 4).map((h) => (
                         <span
                           key={h}
-                          className="px-2 py-0.5 rounded text-[10px] text-white/45"
+                          className="px-2 py-0.5 text-[10px] text-white/45"
                           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}
                         >
                           {h}
@@ -258,8 +256,9 @@ export function GTSExpeditionPopup({ expedition, onClose, onNavigate }: GTSExped
                         onNavigate({ page: "experience-detail", id: expedition.id });
                       }}
                       className="w-full flex items-center justify-center gap-2 py-3.5 text-white uppercase tracking-widest font-bold relative overflow-hidden"
-                      style={{ background: "#91040C", borderRadius: 10, fontSize: 11 }}
-                      whileHover={{ scale: 1.02 }}
+                      style={{ background: "#91040C", fontSize: 11 }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#6d0309")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "#91040C")}
                       whileTap={{ scale: 0.98 }}
                     >
                       {/* hover sweep */}

@@ -48,7 +48,7 @@ class LandingSectionBoundary extends Component<
     if (this.state.hasError) {
       return (
         <section className="bg-[#0B0B0C] text-white px-6 py-16">
-          <div className="mx-auto max-w-5xl rounded-2xl border border-white/10 bg-white/5 p-6">
+          <div className="mx-auto max-w-5xl border border border-white/10 bg-white/5 p-6">
             <div className="text-lg">Секция временно недоступна</div>
             <div className="mt-2 text-sm text-white/60">{this.props.sectionName}</div>
           </div>
@@ -63,7 +63,7 @@ class LandingSectionBoundary extends Component<
 function LandingSectionLoader() {
   return (
     <section className="bg-[#0B0B0C] text-white px-6 py-16">
-      <div className="mx-auto max-w-5xl rounded-2xl border border-white/10 bg-white/5 p-6 text-white/60">
+      <div className="mx-auto max-w-5xl border border border-white/10 bg-white/5 p-6 text-white/60">
         Загрузка секции...
       </div>
     </section>
