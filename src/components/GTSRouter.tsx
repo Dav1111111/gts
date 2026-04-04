@@ -10,6 +10,9 @@ const GTSAboutPage = lazy(() =>
 const GTSExperiencesPage = lazy(() =>
   import("./pages/GTSExperiencesPage").then((module) => ({ default: module.GTSExperiencesPage }))
 );
+const GTSExperienceDetailPage = lazy(() =>
+  import("./pages/GTSExperienceDetailPage").then((module) => ({ default: module.GTSExperienceDetailPage }))
+);
 const GTSStoriesPage = lazy(() =>
   import("./pages/GTSStoriesPage").then((module) => ({ default: module.GTSStoriesPage }))
 );
@@ -216,7 +219,7 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
         return <GTSExperiencesPage onNavigate={navigate} />;
 
       case "experience-detail":
-        return <GTSExperiencesPage onNavigate={navigate} />;
+        return <GTSExperienceDetailPage experienceId={currentRoute.id} onNavigate={navigate} />;
       
       case "stories":
         // Show authenticated version if user is logged in

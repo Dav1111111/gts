@@ -112,7 +112,7 @@ export function GTSLandingPage({ onNavigate }: GTSLandingPageProps) {
 
         <section id="abkhazia">
           <LazyLandingSection sectionName="Абхазия">
-            <GTSAbkhaziaHeroSection />
+            <GTSAbkhaziaHeroSection onNavigate={onNavigate} />
           </LazyLandingSection>
         </section>
 

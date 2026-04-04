@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Plus, Pencil, Trash2, ArrowLeft, Save, X, Eye, EyeOff,
   MapPin, Calendar, Clock, Users, Truck, Mountain, ChevronDown,
   ChevronUp, Star, Copy, Search, Filter, GripVertical,
-  Check, AlertTriangle, Image as ImageIcon
+  AlertTriangle, Image as ImageIcon, Upload
 } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { useExpeditions, ExpeditionData, DayProgram } from "../../contexts/GTSExpeditionsContext";
@@ -166,6 +166,154 @@ function createEmptyExpedition(id: string): ExpeditionData {
     isFeatured: false,
     highlights: [""],
   });
+}
+
+/* ═══ Image Uploader (single) ═══ */
+function ImageUploader({ label, value, onChange }: { label: string; value: string; onChange: (url: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) { setError("Выберите изображение (JPG, PNG, WebP)"); return; }
+    if (file.size > 10 * 1024 * 1024) { setError("Максимальный размер: 10 МБ"); return; }
+    setUploading(true);
+    setError(null);
+    try {
+      const { supabase } = await import("../../utils/supabase/client");
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `expeditions/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error: upErr } = await supabase.storage.from("expedition-images").upload(path, file, { cacheControl: "3600", upsert: false });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("expedition-images").getPublicUrl(data.path);
+      onChange(publicUrl);
+    } catch (e: any) {
+      setError(e.message ?? "Ошибка загрузки. Проверьте, что bucket «expedition-images» создан в Supabase Storage.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40 mb-2">{label}</label>
+      {value && (
+        <div className="relative mb-2 overflow-hidden rounded-lg" style={{ aspectRatio: "21/9" }}>
+          <img src={value} alt="preview" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <button
+            onClick={() => onChange("")}
+            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white/60 hover:text-white transition-colors"
+          >
+            <X size={13} />
+          </button>
+          <span className="absolute bottom-2 left-3 text-white/50 text-[10px]">Нажмите ниже чтобы заменить</span>
+        </div>
+      )}
+      <div
+        onClick={() => !uploading && inputRef.current?.click()}
+        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+        onDragOver={(e) => e.preventDefault()}
+        className="flex flex-col items-center justify-center gap-2 p-5 rounded-lg cursor-pointer transition-all duration-200"
+        style={{ background: "rgba(255,255,255,0.02)", border: `2px dashed ${uploading ? "#91040C" : "rgba(255,255,255,0.12)"}` }}
+      >
+        {uploading ? (
+          <>
+            <div className="w-5 h-5 rounded-full border-2 border-[#91040C] border-t-transparent animate-spin" />
+            <span className="text-white/40 text-xs">Загрузка в Supabase Storage...</span>
+          </>
+        ) : (
+          <>
+            <Upload size={18} className="text-white/25" />
+            <span className="text-white/40 text-xs text-center">
+              Нажмите или перетащите фото<br />
+              <span className="text-white/20">JPG, PNG, WebP · до 10 МБ</span>
+            </span>
+          </>
+        )}
+      </div>
+      {error && <p className="mt-1.5 text-[11px] text-[#91040C]">{error}</p>}
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
+    </div>
+  );
+}
+
+/* ═══ Image Uploader (gallery, multiple) ═══ */
+function GalleryUploader({ label, values, onChange }: { label: string; values: string[]; onChange: (urls: string[]) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFiles = async (files: FileList) => {
+    setUploading(true);
+    setError(null);
+    const uploaded: string[] = [];
+    try {
+      const { supabase } = await import("../../utils/supabase/client");
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith("image/")) continue;
+        if (file.size > 10 * 1024 * 1024) continue;
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `expeditions/gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { data, error: upErr } = await supabase.storage.from("expedition-images").upload(path, file, { cacheControl: "3600", upsert: false });
+        if (upErr) throw upErr;
+        const { data: { publicUrl } } = supabase.storage.from("expedition-images").getPublicUrl(data.path);
+        uploaded.push(publicUrl);
+      }
+      onChange([...values.filter(Boolean), ...uploaded]);
+    } catch (e: any) {
+      setError(e.message ?? "Ошибка загрузки");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const remove = (idx: number) => onChange(values.filter((_, i) => i !== idx));
+
+  return (
+    <div>
+      <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40 mb-2">{label}</label>
+      {values.filter(Boolean).length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
+          {values.filter(Boolean).map((url, i) => (
+            <div key={i} className="relative aspect-square rounded-lg overflow-hidden group">
+              <img src={url} alt={`gallery-${i}`} className="w-full h-full object-cover" />
+              <button
+                onClick={() => remove(i)}
+                className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X size={16} className="text-white" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div
+        onClick={() => !uploading && inputRef.current?.click()}
+        onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); }}
+        onDragOver={(e) => e.preventDefault()}
+        className="flex flex-col items-center justify-center gap-2 p-5 rounded-lg cursor-pointer transition-all duration-200"
+        style={{ background: "rgba(255,255,255,0.02)", border: `2px dashed ${uploading ? "#91040C" : "rgba(255,255,255,0.12)"}` }}
+      >
+        {uploading ? (
+          <>
+            <div className="w-5 h-5 rounded-full border-2 border-[#91040C] border-t-transparent animate-spin" />
+            <span className="text-white/40 text-xs">Загрузка...</span>
+          </>
+        ) : (
+          <>
+            <Upload size={18} className="text-white/25" />
+            <span className="text-white/40 text-xs text-center">
+              Добавить фото в галерею<br />
+              <span className="text-white/20">Можно несколько файлов сразу</span>
+            </span>
+          </>
+        )}
+      </div>
+      {error && <p className="mt-1.5 text-[11px] text-[#91040C]">{error}</p>}
+      <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { if (e.target.files?.length) handleFiles(e.target.files); e.target.value = ""; }} />
+    </div>
+  );
 }
 
 /* ═══ Reusable Input ═══ */
@@ -568,7 +716,7 @@ function ExpeditionEditor({
                 <AdminInput label="Подзаголовок (tagline)" value={draft.tagline} onChange={(v) => update("tagline", v)} placeholder="Горы · Перевалы · Побережье" />
               </div>
 
-              <AdminInput label="URL фото Hero" value={draft.heroImage} onChange={(v) => update("heroImage", v)} placeholder="https://images.unsplash.com/..." />
+              <ImageUploader label="Фото Hero" value={draft.heroImage} onChange={(v) => update("heroImage", v)} />
 
               <AdminTextarea label="Описание" value={draft.description} onChange={(v) => update("description", v)} placeholder="Подробное описание экспедиции..." rows={4} />
 
@@ -705,7 +853,7 @@ function ExpeditionEditor({
               <EditableList label="Включено в стоимость" items={draft.included} onChange={(v) => update("included", v)} />
               <EditableList label="Не включено" items={draft.notIncluded} onChange={(v) => update("notIncluded", v)} />
               <EditableList label="Дополнительные расходы" items={draft.additionalCosts} onChange={(v) => update("additionalCosts", v)} />
-              <EditableList label="URL фото галереи" items={draft.galleryImages.length ? draft.galleryImages : [""]} onChange={(v) => update("galleryImages", v.filter(Boolean))} />
+              <GalleryUploader label="Фото галереи" values={draft.galleryImages} onChange={(v) => update("galleryImages", v)} />
             </motion.div>
           )}
 

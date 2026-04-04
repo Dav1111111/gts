@@ -261,10 +261,9 @@ function ExperiencesHero() {
 function ServicesIndex({ onNavigate }: { onNavigate: (r: Route) => void }) {
   return (
     <nav
-      className="sticky top-[72px] z-40 px-6 md:px-12 py-4 hidden lg:block"
+      className="px-6 md:px-12 py-4 hidden lg:block"
       style={{
-        background: "rgba(11,11,12,0.92)",
-        backdropFilter: "blur(16px)",
+        background: "rgba(11,11,12,0.97)",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}
     >
