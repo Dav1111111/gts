@@ -95,7 +95,7 @@ export function GTSServicesBlock({ onNavigate }: GTSServicesBlockProps) {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.5 }}
               className="flex items-center gap-3 mb-4"
             >
@@ -105,19 +105,17 @@ export function GTSServicesBlock({ onNavigate }: GTSServicesBlockProps) {
               </span>
             </motion.div>
 
-            <div className="overflow-hidden">
-              <motion.h2
-                initial={{ y: "100%" }}
-                whileInView={{ y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-                className="font-black uppercase leading-none text-white"
-                style={{ fontSize: "clamp(38px, 5.5vw, 82px)", letterSpacing: "-0.02em" }}
-              >
-                Доступ{" "}
-                <span style={{ color: "#91040C" }}>ко всему</span>
-              </motion.h2>
-            </div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+              className="font-black uppercase leading-none text-white"
+              style={{ fontSize: "clamp(38px, 5.5vw, 82px)", letterSpacing: "-0.02em" }}
+            >
+              Доступ{" "}
+              <span style={{ color: "#91040C" }}>ко всему</span>
+            </motion.h2>
           </div>
 
           <motion.p
