@@ -409,7 +409,7 @@ function ServiceSection({
           >
             {svc.points.map((pt, i) => (
               <div key={i} className="flex items-start gap-3">
-                <div className="w-1 h-1 rounded-full shrink-0 mt-[7px]" style={{ background: "#91040C" }} />
+                <div className="w-1 h-1 shrink-0 mt-[7px]" style={{ background: "#91040C" }} />
                 <span className="text-white/45 leading-relaxed" style={{ fontSize: 13 }}>{pt}</span>
               </div>
             ))}
@@ -421,23 +421,16 @@ function ServiceSection({
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, delay: 0.32 }}
           >
-            <motion.button
+            <button
               onClick={() => onNavigate({ page: "contacts" })}
-              className="inline-flex items-center gap-3 py-3.5 px-7 text-white text-xs uppercase tracking-widest font-bold relative overflow-hidden"
+              className="inline-flex items-center gap-3 py-3.5 px-7 text-white text-xs uppercase tracking-widest font-bold transition-colors duration-200"
               style={{ background: "#91040C" }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#6d0309")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#91040C")}
             >
-              <motion.span
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)" }}
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.5 }}
-              />
-              <span className="relative">Узнать цену</span>
-              <ArrowRight size={13} className="relative" />
-            </motion.button>
+              Узнать цену
+              <ArrowRight size={13} />
+            </button>
           </motion.div>
         </div>
       </div>
@@ -511,23 +504,16 @@ function ContactSection({ onNavigate }: { onNavigate: (r: Route) => void }) {
           transition={{ duration: 0.6, delay: 0.26 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <motion.button
+          <button
             onClick={() => onNavigate({ page: "contacts" })}
-            className="inline-flex items-center gap-3 py-4 px-10 text-white text-xs uppercase tracking-widest font-bold relative overflow-hidden"
+            className="inline-flex items-center gap-3 py-4 px-10 text-white text-xs uppercase tracking-widest font-bold transition-colors duration-200"
             style={{ background: "#91040C" }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#6d0309")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#91040C")}
           >
-            <motion.span
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)" }}
-              initial={{ x: "-100%" }}
-              whileHover={{ x: "100%" }}
-              transition={{ duration: 0.5 }}
-            />
-            <span className="relative">Написать нам</span>
-            <ArrowRight size={13} className="relative" />
-          </motion.button>
+            Написать нам
+            <ArrowRight size={13} />
+          </button>
 
           <a
             href="tel:+78625550123"
