@@ -1026,7 +1026,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
       >
         {showArrowNav && (
           <motion.button
-            className="absolute left-2 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full transition-colors"
+            className="absolute left-2 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center transition-colors"
             style={{
               width: isCompactView ? 36 : isCondensedView ? 42 : 46,
               height: isCompactView ? 36 : isCondensedView ? 42 : 46,
@@ -1046,7 +1046,7 @@ export function GTSExpeditionsCalendar({ onNavigate }: GTSExpeditionsCalendarPro
 
         {showArrowNav && (
           <motion.button
-            className="absolute right-2 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center rounded-full transition-colors"
+            className="absolute right-2 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center transition-colors"
             style={{
               width: isCompactView ? 36 : isCondensedView ? 42 : 46,
               height: isCompactView ? 36 : isCondensedView ? 42 : 46,

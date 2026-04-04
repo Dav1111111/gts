@@ -130,21 +130,21 @@ export function GTSHeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <div 
-              className="backdrop-blur-xl rounded-2xl p-4 border"
-              style={{ 
-                background: "rgba(0,0,0,0.55)", 
-                borderColor: "rgba(255,255,255,0.08)" 
+            <div
+              className="p-4 border"
+              style={{
+                background: "rgba(0,0,0,0.75)",
+                borderColor: "rgba(255,255,255,0.08)"
               }}
             >
               {/* Header */}
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full bg-[#91040C] flex items-center justify-center">
+                <div className="w-6 h-6 bg-[#91040C] flex items-center justify-center">
                   <Bot className="w-3 h-3 text-white" aria-hidden="true" />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-white text-xs tracking-wide">AI Консультант</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  <span className="w-1.5 h-1.5 bg-green-500" />
                 </div>
               </div>
               
@@ -154,14 +154,14 @@ export function GTSHeroSection() {
                   <div key={message.id} className="space-y-2">
                     <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`flex items-start gap-1.5 max-w-[90%] ${message.type === 'user' ? 'flex-row-reverse' : ''}`}>
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${message.type === 'user' ? 'bg-white' : 'bg-[#91040C]'}`}>
+                        <div className={`w-5 h-5 flex items-center justify-center flex-shrink-0 ${message.type === 'user' ? 'bg-white' : 'bg-[#91040C]'}`}>
                           {message.type === 'user' ? 
                             <User className="w-2.5 h-2.5 stroke-2 text-black" aria-hidden="true" /> :
                             <Bot className="w-2.5 h-2.5 stroke-2 text-white" aria-hidden="true" />
                           }
                         </div>
                         <div 
-                          className="px-2.5 py-1.5 rounded-xl text-xs leading-relaxed"
+                          className="px-2.5 py-1.5 text-xs leading-relaxed"
                           style={{
                             background: message.type === 'user' ? "rgba(255,255,255,0.93)" : "rgba(255,255,255,0.08)",
                             color: message.type === 'user' ? "#000" : "#fff"
@@ -175,14 +175,14 @@ export function GTSHeroSection() {
                     {message.card && (
                       <div className="ml-6">
                         <div 
-                          className="rounded-xl p-2 border"
+                          className="p-2 border"
                           style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}
                         >
                           <div className="flex gap-2">
                             <ImageWithFallback
                               src={message.card.image}
                               alt={message.card.title}
-                              className="w-10 h-10 object-cover rounded-lg flex-shrink-0"
+                              className="w-10 h-10 object-cover flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0">
                               <h4 className="text-white text-xs truncate">{message.card.title}</h4>
@@ -201,7 +201,7 @@ export function GTSHeroSection() {
               
               {/* Input */}
               <div 
-                className="flex items-center gap-2 rounded-xl px-3 py-1.5 border"
+                className="flex items-center gap-2 px-3 py-1.5 border"
                 style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)" }}
               >
                 <input
@@ -209,12 +209,12 @@ export function GTSHeroSection() {
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Задайте вопрос..."
-                  className="flex-1 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded text-white text-xs h-7"
+                  className="flex-1 bg-transparent border-none outline-none text-white text-xs h-7"
                   style={{ color: "rgba(255,255,255,0.9)" }}
                 />
                 <button
                   onClick={handleSendMessage}
-                  className="w-7 h-7 rounded-lg bg-[#91040C] hover:bg-[#a50e16] flex items-center justify-center flex-shrink-0 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500"
+                  className="w-7 h-7 bg-[#91040C] hover:bg-[#6d0309] flex items-center justify-center flex-shrink-0 transition-colors"
                   aria-label="Отправить сообщение"
                 >
                   <Send className="w-3 h-3 text-white" aria-hidden="true" />
@@ -254,12 +254,12 @@ export function GTSHeroSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div 
-            className="backdrop-blur-xl rounded-2xl p-3 border"
-            style={{ background: "rgba(0,0,0,0.6)", borderColor: "rgba(255,255,255,0.08)" }}
+            className="p-3 border"
+            style={{ background: "rgba(0,0,0,0.75)", borderColor: "rgba(255,255,255,0.08)" }}
           >
             {/* Header */}
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-5 h-5 rounded-full bg-[#91040C] flex items-center justify-center">
+              <div className="w-5 h-5 bg-[#91040C] flex items-center justify-center">
                 <Bot className="w-2.5 h-2.5 text-white" aria-hidden="true" />
               </div>
               <span className="text-white text-[11px] tracking-wide">AI Консультант</span>
@@ -270,7 +270,7 @@ export function GTSHeroSection() {
             <div className="mb-2">
               {messages.length > 0 && (
                 <div 
-                  className="px-2.5 py-1.5 rounded-xl text-xs leading-relaxed inline-block"
+                  className="px-2.5 py-1.5 text-xs leading-relaxed inline-block"
                   style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
                 >
                   {messages[messages.length - 1].text}
@@ -280,7 +280,7 @@ export function GTSHeroSection() {
 
             {/* Input */}
             <div 
-              className="flex items-center gap-2 rounded-xl px-3 py-1.5 border"
+              className="flex items-center gap-2 px-3 py-1.5 border"
               style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)" }}
             >
               <input
@@ -288,11 +288,11 @@ export function GTSHeroSection() {
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="Задайте вопрос..."
-                className="flex-1 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded text-white text-xs h-7"
+                className="flex-1 bg-transparent border-none outline-none text-white text-xs h-7"
               />
               <button
                 onClick={handleSendMessage}
-                className="w-7 h-7 rounded-lg bg-[#91040C] hover:bg-[#a50e16] flex items-center justify-center flex-shrink-0 transition-colors focus-visible:ring-2 focus-visible:ring-yellow-500"
+                className="w-7 h-7 bg-[#91040C] hover:bg-[#6d0309] flex items-center justify-center flex-shrink-0 transition-colors"
                 aria-label="Отправить сообщение"
               >
                 <Send className="w-3 h-3 text-white" aria-hidden="true" />
