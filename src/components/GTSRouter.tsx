@@ -4,8 +4,11 @@ import { useGTSAuth } from "../contexts/GTSAuthContext";
 const GTSLandingPage = lazy(() =>
   import("./pages/GTSLandingPage").then((module) => ({ default: module.GTSLandingPage }))
 );
-const GTSAboutPage = lazy(() =>
-  import("./pages/GTSAboutPage").then((module) => ({ default: module.GTSAboutPage }))
+const GTSPrivacyPage = lazy(() =>
+  import("./pages/GTSPrivacyPage").then((module) => ({ default: module.GTSPrivacyPage }))
+);
+const GTSTermsPage = lazy(() =>
+  import("./pages/GTSTermsPage").then((module) => ({ default: module.GTSTermsPage }))
 );
 const GTSExperiencesPage = lazy(() =>
   import("./pages/GTSExperiencesPage").then((module) => ({ default: module.GTSExperiencesPage }))
@@ -56,7 +59,6 @@ const GTSAbkhaziaPage = lazy(() =>
 export type Route =
   | { page: "landing" }
   | { page: "abkhazia" }
-  | { page: "about" }
   | { page: "experiences"; category?: string }
   | { page: "experience-detail"; id: string }
   | { page: "stories"; filter?: string }
@@ -64,6 +66,8 @@ export type Route =
   | { page: "partners" }
   | { page: "contacts" }
   | { page: "login" }
+  | { page: "privacy" }
+  | { page: "terms" }
   | { page: "member-portal" }
   | { page: "admin" }
   | { page: "executive-panel" }
@@ -216,9 +220,12 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
       case "abkhazia":
         return <GTSAbkhaziaPage onNavigate={navigate} />;
 
-      case "about":
-        return <GTSAboutPage onNavigate={navigate} />;
-      
+      case "privacy":
+        return <GTSPrivacyPage onNavigate={navigate} />;
+
+      case "terms":
+        return <GTSTermsPage onNavigate={navigate} />;
+
       case "experiences":
         return <GTSExperiencesPage onNavigate={navigate} />;
 

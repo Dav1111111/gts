@@ -4,11 +4,9 @@ import { Badge } from "./ui/badge";
 import { Route } from "./GTSRouter";
 import { useGTSAuth } from "../contexts/GTSAuthContext";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { 
-  Menu, X, ChevronDown, Phone, 
-  Ship, Car, Plane, Sparkles, Calendar, 
-  MapPin, Users, MessageCircle,
-  Newspaper, User, LogOut
+import {
+  Menu, X, ChevronDown, Phone,
+  Users, User, LogOut
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { GTSLogo } from "./GTSLogo";
@@ -53,37 +51,6 @@ const navItems: NavItem[] = [
     id: "partners",
     label: "Партнёрам",
     href: "partners",
-  },
-  {
-    id: "feed",
-    label: "Истории",
-    href: "stories",
-    hasSubmenu: true,
-    submenu: [
-      {
-        title: "Категории",
-        items: [
-          {
-            icon: Newspaper,
-            label: "Новости",
-            description: "Анонсы и события клуба",
-            href: "stories?filter=news"
-          },
-          {
-            icon: MapPin,
-            label: "Советы гидов",
-            description: "Секретные места и маршруты",
-            href: "stories?filter=guide_story"
-          },
-          {
-            icon: MessageCircle,
-            label: "Отзывы гостей",
-            description: "Реальные истории",
-            href: "stories?filter=review"
-          }
-        ]
-      }
-    ]
   },
 ];
 
@@ -130,8 +97,6 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
           const el = document.getElementById("expeditions");
           if (el) el.scrollIntoView({ behavior: "smooth" });
         }, 350);
-      } else if (cleanHref === "about") {
-        onNavigate({ page: "about" });
       } else if (cleanHref === "experiences" || cleanHref.startsWith("experiences")) {
         if (cleanHref.includes("?category=")) {
           const category = cleanHref.split("=")[1];
