@@ -10,6 +10,9 @@ const GTSAboutPage = lazy(() =>
 const GTSExperiencesPage = lazy(() =>
   import("./pages/GTSExperiencesPage").then((module) => ({ default: module.GTSExperiencesPage }))
 );
+const GTSPartnersPage = lazy(() =>
+  import("./pages/GTSPartnersPage").then((module) => ({ default: module.GTSPartnersPage }))
+);
 const GTSExperienceDetailPage = lazy(() =>
   import("./pages/GTSExperienceDetailPage").then((module) => ({ default: module.GTSExperienceDetailPage }))
 );
@@ -58,6 +61,7 @@ export type Route =
   | { page: "experience-detail"; id: string }
   | { page: "stories"; filter?: string }
   | { page: "story-detail"; id: string }
+  | { page: "partners" }
   | { page: "contacts" }
   | { page: "login" }
   | { page: "member-portal" }
@@ -241,6 +245,9 @@ export function GTSRouter({ initialRoute = { page: "landing" } }: GTSRouterProps
           onNavigate={navigate} 
         />;
       
+      case "partners":
+        return <GTSPartnersPage onNavigate={navigate} />;
+
       case "contacts":
         return <GTSContactsPage onNavigate={navigate} />;
       

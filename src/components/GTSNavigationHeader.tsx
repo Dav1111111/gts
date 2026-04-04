@@ -50,6 +50,11 @@ const navItems: NavItem[] = [
     href: "experiences",
   },
   {
+    id: "partners",
+    label: "Партнёрам",
+    href: "partners",
+  },
+  {
     id: "feed",
     label: "Истории",
     href: "stories",
@@ -143,6 +148,8 @@ export function GTSNavigationHeader({ onNavigate }: GTSNavigationHeaderProps = {
         }
       } else if (cleanHref === "abkhazia") {
         onNavigate({ page: "abkhazia" });
+      } else if (cleanHref === "partners") {
+        onNavigate({ page: "partners" });
       } else if (cleanHref === "contacts") {
         onNavigate({ page: "contacts" });
       }

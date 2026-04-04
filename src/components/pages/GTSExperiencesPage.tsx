@@ -346,12 +346,10 @@ function ServiceSection({
           {/* Tag */}
           <div className="absolute top-6 left-6">
             <span
-              className="px-3 py-1.5 text-[9px] uppercase tracking-[0.3em] font-bold text-white/80"
+              className="px-3 py-1.5 text-[9px] uppercase tracking-[0.3em] font-bold"
               style={{
-                background: "rgba(11,11,12,0.75)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                backdropFilter: "blur(8px)",
-                borderRadius: 6,
+                color: "#91040C",
+                border: "1px solid rgba(145,4,12,0.4)",
               }}
             >
               {svc.tag}
@@ -426,7 +424,7 @@ function ServiceSection({
             <motion.button
               onClick={() => onNavigate({ page: "contacts" })}
               className="inline-flex items-center gap-3 py-3.5 px-7 text-white text-xs uppercase tracking-widest font-bold relative overflow-hidden"
-              style={{ background: "#91040C", borderRadius: 10 }}
+              style={{ background: "#91040C" }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -516,7 +514,7 @@ function ContactSection({ onNavigate }: { onNavigate: (r: Route) => void }) {
           <motion.button
             onClick={() => onNavigate({ page: "contacts" })}
             className="inline-flex items-center gap-3 py-4 px-10 text-white text-xs uppercase tracking-widest font-bold relative overflow-hidden"
-            style={{ background: "#91040C", borderRadius: 12 }}
+            style={{ background: "#91040C" }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -534,7 +532,7 @@ function ContactSection({ onNavigate }: { onNavigate: (r: Route) => void }) {
           <a
             href="tel:+78625550123"
             className="inline-flex items-center gap-2.5 py-4 px-8 text-white/45 hover:text-white/70 transition-colors text-xs uppercase tracking-[0.25em] font-semibold"
-            style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12 }}
+            style={{ border: "1px solid rgba(255,255,255,0.1)" }}
           >
             <Phone size={13} />
             +7 (862) 555-0123
